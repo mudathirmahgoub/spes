@@ -1,0 +1,106 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Cvc5Analysis",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.Cvc5Analysis",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "JoinEqualOuterJoin",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.JoinEqualOuterJoin",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "SimpleAnalysis",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SimpleAnalysis",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "SimpleEmptyTable",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SimpleEmptyTable",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "SimpleLeftOuterJoin",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SimpleLeftOuterJoin",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "SingleAnalysis",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SingleAnalysis",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "simpleAgg",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.simpleAgg",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "simpleExists",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.simpleExists",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "simpleFilter",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.simpleFilter",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "simpleJoin",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.simpleJoin",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "simpleTest",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.simpleTest",
+            "projectName": "equitas",
+            "args": "\"SELECT EMP.EMPNO FROM EMP\" \"SELECT EMP.EMPNO FROM EMP\""
+        },
+        {
+            "type": "java",
+            "name": "testOftest",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.testOftest",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "z3Test1",
+            "request": "launch",
+            "mainClass": "z3Test1",
+            "projectName": "equitas"
+        }
+    ]
+}

@@ -12,15 +12,18 @@ import com.google.gson.JsonParser;
 import com.microsoft.z3.Context;
 import java.io.*;
 import java.util.List;
+import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.plan.RelOptQuery;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.JoinRelType;
+import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalJoin;
 import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.schema.ScannableTable;
 import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.util.ImmutableBitSet;
 
@@ -107,26 +110,13 @@ public class Cvc5Analysis
     }
     return false;
   }
-
+ 
   private static void translate(RelNode n1, RelNode n2)
   {
     System.out.println();
-    if (n1 instanceof LogicalAggregate)
-    {
-      LogicalAggregate aggregate = (LogicalAggregate) n1;
-      List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
-      List<RexNode> rowNodes = aggregate.getChildExps();
-      ImmutableList<ImmutableBitSet> bitSets = aggregate.getGroupSets();
-      ImmutableBitSet bitSet = aggregate.getGroupSet();
-    }
-    if (n1 instanceof LogicalProject)
-    {
-      LogicalProject project = (LogicalProject) n1;
-      List<RexNode> rowNodes = project.getChildExps();
-      RelOptQuery query = project.getQuery();
-    }
-    System.out.println(n1.getClass());
-    System.out.println(n2.getClass());
+    Cvc5Translator.translate(n1);
+    Cvc5Translator.translate(n2);
+    Cvc5Translator.reset();
   }
 
   public static void main(String[] args) throws Exception

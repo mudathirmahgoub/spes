@@ -5,6 +5,8 @@ import AlgeNodeParser.AlgeNodeParserPair;
 import AlgeRule.AlgeRule;
 import SymbolicRexNode.SymbolicColumn;
 import Z3Helper.z3Utility;
+import io.github.cvc5.CVC5ApiException;
+
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -88,8 +90,7 @@ public class Cvc5Analysis
         AlgeNode algeExpr2 = AlgeNodeParserPair.constructAlgeNode(logicPlan2, z3Context);
         algeExpr = AlgeRule.normalize(algeExpr);
         algeExpr2 = AlgeRule.normalize(algeExpr2);
-        System.out.println("sql1: " + sql1);
-        translate(logicPlan, logicPlan2);
+        translate(logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)
       {
@@ -110,12 +111,12 @@ public class Cvc5Analysis
     }
     return false;
   }
- 
-  private static void translate(RelNode n1, RelNode n2)
+
+  private static void translate(RelNode n1, String sql1, RelNode n2, String sql2) throws CVC5ApiException
   {
     System.out.println();
-    Cvc5Translator.translate(n1);
-    Cvc5Translator.translate(n2);
+    Cvc5Translator.translate(n1, sql1);
+    Cvc5Translator.translate(n2, sql2);
     Cvc5Translator.reset();
   }
 

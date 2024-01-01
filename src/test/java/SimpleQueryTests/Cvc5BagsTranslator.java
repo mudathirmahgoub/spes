@@ -310,6 +310,10 @@ public class Cvc5BagsTranslator
         {
           columnSorts.add(solver.getStringSort());
         }
+        else if (basicSqlType.getSqlTypeName().toString().equals("BOOLEAN"))
+        {
+          columnSorts.add(solver.getBooleanSort());
+        }
         else
         {
           System.out.print("Unsupported sql type: " + type);

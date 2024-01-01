@@ -229,8 +229,21 @@ public class Cvc5SetsTranslator
     }
     else if (expr instanceof RexLiteral)
     {
-      int integer = RexLiteral.intValue(expr);
-      return solver.mkInteger(integer);
+      RexLiteral literal = (RexLiteral) expr;      
+      if (literal.getType().toString().equals("INTEGER"))
+      {
+        int integer = RexLiteral.intValue(literal);
+        return solver.mkInteger(integer);
+      }
+      if (literal.getType().toString().equals("VARCHAR"))
+      {
+        String string = RexLiteral.stringValue(literal);
+        return solver.mkString(string);
+      }
+      else
+      {
+        throw new RuntimeException(literal.toString());
+      }
     }
     else if (expr instanceof RexCall)
     {
@@ -250,8 +263,11 @@ public class Cvc5SetsTranslator
         case "<": k = Kind.LT; break;
         case ">=": k = Kind.GEQ; break;
         case "<=": k = Kind.LEQ; break;
+        case "*": k = Kind.MULT; break;
+        case "/": k = Kind.DIVISION; break;
         case "AND": k = Kind.AND; break;
         case "OR": k = Kind.OR; break;
+        case "UPPER": k = Kind.STRING_TO_UPPER; break;
         default:
         {
           System.out.println(call);

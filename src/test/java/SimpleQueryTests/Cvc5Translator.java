@@ -3,6 +3,7 @@ import io.github.cvc5.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalAggregate;
@@ -22,6 +23,7 @@ import org.apache.calcite.sql.type.BasicSqlType;
 public class Cvc5Translator
 {
   public static HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
+  public static HashMap<String, Term> definedFunctions = new HashMap<>();
   private static Solver solver;
   private static int functionIndex = 0;
 
@@ -33,12 +35,7 @@ public class Cvc5Translator
     Term q1 = Cvc5Translator.translate(n1, sql1);
     Term q2 = Cvc5Translator.translate(n2, sql2);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
-    for (Term term : solver.getAssertions())
-    {
-      System.out.print("(assert ");
-      System.out.print(term);
-      System.out.println(")");
-    }
+    printSmtProblem();
     Result result = solver.checkSat();
     System.out.println("answer: " + result);
     if (result.isSat())
@@ -47,6 +44,35 @@ public class Cvc5Translator
       System.out.println(solver.getModel(new Sort[0], terms));
     }
     return result;
+  }
+
+  private static void printSmtProblem()
+  {
+    System.out.println("(set-logic HO_ALL)\r\n" + //        
+        "(set-option :fmf-bound true)\r\n" + //
+        "(set-option :uf-lazy-ll true)\r\n" + //
+        "(set-option :strings-exp true)");
+
+    Term[] terms = tables.values().toArray(new Term[0]);
+    for (Term term : terms)
+    {
+      System.out.print("(declare-const ");
+      System.out.print(term + " ");
+      System.out.println(term.getSort() + ")");
+    }
+    for (Map.Entry<String, Term> entry : definedFunctions.entrySet())
+    {
+      System.out.print("(declare-const ");
+      System.out.print(entry.getKey() + " ");
+      System.out.println(entry.getValue().getSort() + ")");
+    }
+    for (Term term : solver.getAssertions())
+    {
+      System.out.print("(assert ");
+      System.out.print(term);
+      System.out.println(")");
+    }
+    System.out.println("(check-sat)");
   }
 
   public static Term translate(RelNode n, String sql) throws CVC5ApiException
@@ -128,10 +154,18 @@ public class Cvc5Translator
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
     Term body = translateRowExpr(condition, constructor, t);
-    Term f = solver.defineFun("f" + functionIndex, new Term[] {t}, functionType, body, true);
-    functionIndex++;
-    Term ret = solver.mkTerm(Kind.BAG_FILTER, f, table);
+    Term p = defineFun(t, functionType, body, "p");
+    Term ret = solver.mkTerm(Kind.BAG_FILTER, p, table);
     return ret;
+  }
+
+  private static Term defineFun(Term t, Sort functionType, Term body, String prefix)
+  {
+    String name = prefix + functionIndex;
+    Term f = solver.defineFun(name, new Term[] {t}, functionType, body, true);
+    functionIndex++;
+    definedFunctions.put(name, f);
+    return f;
   }
   private static Term translateProject(LogicalProject project) throws CVC5ApiException
   {
@@ -175,8 +209,7 @@ public class Cvc5Translator
         terms[i] = translateRowExpr(exprs.get(i), constructor, t);
       }
       Term body = solver.mkTuple(terms);
-      Term f = solver.defineFun("f" + functionIndex, new Term[] {t}, functionType, body, true);
-      functionIndex++;
+      Term f = defineFun(t, functionType, body, "f");
       Term ret = solver.mkTerm(Kind.BAG_MAP, f, child);
       return ret;
     }
@@ -296,6 +329,7 @@ public class Cvc5Translator
   public static void reset() throws CVC5ApiException
   {
     tables.clear();
+    definedFunctions.clear();
     functionIndex = 0;
     Context.deletePointers();
     solver = new Solver();
@@ -305,5 +339,6 @@ public class Cvc5Translator
     solver.setOption("dag-thresh", "0");
     solver.setOption("uf-lazy-ll", "true");
     solver.setOption("fmf-bound", "true");
+    solver.setOption("tlimit", "6000");
   }
 }

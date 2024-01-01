@@ -236,11 +236,22 @@ public class Cvc5SetsTranslator
     {
       RexCall call = (RexCall) expr;
       Kind k;
+      if (call.op.toString().equals("CAST"))
+      {
+        Term ret = translateRowExpr(call.getOperands().get(0), constructor, t);
+        return ret;
+      }
       switch (call.op.toString())
       {
         case "=": k = Kind.EQUAL; break;
         case "+": k = Kind.ADD; break;
         case "-": k = Kind.SUB; break;
+        case ">": k = Kind.GT; break;
+        case "<": k = Kind.LT; break;
+        case ">=": k = Kind.GEQ; break;
+        case "<=": k = Kind.LEQ; break;
+        case "AND": k = Kind.AND; break;
+        case "OR": k = Kind.OR; break;
         default:
         {
           System.out.println(call);

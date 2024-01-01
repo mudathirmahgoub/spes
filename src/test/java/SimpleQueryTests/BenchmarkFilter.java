@@ -12,12 +12,12 @@ public class BenchmarkFilter
 {
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/no_aggregation.json");
+    File f = new File("testData/no_aggregation_no_null.json");
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
     JsonArray filteredArray = new JsonArray();
 
-    JsonWriter writer = new JsonWriter(new FileWriter("testData/no_aggregation_no_null.json"));
+    JsonWriter writer = new JsonWriter(new FileWriter("testData/no_aggregation_no_null_no_cast.json"));
     Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     writer.beginArray();
 
@@ -27,7 +27,8 @@ public class BenchmarkFilter
       String query1 = testCase.get("q1").getAsString();
       String query2 = testCase.get("q2").getAsString();
       //if (query1.contains("GROUP BY") || query2.contains("GROUP BY"))
-      if (query1.contains("NULL") || query2.contains("NULL"))
+      //if (query1.contains("NULL") || query2.contains("NULL"))
+      if (query1.contains("CAST") || query2.contains("CAST"))
       {
         continue;
       }

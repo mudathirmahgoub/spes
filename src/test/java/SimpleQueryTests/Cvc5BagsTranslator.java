@@ -20,7 +20,7 @@ import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.type.BasicSqlType;
 
-public class Cvc5Translator
+public class Cvc5BagsTranslator
 {
   public static HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
   public static HashMap<String, Term> definedFunctions = new HashMap<>();

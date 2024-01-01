@@ -3,31 +3,18 @@ package SimpleQueryTests;
 import AlgeNode.AlgeNode;
 import AlgeNodeParser.AlgeNodeParserPair;
 import AlgeRule.AlgeRule;
-import SymbolicRexNode.SymbolicColumn;
 import Z3Helper.z3Utility;
 import io.github.cvc5.CVC5ApiException;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.z3.Context;
 import java.io.*;
-import java.util.List;
-import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
-import org.apache.calcite.plan.RelOptQuery;
-import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.JoinRelType;
-import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalJoin;
-import org.apache.calcite.rel.logical.LogicalProject;
-import org.apache.calcite.rex.RexNode;
-import org.apache.calcite.schema.ScannableTable;
-import org.apache.calcite.sql.JoinType;
-import org.apache.calcite.util.ImmutableBitSet;
 
 public class Cvc5Analysis
 {
@@ -45,7 +32,7 @@ public class Cvc5Analysis
       PrintWriter cannotCompile,
       PrintWriter cannotProve,
       PrintWriter prove,
-      PrintWriter bug)
+      PrintWriter bug) throws Exception
   {
     if ((contains(sql1)) || (contains(sql2)))
     {
@@ -106,7 +93,7 @@ public class Cvc5Analysis
         }
         bug.println("---------------------------------------------------");
         bug.flush();
-        return false;
+        throw e;
       }
     }
     return false;
@@ -122,7 +109,7 @@ public class Cvc5Analysis
 
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/calcite_tests.json");
+    File f = new File("testData/no_aggregation.json");
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
     FileWriter prove = new FileWriter("calciteProve.txt");

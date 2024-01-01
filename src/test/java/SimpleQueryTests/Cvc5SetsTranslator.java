@@ -1,5 +1,8 @@
 package SimpleQueryTests;
 import io.github.cvc5.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,29 +29,53 @@ public class Cvc5SetsTranslator
   public static HashMap<String, Term> definedFunctions = new HashMap<>();
   private static Solver solver;
   private static int functionIndex = 0;
-
+  private static PrintWriter writer = null;
+  static
+  {
+    try
+    {
+      writer = new PrintWriter(new File("output.smt2"));
+    }
+    catch (FileNotFoundException e)
+    {
+      System.exit(-1);
+    }
+  }
   public static Result translate(RelNode n1, String sql1, RelNode n2, String sql2)
       throws CVC5ApiException
   {
     reset();
-    System.out.println();
+    println("");
     Term q1 = translate(n1, sql1);
     Term q2 = translate(n2, sql2);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
     printSmtProblem();
     Result result = solver.checkSat();
-    System.out.println("answer: " + result);
+    println(";answer: " + result);
     if (result.isSat())
     {
       Term[] terms = tables.values().toArray(new Term[0]);
-      System.out.println(solver.getModel(new Sort[0], terms));
+      println(solver.getModel(new Sort[0], terms));
     }
     return result;
   }
 
+  private static void println(Object object)
+  {
+    writer.println(object);
+    System.out.println(object);
+    writer.flush();
+  }
+  private static void print(Object object)
+  {
+    writer.print(object);
+    System.out.print(object);
+    writer.flush();
+  }
+
   private static void printSmtProblem()
   {
-    System.out.println("(set-logic HO_ALL)\r\n" + //
+    println("(set-logic HO_ALL)\r\n" + //
         "(set-option :fmf-bound true)\r\n" + //
         "(set-option :uf-lazy-ll true)\r\n" + //
         "(set-option :strings-exp true)");
@@ -56,29 +83,31 @@ public class Cvc5SetsTranslator
     Term[] terms = tables.values().toArray(new Term[0]);
     for (Term term : terms)
     {
-      System.out.print("(declare-const ");
-      System.out.print(term + " ");
-      System.out.println(term.getSort() + ")");
+      print("(declare-const ");
+      print(term + " ");
+      println(term.getSort() + ")");
     }
     for (Map.Entry<String, Term> entry : definedFunctions.entrySet())
     {
-      System.out.print("(declare-const ");
-      System.out.print(entry.getKey() + " ");
-      System.out.println(entry.getValue().getSort() + ")");
+      print("(declare-const ");
+      print(entry.getKey() + " ");
+      println(entry.getValue().getSort() + ")");
     }
     for (Term term : solver.getAssertions())
     {
-      System.out.print("(assert ");
-      System.out.print(term);
-      System.out.println(")");
+      print("(assert ");
+      print(term);
+      println(")");
     }
-    System.out.println("(check-sat)");
+    println("(check-sat)");
   }
 
   public static Term translate(RelNode n, String sql) throws CVC5ApiException
   {
-    System.out.println("Translating sql query: " + sql);
+    println(";-----------------------------------------------------------");
+    println(";Translating sql query: " + sql);
     return translate(n);
+
   }
   public static Term translate(RelNode n) throws CVC5ApiException
   {
@@ -229,7 +258,7 @@ public class Cvc5SetsTranslator
     }
     else if (expr instanceof RexLiteral)
     {
-      RexLiteral literal = (RexLiteral) expr;      
+      RexLiteral literal = (RexLiteral) expr;
       if (literal.getType().toString().equals("INTEGER"))
       {
         int integer = RexLiteral.intValue(literal);
@@ -239,6 +268,11 @@ public class Cvc5SetsTranslator
       {
         String string = RexLiteral.stringValue(literal);
         return solver.mkString(string);
+      }
+      if (literal.getType().toString().equals("BOOLEAN"))
+      {
+        boolean value = RexLiteral.booleanValue(literal);
+        return solver.mkBoolean(value);
       }
       else
       {
@@ -268,9 +302,10 @@ public class Cvc5SetsTranslator
         case "AND": k = Kind.AND; break;
         case "OR": k = Kind.OR; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
+        case "CASE": k = Kind.ITE; break;
         default:
         {
-          System.out.println(call);
+          println(call);
           k = Kind.UNDEFINED_KIND;
           System.exit(0);
         }
@@ -342,7 +377,7 @@ public class Cvc5SetsTranslator
         }
         else
         {
-          System.out.print("Unsupported sql type: " + type);
+          print("Unsupported sql type: " + type);
           System.exit(0);
           throw new RuntimeException("Unsupported sql type: " + type);
         }
@@ -357,7 +392,7 @@ public class Cvc5SetsTranslator
   }
 
   public static void reset() throws CVC5ApiException
-  {
+  {    
     tables.clear();
     definedFunctions.clear();
     functionIndex = 0;

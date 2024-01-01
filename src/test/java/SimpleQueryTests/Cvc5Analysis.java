@@ -75,7 +75,7 @@ public class Cvc5Analysis
         AlgeNode algeExpr2 = AlgeNodeParserPair.constructAlgeNode(logicPlan2, z3Context);
         algeExpr = AlgeRule.normalize(algeExpr);
         algeExpr2 = AlgeRule.normalize(algeExpr2);
-        Cvc5SetsTranslator.translate(logicPlan, sql1, logicPlan2, sql2);
+        Cvc5SetsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)
       {
@@ -132,14 +132,6 @@ public class Cvc5Analysis
         count++;
       }
     }
-    System.out.println("what is the number:" + count);
-    System.out.println(time / count);
-    System.out.println("USPJ number:" + SPJcount);
-    System.out.println(SPJTime / SPJcount);
-    System.out.println("Agg number:" + aggCount);
-    System.out.println(aggTime / aggCount);
-    System.out.println("Outer join number:" + outerJoinCount);
-    System.out.println(outerJoinTime / outerJoinCount);
     out.close();
     out2.close();
     out3.close();

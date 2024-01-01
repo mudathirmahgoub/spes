@@ -41,11 +41,12 @@ public class Cvc5SetsTranslator
       System.exit(-1);
     }
   }
-  public static Result translate(RelNode n1, String sql1, RelNode n2, String sql2)
+  public static Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
       throws CVC5ApiException
   {
     reset();
-    println("");
+    println(";-----------------------------------------------------------");
+    println("; test name: " + name);
     Term q1 = translate(n1, sql1);
     Term q2 = translate(n2, sql2);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
@@ -54,6 +55,7 @@ public class Cvc5SetsTranslator
     println(";answer: " + result);
     if (result.isSat())
     {
+      println("(get-model)");
       Term[] terms = tables.values().toArray(new Term[0]);
       println(solver.getModel(new Sort[0], terms));
     }
@@ -104,10 +106,8 @@ public class Cvc5SetsTranslator
 
   public static Term translate(RelNode n, String sql) throws CVC5ApiException
   {
-    println(";-----------------------------------------------------------");
     println(";Translating sql query: " + sql);
     return translate(n);
-
   }
   public static Term translate(RelNode n) throws CVC5ApiException
   {
@@ -392,7 +392,7 @@ public class Cvc5SetsTranslator
   }
 
   public static void reset() throws CVC5ApiException
-  {    
+  {
     tables.clear();
     definedFunctions.clear();
     functionIndex = 0;

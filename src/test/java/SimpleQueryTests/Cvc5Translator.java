@@ -33,17 +33,17 @@ public class Cvc5Translator
     Term q1 = Cvc5Translator.translate(n1, sql1);
     Term q2 = Cvc5Translator.translate(n2, sql2);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
+    for (Term term : solver.getAssertions())
+    {
+      System.out.print("(assert ");
+      System.out.print(term);
+      System.out.println(")");
+    }
     Result result = solver.checkSat();
     System.out.println("answer: " + result);
     if (result.isSat())
     {
       Term[] terms = tables.values().toArray(new Term[0]);
-      for (Term term : solver.getAssertions())
-      {
-        System.out.print("(assert ");
-        System.out.print(term);
-        System.out.println(")");
-      }
       System.out.println(solver.getModel(new Sort[0], terms));
     }
     return result;
@@ -103,6 +103,10 @@ public class Cvc5Translator
     Term left = translate(n.getLeft());
     Term right = translate(n.getRight());
     Term product = solver.mkTerm(Kind.TABLE_PRODUCT, left, right);
+    if (!n.getCondition().isAlwaysTrue())
+    {
+      product = applyFilter(n.getCondition(), product);
+    }
     switch (n.getJoinType())
     {
       case INNER: return product;
@@ -113,15 +117,20 @@ public class Cvc5Translator
   {
     // (bag.filter (lambda (t (Tuple ...) ) ... ) input)
     Term child = translate(n.getInput());
-    Sort tupleSort = child.getSort().getBagElementSort();
+    return applyFilter(n.getCondition(), child);
+  }
+
+  private static Term applyFilter(RexNode condition, Term table)
+  {
+    Sort tupleSort = table.getSort().getBagElementSort();
     Datatype datatype = tupleSort.getDatatype();
     DatatypeConstructor constructor = datatype.getConstructor(0);
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
-    Term body = translateRowExpr(n.getCondition(), constructor, t);
+    Term body = translateRowExpr(condition, constructor, t);
     Term f = solver.defineFun("f" + functionIndex, new Term[] {t}, functionType, body, true);
     functionIndex++;
-    Term ret = solver.mkTerm(Kind.BAG_FILTER, f, child);
+    Term ret = solver.mkTerm(Kind.BAG_FILTER, f, table);
     return ret;
   }
   private static Term translateProject(LogicalProject project) throws CVC5ApiException
@@ -292,6 +301,9 @@ public class Cvc5Translator
     solver = new Solver();
     solver.setLogic("HO_ALL");
     solver.setOption("produce-models", "true");
+    solver.setOption("debug-check-models", "true");
     solver.setOption("dag-thresh", "0");
+    solver.setOption("uf-lazy-ll", "true");
+    solver.setOption("fmf-bound", "true");
   }
 }

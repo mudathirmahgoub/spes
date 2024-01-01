@@ -75,7 +75,7 @@ public class Cvc5Analysis
         AlgeNode algeExpr2 = AlgeNodeParserPair.constructAlgeNode(logicPlan2, z3Context);
         algeExpr = AlgeRule.normalize(algeExpr);
         algeExpr2 = AlgeRule.normalize(algeExpr2);
-        Cvc5Translator.translate(logicPlan, sql1, logicPlan2, sql2);
+        Cvc5SetsTranslator.translate(logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)
       {

@@ -20,7 +20,7 @@ import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.type.BasicSqlType;
 
-public class Cvc5Translator
+public class Cvc5SetsTranslator
 {
   public static HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
   public static HashMap<String, Term> definedFunctions = new HashMap<>();
@@ -111,9 +111,8 @@ public class Cvc5Translator
     }
     if (n instanceof LogicalUnion)
     {
-      LogicalUnion union = (LogicalUnion) n;
       List<RelNode> inputs = n.getInputs();
-      Kind k = union.all ? Kind.BAG_UNION_DISJOINT : Kind.BAG_UNION_MAX;
+      Kind k = Kind.SET_UNION;
       Term result = translate(inputs.get(0));
       result = solver.mkTerm(k, result, translate(inputs.get(1)));
       for (int i = 2; i < inputs.size(); i++)
@@ -128,7 +127,7 @@ public class Cvc5Translator
   {
     Term left = translate(n.getLeft());
     Term right = translate(n.getRight());
-    Term product = solver.mkTerm(Kind.TABLE_PRODUCT, left, right);
+    Term product = solver.mkTerm(Kind.RELATION_PRODUCT, left, right);
     if (!n.getCondition().isAlwaysTrue())
     {
       product = applyFilter(n.getCondition(), product);
@@ -141,21 +140,21 @@ public class Cvc5Translator
   }
   private static Term translateFilter(LogicalFilter n) throws CVC5ApiException
   {
-    // (bag.filter (lambda (t (Tuple ...) ) ... ) input)
+    // (set.filter (lambda (t (Tuple ...) ) ... ) input)
     Term child = translate(n.getInput());
     return applyFilter(n.getCondition(), child);
   }
 
   private static Term applyFilter(RexNode condition, Term table)
   {
-    Sort tupleSort = table.getSort().getBagElementSort();
+    Sort tupleSort = table.getSort().getSetElementSort();
     Datatype datatype = tupleSort.getDatatype();
     DatatypeConstructor constructor = datatype.getConstructor(0);
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
     Term body = translateRowExpr(condition, constructor, t);
     Term p = defineFun(t, functionType, body, "p");
-    Term ret = solver.mkTerm(Kind.BAG_FILTER, p, table);
+    Term ret = solver.mkTerm(Kind.SET_FILTER, p, table);
     return ret;
   }
 
@@ -169,7 +168,7 @@ public class Cvc5Translator
   }
   private static Term translateProject(LogicalProject project) throws CVC5ApiException
   {
-    // check whether to use table.project or bag.map
+    // check whether to use table.project or set.map
     boolean isTableProject = true;
     List<RexNode> exprs = project.getChildExps();
     int[] indices = new int[exprs.size()];
@@ -190,14 +189,14 @@ public class Cvc5Translator
     if (isTableProject)
     {
       // ((_ table.project indices) input)
-      Op op = solver.mkOp(Kind.TABLE_PROJECT, indices);
+      Op op = solver.mkOp(Kind.RELATION_PROJECT, indices);
       Term ret = solver.mkTerm(op, child);
       return ret;
     }
     else
     {
-      // (bag.map (lambda (t (Tuple ...) ) ... ) input)
-      Sort argType = child.getSort().getBagElementSort();
+      // (set.map (lambda (t (Tuple ...) ) ... ) input)
+      Sort argType = child.getSort().getSetElementSort();
       Term t = solver.mkVar(argType, "t");
       Sort functionType = getSort(project.getRowType());
 
@@ -210,7 +209,7 @@ public class Cvc5Translator
       }
       Term body = solver.mkTuple(terms);
       Term f = defineFun(t, functionType, body, "f");
-      Term ret = solver.mkTerm(Kind.BAG_MAP, f, child);
+      Term ret = solver.mkTerm(Kind.SET_MAP, f, child);
       return ret;
     }
   }
@@ -271,7 +270,7 @@ public class Cvc5Translator
     }
     String tableName = String.join("_", table.getTable().getQualifiedName());
     Sort tupleSort = getSort(table.getRowType());
-    Sort tableSort = solver.mkBagSort(tupleSort);
+    Sort tableSort = solver.mkSetSort(tupleSort);
     Term cvc5Table = solver.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
     return cvc5Table;

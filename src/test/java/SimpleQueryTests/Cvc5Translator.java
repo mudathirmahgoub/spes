@@ -48,7 +48,7 @@ public class Cvc5Translator
 
   private static void printSmtProblem()
   {
-    System.out.println("(set-logic HO_ALL)\r\n" + //        
+    System.out.println("(set-logic HO_ALL)\r\n" + //
         "(set-option :fmf-bound true)\r\n" + //
         "(set-option :uf-lazy-ll true)\r\n" + //
         "(set-option :strings-exp true)");

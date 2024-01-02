@@ -404,6 +404,6 @@ public class Cvc5SetsTranslator
     solver.setOption("dag-thresh", "0");
     solver.setOption("uf-lazy-ll", "true");
     solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit", "6000");
+    solver.setOption("tlimit-per", "3000");
   }
 }

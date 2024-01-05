@@ -204,7 +204,7 @@ public class Cvc5SetsTranslator
     for (int i = 0; i < exprs.size(); i++)
     {
       RexNode expr = exprs.get(i);
-      if (exprs instanceof RexInputRef)
+      if (expr instanceof RexInputRef)
       {
         RexInputRef rex = (RexInputRef) expr;
         indices[i] = rex.getIndex();
@@ -404,6 +404,6 @@ public class Cvc5SetsTranslator
     solver.setOption("dag-thresh", "0");
     solver.setOption("uf-lazy-ll", "true");
     solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "3000");
+    solver.setOption("tlimit-per", "6000");
   }
 }

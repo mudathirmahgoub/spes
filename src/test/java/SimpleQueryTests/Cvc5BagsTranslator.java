@@ -205,7 +205,7 @@ public class Cvc5BagsTranslator
     for (int i = 0; i < exprs.size(); i++)
     {
       RexNode expr = exprs.get(i);
-      if (exprs instanceof RexInputRef)
+      if (expr instanceof RexInputRef)
       {
         RexInputRef rex = (RexInputRef) expr;
         indices[i] = rex.getIndex();

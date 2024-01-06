@@ -11,7 +11,9 @@ import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalFilter;
+import org.apache.calcite.rel.logical.LogicalIntersect;
 import org.apache.calcite.rel.logical.LogicalJoin;
+import org.apache.calcite.rel.logical.LogicalMinus;
 import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.logical.LogicalUnion;
 import org.apache.calcite.rel.type.RelDataType;
@@ -22,6 +24,7 @@ import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.type.BasicSqlType;
+import org.apache.calcite.util.ImmutableBitSet;
 
 public class Cvc5SetsTranslator
 {
@@ -118,6 +121,27 @@ public class Cvc5SetsTranslator
     }
     if (n instanceof LogicalAggregate)
     {
+      LogicalAggregate aggregate = (LogicalAggregate) n;
+      if (aggregate.getAggCallList().isEmpty())
+      {
+        // it is similar to duplicate removal of a projection
+        Term child = translate(aggregate.getInput());
+        ImmutableBitSet bitSet = aggregate.getGroupSet();
+        // ((_ table.project indices) child)
+        int[] indices = new int[bitSet.asList().size()];
+        int index = 0;
+        for (int i = 0; i < indices.length; i++)
+        {
+          if (bitSet.get(i))
+          {
+            indices[index] = i;
+            index++;
+          }
+        }
+        Op op = solver.mkOp(Kind.RELATION_PROJECT, indices);
+        Term ret = solver.mkTerm(op, child);
+        return ret;
+      }
       return null;
       // LogicalAggregate aggregate = (LogicalAggregate) n;
       // List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
@@ -149,6 +173,22 @@ public class Cvc5SetsTranslator
         result = solver.mkTerm(k, result, translate(inputs.get(i)));
       }
       return result;
+    }
+    if (n instanceof LogicalMinus)
+    {
+      LogicalMinus minus = (LogicalMinus) n;
+      Term a = translate(minus.getInput(0));
+      Term b = translate(minus.getInput(1));
+      Term difference = solver.mkTerm(Kind.SET_MINUS, a, b);
+      return difference;
+    }
+    if (n instanceof LogicalIntersect)
+    {
+      LogicalIntersect intersect = (LogicalIntersect) n;
+      Term a = translate(intersect.getInput(0));
+      Term b = translate(intersect.getInput(1));
+      Term difference = solver.mkTerm(Kind.SET_INTER, a, b);
+      return difference;
     }
     return null;
   }

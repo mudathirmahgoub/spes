@@ -71,11 +71,7 @@ public class Cvc5Analysis
       try
       {
         long startTime = System.currentTimeMillis();
-        AlgeNode algeExpr = AlgeNodeParserPair.constructAlgeNode(logicPlan, z3Context);
-        AlgeNode algeExpr2 = AlgeNodeParserPair.constructAlgeNode(logicPlan2, z3Context);
-        algeExpr = AlgeRule.normalize(algeExpr);
-        algeExpr2 = AlgeRule.normalize(algeExpr2);
-        Cvc5BagsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
+        Cvc5SetsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)
       {
@@ -140,7 +136,7 @@ public class Cvc5Analysis
 
   static public boolean contains(String sql)
   {
-    String[] keyWords = {"VALUE", "EXISTS", "ROW", "ORDER", "CAST", "INTERSECT", "EXCEPT", " IN "};
+    String[] keyWords = {"VALUE", "EXISTS", "ROW", "ORDER", "CAST"};
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))

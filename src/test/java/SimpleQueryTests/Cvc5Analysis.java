@@ -1,18 +1,10 @@
 package SimpleQueryTests;
 
-import AlgeNode.AlgeNode;
-import AlgeNodeParser.AlgeNodeParserPair;
-import AlgeRule.AlgeRule;
-import Z3Helper.z3Utility;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.microsoft.z3.Context;
 import java.io.*;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.core.JoinRelType;
-import org.apache.calcite.rel.logical.LogicalAggregate;
-import org.apache.calcite.rel.logical.LogicalJoin;
 
 public class Cvc5Analysis
 {
@@ -41,7 +33,6 @@ public class Cvc5Analysis
     boolean compile = false;
     try
     {
-      z3Utility.reset();
       simpleParser parser = new simpleParser();
       simpleParser parser2 = new simpleParser();
 
@@ -67,7 +58,6 @@ public class Cvc5Analysis
     }
     if (compile)
     {
-      Context z3Context = new Context();
       try
       {
         long startTime = System.currentTimeMillis();
@@ -75,8 +65,7 @@ public class Cvc5Analysis
       }
       catch (Exception e)
       {
-        System.out.println("buggy in code");
-        z3Context.close();
+        System.out.println("buggy in code");        
         bug.println(name);
         bug.println("---------------------------------------------------");
         bug.println(e);
@@ -140,42 +129,6 @@ public class Cvc5Analysis
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static public boolean hasAgg(RelNode plan)
-  {
-    if (plan instanceof LogicalAggregate)
-    {
-      return true;
-    }
-    for (RelNode input : plan.getInputs())
-    {
-      if (hasAgg(input))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static public boolean outerJoin(RelNode plan)
-  {
-    if (plan instanceof LogicalJoin)
-    {
-      LogicalJoin join = (LogicalJoin) plan;
-      if (join.getJoinType() != JoinRelType.INNER)
-      {
-        return true;
-      }
-    }
-    for (RelNode input : plan.getInputs())
-    {
-      if (outerJoin(input))
       {
         return true;
       }

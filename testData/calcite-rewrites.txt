@@ -1,0 +1,756 @@
+testReduceCompositeInSubQuery
+select * from emp where (empno, deptno) in (   select empno, deptno from (     select empno, deptno     from emp     group by empno, deptno)) or deptno < 40 + 60
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE (`EMPNO`, `DEPTNO`) IN (SELECT `EMPNO`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `EMPNO`, `DEPTNO`) OR `DEPTNO` < 100
+
+testReduceNestedCaseWhen
+select sal from emp where case when (sal = 1000) then (case when sal = 1000 then null else 1 end is null) else (case when sal = 2000 then null else 1 end is null) end is true
+SELECT `SAL` FROM `CATALOG`.`SALES`.`EMP` WHERE CASE WHEN `SAL` = 1000 THEN `SAL` = 1000 ELSE `SAL` = 2000 END
+
+testReduceOrCaseWhen
+select sal from emp where case when sal = 1000 then null else 1 end is null OR case when sal = 2000 then null else 1 end is null
+SELECT `SAL` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` = 1000 OR `SAL` = 2000
+
+testReduceNot
+select * from (select (case when sal > 1000 then null else false end) as caseCol from emp) where NOT(caseCol)
+SELECT * FROM (SELECT CASE WHEN `SAL` > 1000 THEN NULL ELSE FALSE END AS `CASECOL` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE NOT `CASECOL`
+
+testReduceNullableCase
+SELECT CASE WHEN 1=2 THEN cast((values(1)) as integer) ELSE 2 end from (values(1))
+SELECT CAST(2 AS INTEGER) FROM (VALUES  (1)) AS `t` (`EXPR$0`) LEFT JOIN (VALUES  (1)) AS `t` (`EXPR$0`) AS `t0` ON TRUE
+
+testReduceNullableCase2
+SELECT deptno, ename, CASE WHEN 1=2 THEN substring(ename, 1, cast(2 as int)) ELSE NULL end from emp group by deptno, ename, case when 1=2 then substring(ename,1, cast(2 as int))  else null end
+SELECT `DEPTNO`, `ENAME`, NULL FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `ENAME`, NULL
+
+testProjectToWindowRuleForMultipleWindows
+select  count(*) over(partition by empno order by sal) as count1,  count(*) over(partition by deptno order by sal) as count2,  sum(deptno) over(partition by empno order by sal) as sum1,  sum(deptno) over(partition by deptno order by sal) as sum2 from emp
+
+testUnionToDistinctRule
+select * from dept union select * from dept
+SELECT `DEPTNO`, `NAME` FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` UNION ALL SELECT * FROM `CATALOG`.`SALES`.`DEPT`) AS `t` GROUP BY `DEPTNO`, `NAME`
+
+testExtractJoinFilterRule
+select 1 from emp inner join dept on emp.deptno=dept.deptno
+SELECT 1 FROM `CATALOG`.`SALES`.`EMP`, `CATALOG`.`SALES`.`DEPT` WHERE `EMP`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testAddRedundantSemiJoinRule
+select 1 from emp inner join dept on emp.deptno = dept.deptno
+SELECT 1 FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT0` ON `EMP`.`DEPTNO` = `DEPT0`.`DEPTNO`
+
+testStrengthenJoinType
+select * from dept left join emp using (deptno) where emp.deptno is not null and emp.sal > 100
+SELECT `DEPT`.`DEPTNO`, `DEPT`.`NAME`, CAST(`t`.`EMPNO` AS INTEGER) AS `EMPNO`, CAST(`t`.`ENAME` AS VARCHAR(20) CHARACTER SET `ISO-8859-1`) AS `ENAME`, CAST(`t`.`JOB` AS VARCHAR(10) CHARACTER SET `ISO-8859-1`) AS `JOB`, `t`.`MGR`, CAST(`t`.`HIREDATE` AS TIMESTAMP(0)) AS `HIREDATE`, CAST(`t`.`SAL` AS INTEGER) AS `SAL`, CAST(`t`.`COMM` AS INTEGER) AS `COMM`, CAST(`t`.`DEPTNO` AS INTEGER) AS `DEPTNO0`, CAST(`t`.`SLACKER` AS BOOLEAN) AS `SLACKER` FROM `CATALOG`.`SALES`.`DEPT` INNER JOIN (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t` ON `DEPT`.`DEPTNO` = `t`.`DEPTNO`
+
+testFullOuterJoinSimplificationToLeftOuter
+select 1 from sales.dept d full outer join sales.emp e on d.deptno = e.deptno where d.name = 'Charlie'
+SELECT 1 FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `NAME` = 'Charlie') AS `t` LEFT JOIN `CATALOG`.`SALES`.`EMP` ON `t`.`DEPTNO` = `EMP`.`DEPTNO`
+
+testFullOuterJoinSimplificationToRightOuter
+select 1 from sales.dept d full outer join sales.emp e on d.deptno = e.deptno where e.sal > 100
+SELECT 1 FROM `CATALOG`.`SALES`.`DEPT` RIGHT JOIN (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t` ON `DEPT`.`DEPTNO` = `t`.`DEPTNO`
+
+testFullOuterJoinSimplificationToInner
+select 1 from sales.dept d full outer join sales.emp e on d.deptno = e.deptno where d.name = 'Charlie' and e.sal > 100
+SELECT 1 FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `NAME` = 'Charlie') AS `t` INNER JOIN (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t0` ON `t`.`DEPTNO` = `t0`.`DEPTNO`
+
+testLeftOuterJoinSimplificationToInner
+select 1 from sales.dept d left outer join sales.emp e on d.deptno = e.deptno where e.sal > 100
+SELECT 1 FROM `CATALOG`.`SALES`.`DEPT` INNER JOIN (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t` ON `DEPT`.`DEPTNO` = `t`.`DEPTNO`
+
+testRightOuterJoinSimplificationToInner
+select 1 from sales.dept d right outer join sales.emp e on d.deptno = e.deptno where d.name = 'Charlie'
+SELECT 1 FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `NAME` = 'Charlie') AS `t` INNER JOIN `CATALOG`.`SALES`.`EMP` ON `t`.`DEPTNO` = `EMP`.`DEPTNO`
+
+testPushFilterPastAgg
+select dname, c from (select name dname, count(*) as c from dept group by name) t where dname = 'Charlie'
+SELECT `DNAME`, COUNT(*) AS `C` FROM (SELECT `NAME` AS `DNAME` FROM `CATALOG`.`SALES`.`DEPT`) AS `t` WHERE `DNAME` = 'Charlie' GROUP BY `DNAME`
+
+testPushFilterPastAggTwo
+select dept1.c1 from (   select dept.name as c1, count(*) as c2   from dept where dept.name > 'b' group by dept.name) dept1 where dept1.c1 > 'c' and (dept1.c2 > 30 or dept1.c1 < 'z')
+SELECT `C1` FROM (SELECT `NAME` AS `C1` FROM `CATALOG`.`SALES`.`DEPT` WHERE `NAME` > 'b') AS `t0` WHERE `C1` > 'c' GROUP BY `C1` HAVING COUNT(*) > 30 OR `C1` < 'z'
+
+testPushFilterPastAggThree
+select deptno from emp group by deptno having count(*) > 1
+SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO` HAVING COUNT(*) > 1
+
+testPushFilterPastAggFour
+select emp.deptno, count(*) from emp where emp.sal > '12' group by emp.deptno 
+SELECT `DEPTNO`, SUM(COUNT(*)) FROM (SELECT `SAL`, `DEPTNO`, COUNT(*) FROM `CATALOG`.`SALES`.`EMP` WHERE CAST(`SAL` AS BIGINT) > 12 GROUP BY `SAL`, `DEPTNO`) AS `t0` GROUP BY `DEPTNO`
+
+testPushFilterPastProject
+select a.name from dept a left join dept b on b.deptno > 10 right join dept c on b.deptno > 10 
+SELECT `t3`.`NAME` FROM (SELECT `DEPT`.`DEPTNO`, `DEPT`.`NAME`, CAST(`t1`.`DEPTNO` AS INTEGER) AS `DEPTNO0`, CAST(`t1`.`NAME` AS VARCHAR(10) CHARACTER SET `ISO-8859-1`) AS `NAME0`, CAST(`t1`.`DEPTNO` AS INTEGER) > 10 AS `$f4` FROM `CATALOG`.`SALES`.`DEPT`, (SELECT `DEPTNO`, `NAME`, `DEPTNO` > 10 AS `$f2` FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `DEPTNO` > 10) AS `t` WHERE `DEPTNO` > 10) AS `t1`) AS `t3` RIGHT JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT1` ON TRUE
+
+testJoinProjectTranspose
+select a.name from dept a left join dept b on b.deptno > 10 right join dept c on b.deptno > 10 
+SELECT `DEPT`.`NAME` FROM `CATALOG`.`SALES`.`DEPT` LEFT JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT0` ON `DEPT0`.`DEPTNO` > 10 RIGHT JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT1` ON `DEPT0`.`DEPTNO` > 10
+
+testSortUnionTranspose
+select a.name from dept a union all select b.name from dept b order by name limit 10
+SELECT * FROM (SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME` FETCH NEXT 10 ROWS ONLY UNION ALL SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME` FETCH NEXT 10 ROWS ONLY) ORDER BY `NAME` FETCH NEXT 10 ROWS ONLY
+
+testSortUnionTranspose2
+select a.name from dept a union all select b.name from dept b order by name
+SELECT * FROM (SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME` UNION ALL SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME`) ORDER BY `NAME`
+
+testSortUnionTranspose3
+select a.name from dept a union all select b.name from dept b order by name limit 0
+SELECT * FROM (SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME` FETCH NEXT 0 ROWS ONLY UNION ALL SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME` FETCH NEXT 0 ROWS ONLY) ORDER BY `NAME` FETCH NEXT 0 ROWS ONLY
+
+testSemiJoinRuleExists
+select * from dept where exists (   select * from emp   where emp.deptno = dept.deptno   and emp.sal > 100)
+SELECT * FROM `CATALOG`.`SALES`.`DEPT` INNER JOIN (SELECT `DEPTNO` AS `DEPTNO9`, TRUE AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t0` ON `DEPT`.`DEPTNO` = `t0`.`DEPTNO9`
+
+testSemiJoinRule
+select dept.* from dept join (   select distinct deptno from emp   where sal > 100) using (deptno)
+SELECT * FROM `CATALOG`.`SALES`.`DEPT` INNER JOIN (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100) AS `t0` ON `DEPT`.`DEPTNO` = `t0`.`DEPTNO`
+
+testSemiJoinRuleRight
+select dept.* from dept right join (   select distinct deptno from emp   where sal > 100) using (deptno)
+SELECT `DEPT`.`DEPTNO`, `DEPT`.`NAME` FROM `CATALOG`.`SALES`.`DEPT` RIGHT JOIN (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100 GROUP BY `DEPTNO`) AS `t1` ON `DEPT`.`DEPTNO` = `t1`.`DEPTNO`
+
+testSemiJoinRuleFull
+select dept.* from dept full join (   select distinct deptno from emp   where sal > 100) using (deptno)
+SELECT `DEPT`.`DEPTNO`, `DEPT`.`NAME` FROM `CATALOG`.`SALES`.`DEPT` FULL JOIN (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` > 100 GROUP BY `DEPTNO`) AS `t1` ON `DEPT`.`DEPTNO` = `t1`.`DEPTNO`
+
+testSemiJoinRuleLeft
+select name from dept left join (   select distinct deptno from emp   where sal > 100) using (deptno)
+SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT`
+
+testPushFilterThroughSemiJoin
+select * from (   select * from dept where dept.deptno in (     select emp.deptno from emp))R where R.deptno <=10
+SELECT * FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `DEPTNO` <= 10) AS `t` INNER JOIN (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`DEPTNO` = `t0`.`DEPTNO`
+
+testSemiJoinReduceConstants
+select e1.sal from (select * from emp where deptno = 200) as e1 where e1.deptno in (   select e2.deptno from emp e2 where e2.sal = 100)
+SELECT `t0`.`SAL` FROM (SELECT * FROM (SELECT `SAL`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `DEPTNO` = 200) AS `t0` INNER JOIN (SELECT `DEPTNO` FROM (SELECT `SAL`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t1` WHERE `SAL` = 100) AS `t3` ON `t0`.`DEPTNO` = `t3`.`DEPTNO`
+
+testReduceAverage
+select name, max(name), avg(deptno), min(name) from sales.dept group by name
+SELECT `NAME`, MAX(`NAME`), CAST(SUM(`DEPTNO`) / COUNT(*) AS INTEGER), MIN(`NAME`) FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`
+
+testCastInAggregateReduceFunctions
+select name, stddev_pop(deptno), avg(deptno), stddev_samp(deptno),var_pop(deptno), var_samp(deptno) from sales.dept group by name
+SELECT `NAME`, CAST(POWER((SUM(`DEPTNO` * `DEPTNO`) - SUM(`DEPTNO`) * SUM(`DEPTNO`) / COUNT(*)) / COUNT(*), 0.5) AS INTEGER), CAST(SUM(`DEPTNO`) / COUNT(*) AS INTEGER), CAST(POWER((SUM(`DEPTNO` * `DEPTNO`) - SUM(`DEPTNO`) * SUM(`DEPTNO`) / COUNT(*)) / CASE WHEN COUNT(*) = 1 THEN NULL ELSE COUNT(*) - 1 END, 0.5) AS INTEGER), CAST((SUM(`DEPTNO` * `DEPTNO`) - SUM(`DEPTNO`) * SUM(`DEPTNO`) / COUNT(*)) / COUNT(*) AS INTEGER), CAST((SUM(`DEPTNO` * `DEPTNO`) - SUM(`DEPTNO`) * SUM(`DEPTNO`) / COUNT(*)) / CASE WHEN COUNT(*) = 1 THEN NULL ELSE COUNT(*) - 1 END AS INTEGER) FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`
+
+testDistinctCount1
+select deptno, count(distinct ename) from sales.emp group by deptno
+SELECT `DEPTNO`, COUNT(`ENAME`) FROM (SELECT `ENAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `DEPTNO`) AS `t` GROUP BY `DEPTNO`
+
+testDistinctCount2
+select deptno, count(distinct ename), sum(sal) from sales.emp group by deptno
+SELECT `DEPTNO`, COUNT(`ENAME`), CAST(MIN(SUM(`SAL`)) AS INTEGER) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`
+
+testDistinctCount3
+select count(distinct deptno), sum(sal) from sales.emp group by deptno
+SELECT COUNT(`DEPTNO`), CAST(MIN(SUM(`SAL`)) AS INTEGER) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`
+
+testDistinctCountMultipleViaJoin
+select deptno, count(distinct ename), count(distinct job, ename),   count(distinct deptno, job), sum(sal)  from sales.emp group by deptno
+SELECT `t`.`DEPTNO`, COUNT(`ENAME`), COUNT(`JOB`, `ENAME`), COUNT(`DEPTNO`, `JOB`), SUM(`SAL`) FROM (SELECT `DEPTNO`, SUM(`SAL`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t` INNER JOIN (SELECT `DEPTNO`, COUNT(`ENAME`) FROM (SELECT `ENAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `DEPTNO`) AS `t0` GROUP BY `DEPTNO`) AS `t1` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t1`.`DEPTNO` INNER JOIN (SELECT `DEPTNO`, COUNT(`JOB`, `ENAME`) FROM (SELECT `ENAME`, `JOB`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `JOB`, `DEPTNO`) AS `t2` GROUP BY `DEPTNO`) AS `t3` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t3`.`DEPTNO` INNER JOIN (SELECT `DEPTNO`, COUNT(`DEPTNO`, `JOB`) FROM (SELECT `JOB`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `JOB`, `DEPTNO`) AS `t4` GROUP BY `DEPTNO`) AS `t5` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t5`.`DEPTNO`
+
+testDistinctCountMultiple
+select deptno, count(distinct ename), count(distinct job)  from sales.emp group by deptno
+SELECT `DEPTNO`, COUNT(`ENAME`), COUNT(`JOB`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`
+
+testDistinctCountMultipleNoGroup
+select count(distinct ename), count(distinct job)  from sales.emp
+SELECT COUNT(`ENAME`), COUNT(`JOB`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `JOB`
+
+testDistinctCountMixedJoin
+select deptno, count(distinct ename), count(distinct job, ename),   count(distinct deptno, job), sum(sal)  from sales.emp group by deptno
+SELECT `t`.`DEPTNO`, COUNT(`ENAME`), COUNT(`JOB`, `ENAME`), COUNT(`DEPTNO`, `JOB`), SUM(`SAL`) FROM (SELECT `DEPTNO`, SUM(`SAL`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t` INNER JOIN (SELECT `DEPTNO`, COUNT(`ENAME`) FROM (SELECT `ENAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `DEPTNO`) AS `t0` GROUP BY `DEPTNO`) AS `t1` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t1`.`DEPTNO` INNER JOIN (SELECT `DEPTNO`, COUNT(`JOB`, `ENAME`) FROM (SELECT `ENAME`, `JOB`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `JOB`, `DEPTNO`) AS `t2` GROUP BY `DEPTNO`) AS `t3` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t3`.`DEPTNO` INNER JOIN (SELECT `DEPTNO`, COUNT(`DEPTNO`, `JOB`) FROM (SELECT `JOB`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `JOB`, `DEPTNO`) AS `t4` GROUP BY `DEPTNO`) AS `t5` ON `t`.`DEPTNO` IS NOT DISTINCT FROM `t5`.`DEPTNO`
+
+testDistinctCountMixed
+select deptno, count(distinct deptno, job) as cddj, sum(sal) as s  from sales.emp group by deptno
+SELECT `DEPTNO`, COUNT(`DEPTNO`, `JOB`) AS `CDDJ`, CAST(MIN(SUM(`SAL`)) AS INTEGER) AS `S` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`
+
+testDistinctCountMixed2
+select deptno, count(distinct ename) as cde,   count(distinct job, ename) as cdje,   count(distinct deptno, job) as cddj,   sum(sal) as s  from sales.emp group by deptno
+SELECT `DEPTNO`, COUNT(`ENAME`) AS `CDE`, COUNT(`JOB`, `ENAME`) AS `CDJE`, COUNT(`DEPTNO`, `JOB`) AS `CDDJ`, CAST(MIN(SUM(`SAL`)) AS INTEGER) AS `S` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`
+
+testDistinctCountGroupingSets1
+select deptno, job, count(distinct ename) from sales.emp group by rollup(deptno,job)
+SELECT `DEPTNO`, `JOB`, COUNT(`ENAME`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `JOB`
+
+testDistinctCountGroupingSets2
+select deptno, job, count(distinct ename), sum(sal) from sales.emp group by rollup(deptno,job)
+SELECT `DEPTNO`, `JOB`, COUNT(`ENAME`), CAST(MIN(SUM(`SAL`)) AS INTEGER) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `JOB`
+
+testDistinctNonDistinctAggregates
+select emp.empno, count(*), avg(distinct dept.deptno) from sales.emp emp inner join sales.dept dept on emp.deptno = dept.deptno group by emp.empno
+SELECT `t0`.`EMPNO`, SUM(`t0`.`EXPR$2`), AVG(SUM(`t0`.`EXPR$2`)) FROM (SELECT `EMP`.`EMPNO`, `DEPT`.`DEPTNO` AS `DEPTNO0`, COUNT(*) FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` GROUP BY `EMP`.`EMPNO`, `DEPT`.`DEPTNO`) AS `t0` GROUP BY `t0`.`EMPNO`
+
+testCastInAggregateExpandDistinctAggregatesRule
+select name, sum(distinct cn), sum(distinct sm) from (   select name, count(dept.deptno) as cn,sum(dept.deptno) as sm   from sales.dept group by name) group by name
+SELECT `NAME`, CAST(SUM(`CN`) AS BIGINT), CAST(SUM(`SM`) AS INTEGER) FROM (SELECT `NAME`, COUNT(*) AS `CN`, SUM(`DEPTNO`) AS `SM` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t0` GROUP BY `NAME`
+
+testDistinctNonDistinctAggregatesWithGrouping1
+SELECT deptno,   SUM(deptno), SUM(DISTINCT sal), MAX(deptno), MAX(comm) FROM emp GROUP BY deptno
+SELECT `DEPTNO`, SUM(SUM(`DEPTNO`)), SUM(`SAL`), MAX(MAX(`DEPTNO`)), MAX(MAX(`COMM`)) FROM (SELECT `DEPTNO`, `SAL`, SUM(`DEPTNO`), MAX(`DEPTNO`), MAX(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `SAL`) AS `t0` GROUP BY `DEPTNO`
+
+testDistinctNonDistinctAggregatesWithGrouping2
+SELECT deptno, COUNT(deptno), SUM(DISTINCT sal) FROM emp GROUP BY deptno
+SELECT `DEPTNO`, SUM(COUNT(*)), SUM(`SAL`) FROM (SELECT `DEPTNO`, `SAL`, COUNT(*) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `SAL`) AS `t0` GROUP BY `DEPTNO`
+
+testDistinctNonDistinctTwoAggregatesWithGrouping
+SELECT deptno, SUM(comm), MIN(comm), SUM(DISTINCT sal) FROM emp GROUP BY deptno
+SELECT `DEPTNO`, SUM(SUM(`COMM`)), MIN(MIN(`COMM`)), SUM(`SAL`) FROM (SELECT `DEPTNO`, `SAL`, SUM(`COMM`), MIN(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `SAL`) AS `t0` GROUP BY `DEPTNO`
+
+testDistinctWithGrouping
+SELECT sal, SUM(comm), MIN(comm), SUM(DISTINCT sal) FROM emp GROUP BY sal
+SELECT `SAL`, SUM(SUM(`COMM`)), MIN(MIN(`COMM`)), SUM(`SAL`) FROM (SELECT `SAL`, SUM(`COMM`), MIN(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `SAL`) AS `t0` GROUP BY `SAL`
+
+testMultipleDistinctWithGrouping
+SELECT sal, SUM(comm), MIN(DISTINCT comm), SUM(DISTINCT sal) FROM emp GROUP BY sal
+SELECT `t0`.`SAL`, SUM(`COMM`), MIN(`COMM`), SUM(`SAL`) FROM (SELECT `SAL`, SUM(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `SAL`) AS `t0` INNER JOIN (SELECT `SAL`, MIN(`COMM`) FROM (SELECT `SAL`, `COMM` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `SAL`, `COMM`) AS `t2` GROUP BY `SAL`) AS `t3` ON `t0`.`SAL` IS NOT DISTINCT FROM `t3`.`SAL` INNER JOIN (SELECT `SAL`, SUM(`SAL`) FROM (SELECT `SAL` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `SAL`) AS `t6` GROUP BY `SAL`) AS `t7` ON `t0`.`SAL` IS NOT DISTINCT FROM `t7`.`SAL`
+
+testDistinctWithMultipleInputs
+SELECT deptno, SUM(comm), MIN(comm), COUNT(DISTINCT sal, comm) FROM emp GROUP BY deptno
+SELECT `DEPTNO`, SUM(SUM(`COMM`)), MIN(MIN(`COMM`)), COUNT(`SAL`, `COMM`) FROM (SELECT `DEPTNO`, `COMM`, `SAL`, SUM(`COMM`), MIN(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `COMM`, `SAL`) AS `t0` GROUP BY `DEPTNO`
+
+testDistinctWithMultipleInputsAndGroupby
+SELECT deptno, SUM(comm), MIN(comm), COUNT(DISTINCT sal, deptno, comm) FROM emp GROUP BY deptno
+SELECT `DEPTNO`, SUM(SUM(`COMM`)), MIN(MIN(`COMM`)), COUNT(`SAL`, `DEPTNO`, `COMM`) FROM (SELECT `DEPTNO`, `COMM`, `SAL`, SUM(`COMM`), MIN(`COMM`) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`, `COMM`, `SAL`) AS `t0` GROUP BY `DEPTNO`
+
+testPushProjectPastFilter
+select empno + deptno from emp where sal = 10 * comm and upper(ename) = 'FOO'
+SELECT `EMPNO` + `DEPTNO` FROM (SELECT `EMPNO`, `ENAME`, `SAL`, `COMM`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `SAL` = 10 * `COMM` AND UPPER(`ENAME`) = 'FOO'
+
+testPushProjectPastFilter2
+select count(*) from emp where case when mgr < 10 then true else false end
+SELECT COUNT(*) FROM (SELECT `MGR` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `MGR` < 10
+
+testPushProjectPastInnerJoin
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from emp e inner join bonus b on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), `t`.`CASE` FROM (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN 11 ELSE -1 * `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t` INNER JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t`.`CASE`
+
+testPushProjectPastInnerJoinStrong
+select count(*), case when e.sal < 11 then -1 * e.sal else e.sal end from emp e inner join bonus b on e.ename = b.ename group by case when e.sal < 11 then -1 * e.sal else e.sal end
+SELECT COUNT(*), `t`.`CASE` FROM (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN -1 * `SAL` ELSE `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t` INNER JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t`.`CASE`
+
+testPushProjectPastLeftJoin
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from emp e left outer join bonus b on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), `t`.`CASE` FROM (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN 11 ELSE -1 * `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t` LEFT JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t`.`CASE`
+
+testPushProjectPastLeftJoinSwap
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from bonus b left outer join emp e on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), CASE WHEN `t0`.`<` THEN 11 ELSE `t0`.`*` END FROM (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t` LEFT JOIN (SELECT `ENAME`, `SAL` < 11 AS `<`, -1 * `SAL` AS `*` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY CASE WHEN `t0`.`<` THEN 11 ELSE `t0`.`*` END
+
+testPushProjectPastLeftJoinSwapStrong
+select count(*), case when e.sal < 11 then -1 * e.sal else e.sal end from bonus b left outer join emp e on e.ename = b.ename group by case when e.sal < 11 then -1 * e.sal else e.sal end
+SELECT COUNT(*), `t0`.`CASE` FROM (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t` LEFT JOIN (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN -1 * `SAL` ELSE `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t0`.`CASE`
+
+testPushProjectPastRightJoin
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from emp e right outer join bonus b on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), CASE WHEN `t`.`<` THEN 11 ELSE `t`.`*` END FROM (SELECT `ENAME`, `SAL` < 11 AS `<`, -1 * `SAL` AS `*` FROM `CATALOG`.`SALES`.`EMP`) AS `t` RIGHT JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY CASE WHEN `t`.`<` THEN 11 ELSE `t`.`*` END
+
+testPushProjectPastRightJoinStrong
+select count(*),  case when e.sal < 11 then -1 * e.sal else e.sal end from emp e right outer join bonus b on e.ename = b.ename group by case when e.sal < 11 then -1 * e.sal else e.sal end
+SELECT COUNT(*), `t`.`CASE` FROM (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN -1 * `SAL` ELSE `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t` RIGHT JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t`.`CASE`
+
+testPushProjectPastRightJoinSwap
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from bonus b right outer join emp e on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), `t0`.`CASE` FROM (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t` RIGHT JOIN (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN 11 ELSE -1 * `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t0`.`CASE`
+
+testPushProjectPastRightJoinSwapStrong
+select count(*), case when e.sal < 11 then -1 * e.sal else e.sal end from bonus b right outer join emp e on e.ename = b.ename group by case when e.sal < 11 then -1 * e.sal else e.sal end
+SELECT COUNT(*), `t0`.`CASE` FROM (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t` RIGHT JOIN (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN -1 * `SAL` ELSE `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t0`.`CASE`
+
+testPushProjectPastFullJoin
+select count(*), case when e.sal < 11 then 11 else -1 * e.sal end from emp e full outer join bonus b on e.ename = b.ename group by case when e.sal < 11 then 11 else -1 * e.sal end
+SELECT COUNT(*), CASE WHEN `t`.`<` THEN 11 ELSE `t`.`*` END FROM (SELECT `ENAME`, `SAL` < 11 AS `<`, -1 * `SAL` AS `*` FROM `CATALOG`.`SALES`.`EMP`) AS `t` FULL JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY CASE WHEN `t`.`<` THEN 11 ELSE `t`.`*` END
+
+testPushProjectPastFullJoinStrong
+select count(*), case when e.sal < 11 then -1 * e.sal else e.sal end from emp e full outer join bonus b on e.ename = b.ename group by case when e.sal < 11 then -1 * e.sal else e.sal end
+SELECT COUNT(*), `t`.`CASE` FROM (SELECT `ENAME`, CASE WHEN `SAL` < 11 THEN -1 * `SAL` ELSE `SAL` END AS `CASE` FROM `CATALOG`.`SALES`.`EMP`) AS `t` FULL JOIN (SELECT `ENAME` FROM `CATALOG`.`SALES`.`BONUS`) AS `t0` ON `t`.`ENAME` = `t0`.`ENAME` GROUP BY `t`.`CASE`
+
+testPushProjectPastSetOp
+select sal from (select * from emp e1 union all select * from emp e2)
+SELECT `SAL` FROM `CATALOG`.`SALES`.`EMP` UNION ALL SELECT `SAL` FROM `CATALOG`.`SALES`.`EMP`
+
+testPushJoinThroughUnionOnLeft
+select r1.sal from (select * from emp e1 union all select * from emp e2) r1, emp r2
+SELECT `SAL` FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP`, `CATALOG`.`SALES`.`EMP` AS `EMP0` UNION ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` AS `EMP1`, `CATALOG`.`SALES`.`EMP` AS `EMP2`) AS `t`
+
+testPushJoinThroughUnionOnRight
+select r1.sal from emp r1, (select * from emp e1 union all select * from emp e2) r2
+SELECT `SAL` FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP`, `CATALOG`.`SALES`.`EMP` AS `EMP0` UNION ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` AS `EMP1`, `CATALOG`.`SALES`.`EMP` AS `EMP2`) AS `t`
+
+testMergeFilterWithJoinCondition
+
+testMergeFilter
+select name from (   select *   from dept   where deptno = 10) where deptno = 10 
+SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` WHERE `DEPTNO` = 10
+
+testUnionMergeRule
+select * from ( select * from (   select name, deptno from dept   union all   select name, deptno from   (     select name, deptno, count(1) from dept group by name, deptno     union all     select name, deptno, count(1) from dept group by name, deptno   ) subq ) a union all select name, deptno from dept ) aa 
+SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` UNION ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`, `DEPTNO` UNION ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`, `DEPTNO` UNION ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT`
+
+testMinusMergeRule
+select * from ( select * from (   select name, deptno from   (     select name, deptno, count(1) from dept group by name, deptno     except all     select name, deptno, 1 from dept   ) subq   except all   select name, deptno from   (     select name, deptno, 1 from dept     except all     select name, deptno, count(1) from dept group by name, deptno   ) subq2 ) a except all select name, deptno from dept ) aa 
+SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`, `DEPTNO` EXCEPT ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` EXCEPT ALL SELECT * FROM (SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` EXCEPT ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`, `DEPTNO`) EXCEPT ALL SELECT `NAME`, `DEPTNO` FROM `CATALOG`.`SALES`.`DEPT`
+
+testMergeJoinFilter
+select * from (   select d.deptno, e.ename   from emp as e   join dept as d   on e.deptno = d.deptno   and d.deptno = 10) where deptno = 10 
+SELECT `t`.`DEPTNO`, `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `DEPTNO` = 10) AS `t` ON `EMP`.`DEPTNO` = `t`.`DEPTNO`
+
+testMergeUnionAll
+select * from emp where deptno = 10 union all select * from emp where deptno = 20 union all select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 UNION ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 UNION ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeUnionDistinct
+select * from emp where deptno = 10 union distinct select * from emp where deptno = 20 union select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 UNION SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 UNION SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeUnionMixed
+select * from emp where deptno = 10 union select * from emp where deptno = 20 union all select * from emp where deptno = 30 
+SELECT * FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 UNION SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20) UNION ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeUnionMixed2
+select * from emp where deptno = 10 union all select * from emp where deptno = 20 union select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 UNION SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 UNION SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeSetOpMixed
+select * from emp where deptno = 10 union select * from emp where deptno = 20 intersect select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 UNION SELECT * FROM SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 INTERSECT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeIntersect
+select * from emp where deptno = 10 intersect select * from emp where deptno = 20 intersect select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 INTERSECT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 INTERSECT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testIntersectToDistinct
+select * from emp where deptno = 10 intersect select * from emp where deptno = 20 intersect select * from emp where deptno = 30 
+SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` FROM (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, COUNT(*) AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` UNION ALL SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, COUNT(*) AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` UNION ALL SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, COUNT(*) AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30 GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`) AS `t5` GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` HAVING COUNT(*) = 3
+
+testIntersectToDistinctAll
+select * from emp where deptno = 10 intersect select * from emp where deptno = 20 intersect all select * from emp where deptno = 30 
+SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` FROM (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, COUNT(*) AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` UNION ALL SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, COUNT(*) AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`) AS `t3` GROUP BY `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` HAVING COUNT(*) = 2 INTERSECT ALL SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeMinus
+select * from emp where deptno = 10 except select * from emp where deptno = 20 except select * from emp where deptno = 30 
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 EXCEPT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 EXCEPT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30
+
+testMergeMinusRightDeep
+select * from emp where deptno = 10 except select * from (   select * from emp where deptno = 20   except   select * from emp where deptno = 30)
+SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 EXCEPT SELECT * FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 20 EXCEPT SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30)
+
+testPushSemiJoinPastJoinRuleLeft
+select e1.ename from emp e1, dept d, emp e2 where e1.deptno = d.deptno and e1.empno = e2.empno
+SELECT `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP0` ON `EMP`.`EMPNO` = `EMP0`.`EMPNO` INNER JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT0` ON `EMP`.`DEPTNO` = `DEPT0`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP1` ON `EMP`.`EMPNO` = `EMP1`.`EMPNO`
+
+testPushSemiJoinPastJoinRuleRight
+select e1.ename from emp e1, dept d, emp e2 where e1.deptno = d.deptno and d.deptno = e2.deptno
+SELECT `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` INNER JOIN (`CATALOG`.`SALES`.`DEPT` AS `DEPT0` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP0` ON `DEPT0`.`DEPTNO` = `EMP0`.`DEPTNO`) ON `EMP`.`DEPTNO` = `DEPT0`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP1` ON `DEPT`.`DEPTNO` = `EMP1`.`DEPTNO`
+
+testPushSemiJoinPastFilter
+select e.ename from emp e, dept d where e.deptno = d.deptno and e.ename = 'foo'
+SELECT `t`.`ENAME` FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` WHERE `EMP`.`ENAME` = 'foo') AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT0` ON `t`.`DEPTNO` = `DEPT0`.`DEPTNO`
+
+testReduceConstants
+select 1+2, d.deptno+(3+4), (5+6)+d.deptno, cast(null as integer), coalesce(2,null), row(7+8) from dept d inner join emp e on d.deptno = e.deptno + (5-5) where d.deptno=(7+8) and d.deptno=(8+7) and d.deptno=coalesce(2,null)
+SELECT 3, 22, 26, NULL, CAST(2 AS INTEGER), ROW(15) FROM (VALUES) AS `t` (`DEPTNO`, `NAME`, `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO0`, `SLACKER`)
+
+testReduceConstantsDup
+select d.deptno from dept d where d.deptno=7 and d.deptno=8
+SELECT `DEPTNO` FROM (VALUES) AS `t` (`DEPTNO`, `NAME`)
+
+testReduceConstantsDup2
+select * from emp where deptno=7 and deptno=8 and empno = 10 and mgr is null and empno = 10
+SELECT 10 AS `EMPNO`, `ENAME`, `JOB`, NULL AS `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER` FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testPullNull
+select * from emp where deptno=7 and empno = 10 and mgr is null and empno = 10
+SELECT 10 AS `EMPNO`, `ENAME`, `JOB`, NULL AS `MGR`, `HIREDATE`, `SAL`, `COMM`, 7 AS `DEPTNO`, `SLACKER` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 7 AND `MGR` IS NULL AND `EMPNO` = 10
+
+testReduceConstants2
+select p1 is not distinct from p0 from (values (2, cast(null as integer))) as t(p0, p1)
+SELECT FALSE FROM (VALUES  (0)) AS `t` (`ZERO`)
+
+testReduceConstantsProjectNullable
+select mgr from emp where mgr=10
+SELECT CAST(10 AS INTEGER) AS `MGR` FROM `CATALOG`.`SALES`.`EMP` WHERE `MGR` = 10
+
+testReduceConstantsNullEqualsOne
+select count(1) from emp where cast(null as integer) = 1
+SELECT COUNT(*) FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testReduceConstantsCaseEquals
+select count(1) from emp where case deptno   when 20 then 2   when 10 then 1   else 3 end = 1
+SELECT COUNT(*) FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10
+
+testReduceConstantsCaseEquals2
+select count(1) from emp where case deptno   when 20 then 2   when 10 then 1   else cast(null as integer) end = 1
+SELECT COUNT(*) FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10
+
+testReduceConstantsCaseEquals3
+select count(1) from emp where case deptno   when 30 then 1   when 20 then 2   when 10 then 1   when 30 then 111   else 0 end = 1
+SELECT COUNT(*) FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 30 OR `DEPTNO` = 10
+
+testReduceConstantsEliminatesFilter
+select * from (values (1,2)) where 1 + 2 > 3 + CAST(NULL AS INTEGER)
+SELECT * FROM (VALUES) AS `t` (`EXPR$0`, `EXPR$1`)
+
+testReduceConstantsNull
+select * from (   select *   from (     select cast(null as integer) as n     from emp)   where n is null and n is null) where n is null
+SELECT NULL AS `N` FROM `CATALOG`.`SALES`.`EMP`
+
+testReduceConstantsRequiresExecutor
+select * from (values (1,2)) where 1 + 2 > 3 + CAST(NULL AS INTEGER)
+SELECT * FROM (VALUES  (1, 2)) AS `t` (`EXPR$0`, `EXPR$1`) WHERE 1 + 2 > 3 + NULL
+
+testAlreadyFalseEliminatesFilter
+select * from (values (1,2)) where false
+SELECT * FROM (VALUES) AS `t` (`EXPR$0`, `EXPR$1`)
+
+testRemoveSemiJoin
+select e.ename from emp e, dept d where e.deptno = d.deptno
+SELECT `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testRemoveSemiJoinWithFilter
+select e.ename from emp e, dept d where e.deptno = d.deptno and e.ename = 'foo'
+SELECT `t`.`ENAME` FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `ENAME` = 'foo') AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `t`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testRemoveSemiJoinRight
+select e1.ename from emp e1, dept d, emp e2 where e1.deptno = d.deptno and d.deptno = e2.deptno
+SELECT `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP0` ON `DEPT`.`DEPTNO` = `EMP0`.`DEPTNO`
+
+testRemoveSemiJoinRightWithFilter
+select e1.ename from emp e1, dept d, emp e2 where e1.deptno = d.deptno and d.deptno = e2.deptno and d.name = 'foo'
+SELECT `EMP`.`ENAME` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN (SELECT * FROM `CATALOG`.`SALES`.`DEPT` WHERE `NAME` = 'foo') AS `t` ON `EMP`.`DEPTNO` = `t`.`DEPTNO` INNER JOIN `CATALOG`.`SALES`.`EMP` AS `EMP0` ON `t`.`DEPTNO` = `EMP0`.`DEPTNO`
+
+testPushSemiJoinPastProject
+select e.* from (select ename, trim(job), sal * 2, deptno from emp) e, dept d where e.deptno = d.deptno
+SELECT `t`.`ENAME`, TRIM(BOTH ' ' FROM `EMP`.`JOB`), `EMP`.`SAL` * 2, `t`.`DEPTNO` FROM (SELECT `EMP`.`ENAME`, TRIM(BOTH ' ' FROM `EMP`.`JOB`), `EMP`.`SAL` * 2, `EMP`.`DEPTNO` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO`) AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` AS `DEPT0` ON `t`.`DEPTNO` = `DEPT0`.`DEPTNO`
+
+testReduceValuesUnderFilter
+select a, b from (values (10, 'x'), (20, 'y')) as t(a, b) where a < 15
+SELECT * FROM (VALUES  (10, 'x')) AS `t` (`A`, `B`)
+
+testReduceConstantsIsNull
+select empno from emp where empno=10 and empno is null
+SELECT `EMPNO` FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testReduceConstantsIsNotNull
+select empno from emp where empno=10 and empno is not null
+SELECT `EMPNO` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10
+
+testReduceConstantsNegated
+select empno from emp where empno=10 and not(empno=10)
+SELECT `EMPNO` FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testReduceConstantsNegatedInverted
+select empno from emp where empno>10 and empno<=10
+SELECT `EMPNO` FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testReduceValuesToEmpty
+select a + b as x, b, a from (values (10, 1), (30, 7)) as t(a, b) where a - b < 0
+SELECT * FROM (VALUES) AS `t` (`X`, `B`, `A`)
+
+testEmptyProject
+select z + x from (   select x + y as z, x from (     select * from (values (10, 1), (30, 3)) as t (x, y)     where x + y > 50))
+SELECT `X` + `Y` + `X` FROM (VALUES) AS `t` (`X`, `Y`)
+
+testEmptyProject2
+select z + x from (   select x + y as z, x from (     select * from (values (10, 1), (30, 3)) as t (x, y)     where x + y > 50))
+SELECT * FROM (VALUES) AS `t` (`EXPR$0`)
+
+testEmptyIntersect
+select * from (values (30, 3))intersect select * from (values (10, 1), (30, 3)) as t (x, y) where x > 50 intersect select * from (values (30, 3))
+SELECT * FROM (VALUES) AS `t` (`EXPR$0`, `EXPR$1`)
+
+testEmptyMinus
+select * from (values (30, 3)) as t (x, y) where x > 30 except select * from (values (20, 2)) except select * from (values (40, 4))
+SELECT * FROM (VALUES) AS `t` (`X`, `Y`)
+
+testEmptyMinus2
+select * from (values (30, 3)) as t (x, y) except select * from (values (20, 2)) as t (x, y) where x > 30 except select * from (values (40, 4)) except select * from (values (50, 5)) as t (x, y) where x > 50
+SELECT * FROM (VALUES  (30, 3)) AS `t` (`X`, `Y`) EXCEPT SELECT * FROM (VALUES  (40, 4)) AS `t` (`EXPR$0`, `EXPR$1`)
+
+testEmptyJoin
+select * from ( select * from emp where false) join dept using (deptno)
+SELECT * FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `DEPTNO0`, `NAME`)
+
+testEmptyJoinLeft
+select * from ( select * from emp where false) left join dept using (deptno)
+SELECT * FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `DEPTNO0`, `NAME`)
+
+testEmptyJoinRight
+select * from ( select * from emp where false) right join dept using (deptno)
+SELECT * FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`) RIGHT JOIN `CATALOG`.`SALES`.`DEPT` ON `t`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testEmptySort
+select * from emp where false order by deptno
+SELECT * FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`) ORDER BY `DEPTNO`
+
+testEmptySortLimitZero
+select * from emp order by deptno limit 0
+SELECT * FROM (VALUES) AS `t` (`EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`)
+
+testEmptyAggregate
+select sum(empno) from emp where false group by deptno
+SELECT * FROM (VALUES) AS `t` (`EXPR$0`)
+
+testEmptyAggregateEmptyKey
+select sum(empno) from emp where false
+SELECT SUM(`EMPNO`) FROM (VALUES) AS `t` (`EMPNO`)
+
+testEmptyAggregateEmptyKeyWithAggregateValuesRule
+select count(*), sum(empno) from emp where false
+SELECT * FROM (VALUES  (0, NULL)) AS `t` (`EXPR$0`, `EXPR$1`)
+
+testReduceCasts
+select cast(d.name as varchar(128)), cast(e.empno as integer) from dept as d inner join emp as e on cast(d.deptno as integer) = cast(e.deptno as integer) where cast(e.job as varchar(1)) = 'Manager'
+SELECT CAST(`NAME` AS VARCHAR(128) CHARACTER SET `ISO-8859-1`), `EMPNO` FROM (SELECT `t`.`DEPTNO`, `t`.`NAME`, `t0`.`EMPNO`, `t0`.`ENAME`, `t0`.`JOB`, `t0`.`MGR`, `t0`.`HIREDATE`, `t0`.`SAL`, `t0`.`COMM`, `t0`.`DEPTNO` AS `DEPTNO1`, `t0`.`SLACKER` FROM (SELECT `DEPTNO`, `NAME`, `DEPTNO` AS `DEPTNO0` FROM `CATALOG`.`SALES`.`DEPT`) AS `t` INNER JOIN (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `DEPTNO` AS `DEPTNO0` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`DEPTNO0` = `t0`.`DEPTNO0`) AS `t1` WHERE CAST(`t1`.`JOB` AS VARCHAR(1) CHARACTER SET `ISO-8859-1`) = 'Manager'
+
+testReduceCastTimeUnchanged
+select cast(time '12:34:56' as timestamp) from emp as e
+SELECT CAST(TIME '12:34:56' AS TIMESTAMP(0)) FROM `CATALOG`.`SALES`.`EMP`
+
+testPullFilterThroughAggregate
+select ename, sal, deptno from (  select ename, sal, deptno  from emp  where sal > 5000)group by ename, sal, deptno
+SELECT `ENAME`, `SAL`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `SAL`, `DEPTNO` HAVING `SAL` > 5000
+
+testPullFilterThroughAggregateGroupingSets
+select ename, sal, deptno from (  select ename, sal, deptno  from emp  where sal > 5000)group by rollup(ename, sal, deptno)
+SELECT `ENAME`, `SAL`, `DEPTNO` FROM (SELECT `ENAME`, `SAL`, `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `ENAME`, `SAL`, `DEPTNO` HAVING `SAL` > 5000) AS `t1` GROUP BY `ENAME`, `SAL`, `DEPTNO`
+
+testPullConstantThroughUnion
+select 2, deptno, job from emp as e1 union all select 2, deptno, job from emp as e2
+SELECT 2, `DEPTNO`, `JOB` FROM (SELECT `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP` UNION ALL SELECT `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP`) AS `t1`
+
+testPullConstantThroughUnion2
+select 2, deptno, job from emp as e1 union all select 1, deptno, job from emp as e2
+SELECT 2, `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP` UNION ALL SELECT 1, `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP`
+
+testPullConstantThroughUnion3
+select 2, 3 from emp as e1 union all select 2, 3 from emp as e2
+SELECT 2, 3 FROM (SELECT 2 FROM `CATALOG`.`SALES`.`EMP` UNION ALL SELECT 2 FROM `CATALOG`.`SALES`.`EMP`) AS `t1`
+
+testAggregateProjectMerge
+select x, sum(z), y from (   select deptno as x, empno as y, sal as z, sal * 2 as zz   from emp) group by x, y
+SELECT `DEPTNO` AS `X`, SUM(`SAL`), `EMPNO` AS `Y` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `EMPNO`, `DEPTNO`
+
+testAggregateGroupingSetsProjectMerge
+select x, sum(z), y from (   select deptno as x, empno as y, sal as z, sal * 2 as zz   from emp) group by rollup(x, y)
+SELECT `DEPTNO` AS `X`, SUM(`SAL`), `EMPNO` AS `Y` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `EMPNO`, `DEPTNO`
+
+testPullAggregateThroughUnion
+select deptno, job from (select deptno, job from emp as e1 group by deptno,job  union all select deptno, job from emp as e2 group by deptno,job) group by deptno,job
+SELECT `DEPTNO`, `JOB` FROM (SELECT `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP` UNION ALL SELECT `DEPTNO`, `JOB` FROM `CATALOG`.`SALES`.`EMP`) AS `t1` GROUP BY `DEPTNO`, `JOB`
+
+testAggregateProjectPullUpConstants
+select job, empno, sal, sum(sal) as s from emp where empno = 10 group by job, empno, sal
+SELECT `JOB`, 10 AS `EMPNO`, `SAL`, SUM(`SAL`) AS `S` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10 GROUP BY `JOB`, `SAL`
+
+testPushFilterWithRank
+select e1.ename, r from (   select ename,   rank() over(partition by  deptno order by sal) as r   from emp) e1 where r < 2
+SELECT * FROM (SELECT `ENAME`, RANK() OVER (PARTITION BY `DEPTNO` ORDER BY `SAL` RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS `R` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `R` < 2
+
+testPushFilterWithRankExpr
+select e1.ename, r from (   select ename,   rank() over(partition by  deptno order by sal) + 1 as r   from emp) e1 where r < 2
+SELECT * FROM (SELECT `ENAME`, (RANK() OVER (PARTITION BY `DEPTNO` ORDER BY `SAL` RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) + 1 AS `R` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `R` < 2
+
+testPushAggregateThroughJoin1
+select e.job,d.name from (select * from sales.emp where empno = 10) as e join sales.dept as d on e.job = d.name group by e.job,d.name
+SELECT * FROM (SELECT `JOB` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10 GROUP BY `JOB`) AS `t0` INNER JOIN (SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t1` ON `t0`.`JOB` = `t1`.`NAME`
+
+testPushAggregateThroughJoin2
+select e.job,d.name from (select * from sales.emp where empno = 10) as e join sales.dept as d on e.job = d.name and e.deptno + e.empno = d.deptno + 5 group by e.job,d.name
+SELECT `t1`.`JOB`, `t3`.`NAME` FROM (SELECT `JOB`, `DEPTNO` + `EMPNO` AS `$f9` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10 GROUP BY `JOB`, `DEPTNO` + `EMPNO`) AS `t1` INNER JOIN (SELECT `NAME`, `DEPTNO` + 5 AS `$f2` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`, `DEPTNO` + 5) AS `t3` ON `t1`.`JOB` = `t3`.`NAME` AND `t1`.`$f9` = `t3`.`$f2` GROUP BY `t1`.`JOB`, `t3`.`NAME`
+
+testPushAggregateThroughJoin3
+select e.empno,d.deptno from (select * from sales.emp where empno = 10) as e join sales.dept as d on e.empno < d.deptno group by e.empno,d.deptno
+SELECT `t`.`EMPNO`, `DEPT`.`DEPTNO` AS `DEPTNO0` FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10) AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `t`.`EMPNO` < `DEPT`.`DEPTNO` GROUP BY `t`.`EMPNO`, `DEPT`.`DEPTNO`
+
+testPushAggregateThroughJoin4
+select e.deptno from sales.emp as e join sales.dept as d on e.deptno = d.deptno group by e.deptno
+SELECT `t`.`DEPTNO` FROM (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `t`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testPushAggregateThroughJoin5
+select e.deptno, d.deptno from sales.emp as e join sales.dept as d on e.deptno = d.deptno group by e.deptno, d.deptno
+SELECT `t`.`DEPTNO`, `DEPT`.`DEPTNO` AS `DEPTNO0` FROM (SELECT `DEPTNO` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `t`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testPushAggregateSumThroughJoin
+select e.job,sum(sal) from (select * from sales.emp where empno = 10) as e join sales.dept as d on e.job = d.name group by e.job,d.name
+SELECT `t0`.`JOB`, CAST(SUM(`SAL`) * `t1`.`$f1` AS INTEGER) FROM (SELECT `JOB`, SUM(`SAL`) FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` = 10 GROUP BY `JOB`) AS `t0` INNER JOIN (SELECT `NAME`, COUNT(*) AS `$f1` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t1` ON `t0`.`JOB` = `t1`.`NAME`
+
+testPushAggregateFunctionsThroughJoin
+select e.job,   min(sal) as min_sal, min(e.deptno) as min_deptno,   sum(sal) + 1 as sum_sal_plus, max(sal) as max_sal,   sum(sal) as sum_sal_2, count(sal) as count_sal,   count(mgr) as count_mgr from sales.emp as e join sales.dept as d on e.job = d.name group by e.job,d.name
+SELECT `t`.`JOB`, `t`.`MIN_SAL`, `t`.`MIN_DEPTNO`, CAST(`t`.`SUM_SAL_2` * `t0`.`$f1` AS INTEGER) + 1 AS `SUM_SAL_PLUS`, `t`.`MAX_SAL`, CAST(`t`.`SUM_SAL_2` * `t0`.`$f1` AS INTEGER) AS `SUM_SAL_2`, `t`.`COUNT_SAL` * `t0`.`$f1` AS `COUNT_SAL`, `t`.`COUNT_MGR` * `t0`.`$f1` AS `COUNT_MGR` FROM (SELECT `JOB`, MIN(`SAL`) AS `MIN_SAL`, MIN(`DEPTNO`) AS `MIN_DEPTNO`, SUM(`SAL`) AS `SUM_SAL_2`, MAX(`SAL`) AS `MAX_SAL`, COUNT(*) AS `COUNT_SAL`, COUNT(`MGR`) AS `COUNT_MGR` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `JOB`) AS `t` INNER JOIN (SELECT `NAME`, COUNT(*) AS `$f1` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t0` ON `t`.`JOB` = `t0`.`NAME`
+
+testPushAggregateThroughJoinDistinct
+select d.name,   sum(sal) as sum_sal, count(*) as c from sales.emp as e join (select distinct name from sales.dept) as d   on e.job = d.name group by d.name
+SELECT `t0`.`NAME`, `t`.`SUM_SAL`, `t`.`C` FROM (SELECT `JOB`, SUM(`SAL`) AS `SUM_SAL`, COUNT(*) AS `C` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `JOB`) AS `t` INNER JOIN (SELECT `NAME` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t0` ON `t`.`JOB` = `t0`.`NAME`
+
+testPushAggregateSumNoGroup
+select count(*) from sales.emp join sales.dept on job = name
+SELECT SUM(COUNT(*) * COUNT(*)) FROM (SELECT `JOB`, COUNT(*) FROM `CATALOG`.`SALES`.`EMP` GROUP BY `JOB`) AS `t` INNER JOIN (SELECT `NAME`, COUNT(*) FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t0` ON `t`.`JOB` = `t0`.`NAME`
+
+testSwapOuterJoin
+select 1 from sales.dept d left outer join sales.emp e on d.deptno = e.deptno
+SELECT 1 FROM `CATALOG`.`SALES`.`EMP` RIGHT JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO`
+
+testPushJoinCondDownToProject
+select d.deptno, e.deptno from sales.dept d, sales.emp e where d.deptno + 10 = e.deptno * 2
+SELECT `t`.`DEPTNO`, `t0`.`DEPTNO` AS `DEPTNO0` FROM (SELECT `DEPTNO`, `NAME`, `DEPTNO` + 10 AS `$f2` FROM `CATALOG`.`SALES`.`DEPT`) AS `t` INNER JOIN (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `DEPTNO` * 2 AS `$f9` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` ON `t`.`$f2` = `t0`.`$f9`
+
+testSortJoinTranspose1
+select * from sales.emp e left join ( select * from sales.dept d) using (deptno) order by sal limit 10
+SELECT * FROM (SELECT * FROM `CATALOG`.`SALES`.`EMP` ORDER BY `SAL` FETCH NEXT 10 ROWS ONLY) AS `t0` LEFT JOIN `CATALOG`.`SALES`.`DEPT` ON `t0`.`DEPTNO` = `DEPT`.`DEPTNO` ORDER BY `t0`.`SAL` FETCH NEXT 10 ROWS ONLY
+
+testSortJoinTranspose2
+select * from sales.emp e right join ( select * from sales.dept d) using (deptno) order by name
+SELECT * FROM `CATALOG`.`SALES`.`EMP` RIGHT JOIN (SELECT * FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME`) AS `t` ON `EMP`.`DEPTNO` = `t`.`DEPTNO` ORDER BY `t`.`NAME`
+
+testSortJoinTranspose3
+select * from sales.emp left join ( select * from sales.dept) using (deptno) order by sal, name limit 10
+SELECT * FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`DEPTNO` = `DEPT`.`DEPTNO` ORDER BY `EMP`.`SAL`, `DEPT`.`NAME` FETCH NEXT 10 ROWS ONLY
+
+testSortJoinTranspose4
+select * from sales.emp e right join ( select * from sales.dept d) using (deptno) order by name
+SELECT * FROM `CATALOG`.`SALES`.`EMP` RIGHT JOIN (SELECT * FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `NAME`) AS `t` ON `EMP`.`DEPTNO` = `t`.`DEPTNO` ORDER BY `t`.`NAME`
+
+testSortJoinTranspose5
+select * from sales.emp e right join ( select * from sales.dept d) using (deptno) limit 10
+SELECT * FROM `CATALOG`.`SALES`.`EMP` RIGHT JOIN (SELECT * FROM `CATALOG`.`SALES`.`DEPT` FETCH NEXT 10 ROWS ONLY) AS `t` ON `EMP`.`DEPTNO` = `t`.`DEPTNO` FETCH NEXT 10 ROWS ONLY
+
+testSortProjectTranspose1
+select d.deptno from sales.dept d order by cast(d.deptno as integer) offset 1
+SELECT `DEPTNO`, CAST(`DEPTNO` AS INTEGER) FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `DEPTNO` OFFSET 1 ROWS) AS `t0`
+
+testSortProjectTranspose2
+select d.deptno from sales.dept d order by cast(d.deptno as double) offset 1
+SELECT `DEPTNO`, CAST(`DEPTNO` AS DOUBLE) FROM (SELECT * FROM `CATALOG`.`SALES`.`DEPT` ORDER BY `DEPTNO` OFFSET 1 ROWS) AS `t0`
+
+testSortProjectTranspose3
+select d.deptno from sales.dept d order by cast(d.deptno as varchar(10)) offset 1
+SELECT `DEPTNO`, CAST(`DEPTNO` AS VARCHAR(10) CHARACTER SET `ISO-8859-1`) FROM `CATALOG`.`SALES`.`DEPT` ORDER BY CAST(`DEPTNO` AS VARCHAR(10) CHARACTER SET `ISO-8859-1`) OFFSET 1 ROWS
+
+testAggregateConstantKeyRule
+select count(*) as c from sales.emp where deptno = 10 group by deptno, sal
+SELECT COUNT(*) AS `C` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 GROUP BY `SAL`
+
+testAggregateConstantKeyRule2
+select count(*) as c from sales.emp where deptno = 10 group by deptno
+SELECT COUNT(*) AS `C` FROM `CATALOG`.`SALES`.`EMP` WHERE `DEPTNO` = 10 GROUP BY `DEPTNO`
+
+testAggregateConstantKeyRule3
+select job from sales.emp where sal is null and job = 'Clerk' group by sal, job having count(*) > 3
+SELECT `JOB` FROM (SELECT `SAL`, 'Clerk' AS `JOB`, COUNT(*) AS `$f2` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` IS NULL AND `JOB` = 'Clerk' GROUP BY `SAL`) AS `t2` WHERE `$f2` > 3
+
+testReduceExpressionsNot
+select * from (values (false),(true)) as q (col1) where not(col1)
+SELECT * FROM (VALUES  (FALSE),  (TRUE)) AS `t` (`COL1`) WHERE NOT `COL1`
+
+testExpandProjectScalar
+select empno,   (select deptno from sales.emp where empno < 20) as d from sales.emp
+SELECT `EMP`.`EMPNO`, `t1`.`$f0` AS `D` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT SINGLE_VALUE(`DEPTNO`) AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` ON TRUE
+
+testWhereNotInCorrelated
+select sal from emp where empno NOT IN (   select deptno from dept   where emp.job = dept.name)
+SELECT `EMP`.`SAL` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `NAME`, COUNT(*) AS `c`, COUNT(`DEPTNO`) AS `ck` FROM `CATALOG`.`SALES`.`DEPT` GROUP BY `NAME`) AS `t0` ON `EMP`.`JOB` = `t0`.`NAME` LEFT JOIN (SELECT `DEPTNO`, TRUE AS `i`, `NAME` FROM `CATALOG`.`SALES`.`DEPT`) AS `t1` ON `EMP`.`EMPNO` = `t1`.`DEPTNO` AND `EMP`.`JOB` = `t1`.`NAME` WHERE NOT CASE WHEN `t0`.`c` = 0 THEN FALSE WHEN `t1`.`i` IS NOT NULL THEN TRUE WHEN `t0`.`ck` < `t0`.`c` THEN TRUE ELSE FALSE END
+
+testWhereNotInCorrelated2
+select * from emp e1   where e1.empno NOT IN    (select empno from (select ename, empno, sal as r from emp) e2     where r > 2 and e1.ename= e2.ename)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `ENAME`, COUNT(*) AS `c`, COUNT(`EMPNO`) AS `ck` FROM (SELECT `ENAME`, `EMPNO`, `SAL` AS `R` FROM `CATALOG`.`SALES`.`EMP`) AS `t` WHERE `R` > 2 GROUP BY `ENAME`) AS `t3` ON `EMP`.`ENAME` = `t3`.`ENAME` LEFT JOIN (SELECT `EMPNO`, TRUE AS `i`, `ENAME` FROM (SELECT `ENAME`, `EMPNO`, `SAL` AS `R` FROM `CATALOG`.`SALES`.`EMP`) AS `t4` WHERE `R` > 2) AS `t7` ON `EMP`.`EMPNO` = `t7`.`EMPNO` AND `EMP`.`ENAME` = `t7`.`ENAME` WHERE NOT CASE WHEN `t3`.`c` = 0 THEN FALSE WHEN `t7`.`i` IS NOT NULL THEN TRUE WHEN `t3`.`ck` < `t3`.`c` THEN TRUE ELSE FALSE END
+
+testAll
+select * from emp e1   where e1.empno > ALL (select deptno from dept)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP`, (SELECT MAX(`DEPTNO`) AS `m`, COUNT(*) AS `c`, COUNT(`DEPTNO`) AS `d` FROM `CATALOG`.`SALES`.`DEPT`) AS `t0` WHERE NOT CASE WHEN `t0`.`c` = 0 THEN FALSE WHEN `EMP`.`EMPNO` <= `t0`.`m` IS TRUE THEN TRUE WHEN `t0`.`c` > `t0`.`d` THEN NULL ELSE `EMP`.`EMPNO` <= `t0`.`m` END
+
+testSome
+select * from emp e1   where e1.empno > SOME (select deptno from dept)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP`, (SELECT MIN(`DEPTNO`) AS `m`, COUNT(*) AS `c`, COUNT(`DEPTNO`) AS `d` FROM `CATALOG`.`SALES`.`DEPT`) AS `t0` WHERE CASE WHEN `t0`.`c` = 0 THEN FALSE WHEN `EMP`.`EMPNO` > `t0`.`m` IS TRUE THEN TRUE WHEN `t0`.`c` > `t0`.`d` THEN NULL ELSE `EMP`.`EMPNO` > `t0`.`m` END
+
+testWhereOrSubQuery
+select * from emp where sal = 4 or empno NOT IN (select deptno from dept)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `DEPTNO`, TRUE AS `i` FROM `CATALOG`.`SALES`.`DEPT`) AS `t0` ON `EMP`.`EMPNO` = `t0`.`DEPTNO` WHERE `EMP`.`SAL` = 4 OR NOT CASE WHEN `t0`.`i` IS NOT NULL THEN TRUE ELSE FALSE END
+
+testExpandProjectIn
+select empno,   deptno in (select deptno from sales.emp where empno < 20) as d from sales.emp
+SELECT `EMP`.`EMPNO`, CASE WHEN `t2`.`i` IS NOT NULL THEN TRUE ELSE FALSE END AS `D` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `DEPTNO`, TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY `DEPTNO`, TRUE) AS `t2` ON `EMP`.`DEPTNO` = `t2`.`DEPTNO`
+
+testExpandProjectInNullable
+with e2 as (   select empno, case when true then deptno else null end as deptno   from sales.emp) select empno,   deptno in (select deptno from e2 where empno < 20) as d from e2
+SELECT `t`.`EMPNO`, CASE WHEN `t3`.`c` = 0 THEN FALSE WHEN `t8`.`i` IS NOT NULL THEN TRUE WHEN `t`.`DEPTNO` IS NULL THEN NULL WHEN `t3`.`ck` < `t3`.`c` THEN NULL ELSE FALSE END AS `D` FROM (SELECT `EMPNO`, CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END AS `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t`, (SELECT COUNT(*) AS `c`, COUNT(`DEPTNO`) AS `ck` FROM (SELECT `EMPNO`, CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END AS `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` WHERE `EMPNO` < 20) AS `t3` LEFT JOIN (SELECT `DEPTNO`, TRUE AS `i` FROM (SELECT `EMPNO`, CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END AS `DEPTNO` FROM `CATALOG`.`SALES`.`EMP`) AS `t4` WHERE `EMPNO` < 20 GROUP BY `DEPTNO`, TRUE) AS `t8` ON `t`.`DEPTNO` = `t8`.`DEPTNO`
+
+testExpandProjectInComposite
+select empno, (empno, deptno) in (     select empno, deptno from sales.emp where empno < 20) as d from sales.emp
+SELECT `EMP`.`EMPNO`, CASE WHEN `t1`.`i` IS NOT NULL THEN TRUE ELSE FALSE END AS `D` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `EMPNO`, `DEPTNO`, TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` ON `EMP`.`EMPNO` = `t1`.`EMPNO` AND `EMP`.`DEPTNO` = `t1`.`DEPTNO`
+
+testExpandProjectExists
+select empno,   exists (select deptno from sales.emp where empno < 20) as d from sales.emp
+SELECT `EMP`.`EMPNO`, CASE WHEN `t1`.`i` IS NOT NULL THEN TRUE ELSE FALSE END AS `D` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY TRUE) AS `t1` ON TRUE
+
+testExpandFilterScalar
+select empno from sales.emp where (select deptno from sales.emp where empno < 20)  < (select deptno from sales.emp where empno > 100) or emp.sal < 100
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT SINGLE_VALUE(`DEPTNO`) AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` ON TRUE LEFT JOIN (SELECT SINGLE_VALUE(`DEPTNO`) AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` > 100) AS `t4` ON TRUE WHERE `t1`.`$f0` < `t4`.`$f0` OR `EMP`.`SAL` < 100
+
+testExpandFilterIn
+select empno from sales.emp where deptno in (select deptno from sales.emp where empno < 20) or emp.sal < 100
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `DEPTNO`, TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY `DEPTNO`, TRUE) AS `t2` ON `EMP`.`DEPTNO` = `t2`.`DEPTNO` WHERE `t2`.`i` IS NOT NULL OR `EMP`.`SAL` < 100
+
+testExpandFilterInComposite
+select empno from sales.emp where (empno, deptno) in (   select empno, deptno from sales.emp where empno < 20) or emp.sal < 100
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT `EMPNO`, `DEPTNO`, TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` ON `EMP`.`EMPNO` = `t1`.`EMPNO` AND `EMP`.`DEPTNO` = `t1`.`DEPTNO` WHERE `t1`.`i` IS NOT NULL OR `EMP`.`SAL` < 100
+
+testExpandFilterIn3Value
+select empno from sales.emp where empno  < case deptno in (select case when true then deptno else null end                    from sales.emp where empno < 20)    when true then 10    when false then 20    else 30    end
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP`, (SELECT COUNT(*) AS `c`, COUNT(CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END) AS `ck` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` LEFT JOIN (SELECT CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END, TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END, TRUE) AS `t5` ON `EMP`.`DEPTNO` = CASE WHEN TRUE THEN CAST(`DEPTNO` AS INTEGER) ELSE NULL END WHERE `EMP`.`EMPNO` < CASE WHEN CASE WHEN `t1`.`c` = 0 THEN FALSE WHEN `t5`.`i` IS NOT NULL THEN TRUE WHEN `t1`.`ck` < `t1`.`c` THEN NULL ELSE FALSE END = TRUE THEN 10 WHEN CASE WHEN `t1`.`c` = 0 THEN FALSE WHEN `t5`.`i` IS NOT NULL THEN TRUE WHEN `t1`.`ck` < `t1`.`c` THEN NULL ELSE FALSE END = FALSE THEN 20 ELSE 30 END
+
+testExpandFilterExists
+select empno from sales.emp where exists (select deptno from sales.emp where empno < 20) or emp.sal < 100
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (SELECT TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY TRUE) AS `t1` ON TRUE WHERE `t1`.`i` IS NOT NULL OR `EMP`.`SAL` < 100
+
+testExpandFilterExistsSimple
+select empno from sales.emp where exists (select deptno from sales.emp where empno < 20)
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP`, (SELECT TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY TRUE) AS `t1`
+
+testExpandFilterExistsSimpleAnd
+select empno from sales.emp where exists (select deptno from sales.emp where empno < 20) and emp.sal < 100
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP`, (SELECT TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY TRUE) AS `t1` WHERE `EMP`.`SAL` < 100
+
+testExpandJoinScalar
+select empno from sales.emp left join sales.dept on (select deptno from sales.emp where empno < 20)  < (select deptno from sales.emp where empno > 100)
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (`CATALOG`.`SALES`.`DEPT` LEFT JOIN (SELECT SINGLE_VALUE(`DEPTNO`) AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20) AS `t1` ON TRUE LEFT JOIN (SELECT SINGLE_VALUE(`DEPTNO`) AS `$f0` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` > 100) AS `t4` ON TRUE) ON `t1`.`$f0` < `t4`.`$f0`
+
+testExpandJoinExists
+select empno from sales.emp left join sales.dept on exists (select deptno from sales.emp where empno < 20)
+SELECT `EMP`.`EMPNO` FROM `CATALOG`.`SALES`.`EMP` LEFT JOIN (`CATALOG`.`SALES`.`DEPT`, (SELECT TRUE AS `i` FROM `CATALOG`.`SALES`.`EMP` WHERE `EMPNO` < 20 GROUP BY TRUE) AS `t1`) ON TRUE
+
+testDecorrelateExists
+select * from sales.emp where EXISTS (   select * from emp e where emp.deptno = e.deptno)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN (SELECT `DEPTNO`, TRUE AS `$f1` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t2` ON `EMP`.`DEPTNO` = `t2`.`DEPTNO`
+
+testDecorrelateTwoExists
+select * from sales.emp where EXISTS (   select * from emp e where emp.deptno = e.deptno) AND NOT EXISTS (   select * from emp ee where ee.job = emp.job AND ee.sal=34)
+SELECT `EMP`.`EMPNO`, `EMP`.`ENAME`, `EMP`.`JOB`, `EMP`.`MGR`, `EMP`.`HIREDATE`, `EMP`.`SAL`, `EMP`.`COMM`, `EMP`.`DEPTNO`, `EMP`.`SLACKER` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN (SELECT `DEPTNO`, TRUE AS `$f1` FROM `CATALOG`.`SALES`.`EMP` GROUP BY `DEPTNO`) AS `t2` ON `EMP`.`DEPTNO` = `t2`.`DEPTNO` LEFT JOIN (SELECT `JOB`, TRUE AS `$f1` FROM `CATALOG`.`SALES`.`EMP` WHERE `SAL` = 34 GROUP BY `JOB`) AS `t7` ON `EMP`.`JOB` = `t7`.`JOB` WHERE `t7`.`$f1` IS NULL
+
+testDecorrelateTwoIn
+select sal from sales.emp where empno IN (   select deptno from dept where emp.job = dept.name) AND empno IN (   select empno from emp e where emp.ename = e.ename)
+SELECT `EMP`.`SAL` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`JOB` = `DEPT`.`NAME` AND `EMP`.`EMPNO` = `DEPT`.`DEPTNO` INNER JOIN (SELECT `EMPNO`, `ENAME` FROM `CATALOG`.`SALES`.`EMP`) AS `t` ON `EMP`.`ENAME` = `t`.`ENAME` AND `EMP`.`EMPNO` = `t`.`EMPNO`
+
+testWhereInCorrelated
+select sal from emp where empno IN (   select deptno from dept where emp.job = dept.name)
+SELECT `EMP`.`SAL` FROM `CATALOG`.`SALES`.`EMP` INNER JOIN `CATALOG`.`SALES`.`DEPT` ON `EMP`.`JOB` = `DEPT`.`NAME` AND `EMP`.`EMPNO` = `DEPT`.`DEPTNO`
+
+testWhereExpressionInCorrelated
+select ename from (   select ename, deptno, sal + 1 as salPlus from emp) as e where deptno in (   select deptno from emp where sal + 1 = e.salPlus)
+SELECT `t`.`ENAME` FROM (SELECT `ENAME`, `DEPTNO`, `SAL` + 1 AS `SALPLUS` FROM `CATALOG`.`SALES`.`EMP`) AS `t` INNER JOIN (SELECT `DEPTNO`, `$f9` FROM (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `SAL` + 1 AS `$f9` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` WHERE `SAL` + 1 = `$f9` GROUP BY `DEPTNO`, `$f9`) AS `t3` ON `t`.`SALPLUS` = `t3`.`$f9` AND `t`.`DEPTNO` = `t3`.`DEPTNO`
+
+testWhereExpressionInCorrelated2
+select name from (   select name, deptno, deptno - 10 as deptnoMinus from dept) as d where deptno in (   select deptno from emp where sal + 1 = d.deptnoMinus)
+SELECT `t`.`NAME` FROM (SELECT `NAME`, `DEPTNO`, `DEPTNO` - 10 AS `DEPTNOMINUS` FROM `CATALOG`.`SALES`.`DEPT`) AS `t` INNER JOIN (SELECT `DEPTNO`, `$f9` FROM (SELECT `EMPNO`, `ENAME`, `JOB`, `MGR`, `HIREDATE`, `SAL`, `COMM`, `DEPTNO`, `SLACKER`, `SAL` + 1 AS `$f9` FROM `CATALOG`.`SALES`.`EMP`) AS `t0` WHERE `SAL` + 1 = `$f9` GROUP BY `DEPTNO`, `$f9`) AS `t3` ON `t`.`DEPTNOMINUS` = `t3`.`$f9` AND `t`.`DEPTNO` = `t3`.`DEPTNO`
+
+testCustomColumnResolvingInNonCorrelatedSubQuery
+select * from struct.t t1 where c0 in (   select f1.c0 from struct.t t2)
+SELECT `T`.`"K0"`, `T`.`"C1"`, `T`.`"F1"."A0"`, `T`.`"F2"."A0"`, `T`.`"F0"."C0"`, `T`.`"F1"."C0"`, `T`.`"F0"."C1"`, `T`.`"F1"."C2"`, `T`.`"F2"."C3"` FROM `CATALOG`.`STRUCT`.`T` INNER JOIN (SELECT `"F1"."C0"` AS `C0` FROM `CATALOG`.`STRUCT`.`T` GROUP BY `"F1"."C0"`) AS `t0` ON `T`.`"F0"."C0"` = `t0`.`C0`
+
+testExtractYearToRange
+select * from sales.emp_b as e where extract(year from birthdate) = 2014
+SELECT * FROM `CATALOG`.`SALES`.`EMP_B` WHERE `BIRTHDATE` >= DATE '2014-01-01' AND `BIRTHDATE` < DATE '2015-01-01'
+
+testExtractYearMonthToRange
+select * from sales.emp_b as e where extract(year from birthdate) = 2014and extract(month from birthdate) = 4
+SELECT * FROM `CATALOG`.`SALES`.`EMP_B` WHERE `BIRTHDATE` >= DATE '2014-04-01' AND `BIRTHDATE` < DATE '2014-05-01'

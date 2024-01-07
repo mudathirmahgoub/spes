@@ -116,7 +116,7 @@ public class SimpleAnalysis {
     }
 
     public static void main(String[] args) throws Exception {
-        File f = new File("testData/calcite_tests.json");
+        File f = new File("testData/no_aggregation_no_null_no_cast_no_outer_join.json");
         JsonParser parser = new JsonParser();
         JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
         FileWriter prove = new FileWriter("calciteProve.txt");

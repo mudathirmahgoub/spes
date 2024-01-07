@@ -49,6 +49,25 @@ public class Cvc5SetsTranslator
       System.exit(-1);
     }
   }
+
+  public static void reset() throws CVC5ApiException
+  {
+    tables.clear();
+    definedFunctions.clear();
+    functionIndex = 0;
+    Context.deletePointers();
+    solver = new Solver();
+    solver.setLogic("HO_ALL");
+    solver.setOption("produce-models", "true");
+    solver.setOption("debug-check-models", "true");
+    solver.setOption("dag-thresh", "0");
+    solver.setOption("uf-lazy-ll", "true");
+    solver.setOption("fmf-bound", "true");
+    solver.setOption("tlimit-per", "6000");
+    zero = solver.mkInteger(0);
+    one = solver.mkInteger(1);
+  }
+
   public static Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
       throws CVC5ApiException
   {
@@ -508,23 +527,5 @@ public class Cvc5SetsTranslator
     }
     Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
     return tupleSort;
-  }
-
-  public static void reset() throws CVC5ApiException
-  {
-    tables.clear();
-    definedFunctions.clear();
-    functionIndex = 0;
-    Context.deletePointers();
-    solver = new Solver();
-    solver.setLogic("HO_ALL");
-    solver.setOption("produce-models", "true");
-    solver.setOption("debug-check-models", "true");
-    solver.setOption("dag-thresh", "0");
-    solver.setOption("uf-lazy-ll", "true");
-    solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "6000");
-    zero = solver.mkInteger(0);
-    one = solver.mkInteger(1);
   }
 }

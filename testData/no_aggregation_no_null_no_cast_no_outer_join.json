@@ -141,8 +141,8 @@
     },
     {
         "name": "testEmptySort",
-        "q1": "SELECT * FROM EMP AS EMP WHERE FALSE ORDER BY EMP.DEPTNO",
-        "q2": "SELECT * FROM (VALUES) AS t1 ORDER BY t1.DEPTNO"
+        "q1": "SELECT * FROM EMP AS EMP WHERE FALSE",
+        "q2": "SELECT * FROM (VALUES) AS t1"
     },
     {
         "name": "testTransitiveInferenceJoin",

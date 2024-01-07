@@ -259,16 +259,12 @@
 (assert (= f0 (lambda ((t (Tuple Bool))) (tuple "table"))))
 (assert (= f1 (lambda ((t (Tuple Bool))) (tuple "view"))))
 (assert (= f2 (lambda ((t (Tuple Bool))) (tuple "foreign table"))))
-(assert (= f3 (lambda ((t (Tuple String))) (tuple (str.to_upper (str.++ (str.substr ((_ tuple.select 0) t) 0 1) (str.substr ((_ tuple.select 0) t) 2 (str.len ((_ tuple.select 0) t))))) (str.substr ((_ tuple.select 0) t) 0 0)))))
+(assert (= f3 (lambda ((t (Tuple String))) (tuple (str.to_upper (str.++ (str.substr ((_ tuple.select 0) t) 0 2) (str.substr ((_ tuple.select 0) t) 2 (str.len ((_ tuple.select 0) t))))) (str.substr ((_ tuple.select 0) t) 0 1)))))
 (assert (not (= ((_ rel.project 0 1) (set.filter p4 (set.map f3 (set.union ((_ rel.project 0) (set.union (set.map f0 (set.singleton (tuple true))) (set.map f1 (set.singleton (tuple true))))) (set.map f2 (set.singleton (tuple true))))))) (set.map f5 (set.singleton (tuple true))))))
 (assert (= p4 (lambda ((t (Tuple String String))) (= ((_ tuple.select 0) t) "TABLE"))))
 (assert (= f5 (lambda ((t (Tuple Bool))) (tuple "TABLE" "t"))))
 (check-sat)
-;answer: sat
-(get-model)
-(
-)
-
+;answer: unsat
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
 ;Translating sql query: SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.EMPNO = EMP0.EMPNO

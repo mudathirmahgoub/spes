@@ -125,7 +125,7 @@ public class Cvc5Analysis
 
   static public boolean contains(String sql)
   {
-    String[] keyWords = {"VALUE", "EXISTS", "ROW", "ORDER", "CAST"};
+    String[] keyWords = {"EXISTS", "ROW", "ORDER", "CAST"};
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))

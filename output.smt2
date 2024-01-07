@@ -23,6 +23,32 @@
 (check-sat)
 ;answer: unsat
 ;-----------------------------------------------------------
+; test name: testReduceValuesUnderProject
+;Translating sql query: SELECT t.EXPR$0 + t.EXPR$1 FROM (VALUES  (10, 1),  (20, 3)) AS t
+;Translating sql query: SELECT * FROM (VALUES  (11),  (23)) AS t1
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const f0 (-> (Tuple Int Int) (Tuple Int)))
+(assert (not (= (set.map f0 (set.union (set.singleton (tuple 10 1)) (set.singleton (tuple 20 3)))) ((_ rel.project 0) (set.union (set.singleton (tuple 11)) (set.singleton (tuple 23)))))))
+(assert (= f0 (lambda ((t (Tuple Int Int))) (tuple (+ ((_ tuple.select 0) t) ((_ tuple.select 1) t))))))
+(check-sat)
+;answer: unsat
+;-----------------------------------------------------------
+; test name: testReduceValuesUnderFilter
+;Translating sql query: SELECT * FROM (VALUES  (10, 'x'),  (20, 'y')) AS t WHERE t.EXPR$0 < 15
+;Translating sql query: SELECT * FROM (VALUES  (10, 'x')) AS t1
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const p0 (-> (Tuple Int String) Bool))
+(assert (not (= ((_ rel.project 0 1) (set.filter p0 (set.union (set.singleton (tuple 10 "x")) (set.singleton (tuple 20 "y"))))) ((_ rel.project 0 1) (set.singleton (tuple 10 "x"))))))
+(assert (= p0 (lambda ((t (Tuple Int String))) (< ((_ tuple.select 0) t) 15))))
+(check-sat)
+;answer: unsat
+;-----------------------------------------------------------
 ; test name: testRemoveSemiJoin
 ;Translating sql query: SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO
 ;Translating sql query: SELECT EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO
@@ -65,8 +91,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const DEPT (Set (Tuple Int String)))
 (declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
+(declare-const DEPT (Set (Tuple Int String)))
 (declare-const p1 (-> (Tuple Int String String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p5 (-> (Tuple Int String String Int Int Int Int Int Int String Int String String) Bool))
@@ -164,8 +190,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const DEPT (Set (Tuple Int String)))
 (declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
+(declare-const DEPT (Set (Tuple Int String)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
 (declare-const p1 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
@@ -173,6 +199,21 @@
 (assert (= p1 (lambda ((t (Tuple Int String String Int Int Int Int Int Int Int String))) (= ((_ tuple.select 7) t) ((_ tuple.select 9) t)))))
 (assert (not (= ((_ rel.project 1) (set.filter p0 (rel.product (rel.product EMP DEPT) EMP))) ((_ rel.project 1) (set.filter p2 (rel.product (set.filter p1 (rel.product EMP DEPT)) EMP))))))
 (assert (= p2 (lambda ((t (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int))) (= ((_ tuple.select 9) t) ((_ tuple.select 18) t)))))
+(check-sat)
+;answer: unsat
+;-----------------------------------------------------------
+; test name: testReduceExpressionsNot
+;Translating sql query: SELECT * FROM (VALUES  (FALSE),  (TRUE)) AS t WHERE NOT t.EXPR$0
+;Translating sql query: SELECT * FROM (VALUES  (FALSE),  (TRUE)) AS t1 WHERE NOT t1.EXPR$0
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const p0 (-> (Tuple Bool) Bool))
+(declare-const p1 (-> (Tuple Bool) Bool))
+(assert (= p0 (lambda ((t (Tuple Bool))) (not ((_ tuple.select 0) t)))))
+(assert (not (= ((_ rel.project 0) (set.filter p0 (set.union (set.singleton (tuple false)) (set.singleton (tuple true))))) ((_ rel.project 0) (set.filter p1 (set.union (set.singleton (tuple false)) (set.singleton (tuple true))))))))
+(assert (= p1 (lambda ((t (Tuple Bool))) (not ((_ tuple.select 0) t)))))
 (check-sat)
 ;answer: unsat
 ;-----------------------------------------------------------
@@ -202,6 +243,33 @@
 (check-sat)
 ;answer: unsat
 ;-----------------------------------------------------------
+; test name: testReduceConstantsCalc
+;Translating sql query: SELECT * FROM (SELECT UPPER(SUBSTRING(t6.X FROM 1 FOR 2) || SUBSTRING(t6.X FROM 3)) AS U, SUBSTRING(t6.X FROM 1 FOR 1) AS S FROM (SELECT * FROM (SELECT 'table' AS X FROM (VALUES  (TRUE)) AS t UNION SELECT 'view' FROM (VALUES  (TRUE)) AS t1) AS t3 UNION SELECT 'foreign table' FROM (VALUES  (TRUE)) AS t4) AS t6) AS t7 WHERE t7.U = 'TABLE'
+;Translating sql query: SELECT 'TABL' AS U, 't' AS S FROM (VALUES  (TRUE)) AS t9
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const p4 (-> (Tuple String String) Bool))
+(declare-const f0 (-> (Tuple Bool) (Tuple String)))
+(declare-const f1 (-> (Tuple Bool) (Tuple String)))
+(declare-const f2 (-> (Tuple Bool) (Tuple String)))
+(declare-const f3 (-> (Tuple String) (Tuple String String)))
+(declare-const f5 (-> (Tuple Bool) (Tuple String String)))
+(assert (= f0 (lambda ((t (Tuple Bool))) (tuple "table"))))
+(assert (= f1 (lambda ((t (Tuple Bool))) (tuple "view"))))
+(assert (= f2 (lambda ((t (Tuple Bool))) (tuple "foreign table"))))
+(assert (= f3 (lambda ((t (Tuple String))) (tuple (str.to_upper (str.++ (str.substr ((_ tuple.select 0) t) 0 1) (str.substr ((_ tuple.select 0) t) 2 (str.len ((_ tuple.select 0) t))))) (str.substr ((_ tuple.select 0) t) 0 0)))))
+(assert (not (= ((_ rel.project 0 1) (set.filter p4 (set.map f3 (set.union ((_ rel.project 0) (set.union (set.map f0 (set.singleton (tuple true))) (set.map f1 (set.singleton (tuple true))))) (set.map f2 (set.singleton (tuple true))))))) (set.map f5 (set.singleton (tuple true))))))
+(assert (= p4 (lambda ((t (Tuple String String))) (= ((_ tuple.select 0) t) "TABLE"))))
+(assert (= f5 (lambda ((t (Tuple Bool))) (tuple "TABL" "t"))))
+(check-sat)
+;answer: sat
+(get-model)
+(
+)
+
+;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
 ;Translating sql query: SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.EMPNO = EMP0.EMPNO
 ;Translating sql query: SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN DEPT AS DEPT0 ON EMP1.DEPTNO = DEPT0.DEPTNO INNER JOIN EMP AS EMP2 ON EMP1.EMPNO = EMP2.EMPNO INNER JOIN DEPT AS DEPT1 ON EMP1.DEPTNO = DEPT1.DEPTNO INNER JOIN EMP AS EMP3 ON EMP1.EMPNO = EMP3.EMPNO
@@ -209,8 +277,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const DEPT (Set (Tuple Int String)))
+(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
 (declare-const p1 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
@@ -474,6 +542,21 @@
 (check-sat)
 ;answer: unsat
 ;-----------------------------------------------------------
+; test name: testEmptyMinus2
+;Translating sql query: SELECT * FROM (SELECT * FROM (SELECT * FROM (VALUES  (30, 3)) AS t EXCEPT SELECT * FROM (VALUES  (20, 2)) AS t0 WHERE t0.EXPR$0 > 30) AS t2 EXCEPT SELECT * FROM (VALUES  (40, 4)) AS t3) AS t4 EXCEPT SELECT * FROM (VALUES  (50, 5)) AS t5 WHERE t5.EXPR$0 > 50
+;Translating sql query: SELECT * FROM (VALUES  (30, 3)) AS t8 EXCEPT SELECT * FROM (VALUES  (40, 4)) AS t9
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const p0 (-> (Tuple Int Int) Bool))
+(declare-const p1 (-> (Tuple Int Int) Bool))
+(assert (= p0 (lambda ((t (Tuple Int Int))) (> ((_ tuple.select 0) t) 30))))
+(assert (not (= (set.minus ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple 30 3))) ((_ rel.project 0 1) (set.filter p0 (set.singleton (tuple 20 2)))))) ((_ rel.project 0 1) (set.singleton (tuple 40 4))))) ((_ rel.project 0 1) (set.filter p1 (set.singleton (tuple 50 5))))) (set.minus ((_ rel.project 0 1) (set.singleton (tuple 30 3))) ((_ rel.project 0 1) (set.singleton (tuple 40 4)))))))
+(assert (= p1 (lambda ((t (Tuple Int Int))) (> ((_ tuple.select 0) t) 50))))
+(check-sat)
+;answer: unsat
+;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
 ;Translating sql query: SELECT * FROM (SELECT DEPT.DEPTNO, EMP.ENAME FROM EMP AS EMP INNER JOIN DEPT AS DEPT ON EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = 10) AS t WHERE t.DEPTNO = 10
 ;Translating sql query: SELECT t1.DEPTNO, EMP0.ENAME FROM EMP AS EMP0 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO = 10) AS t1 ON EMP0.DEPTNO = t1.DEPTNO
@@ -578,8 +661,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const DEPT (Set (Tuple Int String)))
 (declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
+(declare-const DEPT (Set (Tuple Int String)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p1 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
@@ -719,8 +802,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const DEPT (Set (Tuple Int String)))
 (declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
+(declare-const DEPT (Set (Tuple Int String)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p3 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String) Bool))

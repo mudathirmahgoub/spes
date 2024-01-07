@@ -525,7 +525,7 @@ public class Cvc5BagsTranslator
     solver.setOption("dag-thresh", "0");
     solver.setOption("uf-lazy-ll", "true");
     solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "6000");
+    solver.setOption("tlimit-per", "3000");
     zero = solver.mkInteger(0);
     one = solver.mkInteger(1);
   }

@@ -1,4 +1,17 @@
 ;-----------------------------------------------------------
+; test name: testEmptyFilterProjectUnion
+;Translating sql query: SELECT * FROM (SELECT * FROM (VALUES  (10, 1),  (30, 3)) AS t UNION ALL SELECT * FROM (VALUES  (20, 2)) AS t0) AS t1 WHERE t1.EXPR$0 + t1.EXPR$1 > 30
+;Translating sql query: SELECT * FROM (VALUES  (30, 3)) AS t3
+(set-logic HO_ALL)
+(set-option :fmf-bound true)
+(set-option :uf-lazy-ll true)
+(set-option :strings-exp true)
+(declare-const p0 (-> (Tuple Int Int) Bool))
+(assert (not (= ((_ rel.project 0 1) (set.filter p0 (set.union ((_ rel.project 0 1) (set.union (set.singleton (tuple 10 1)) (set.singleton (tuple 30 3)))) ((_ rel.project 0 1) (set.singleton (tuple 20 2)))))) ((_ rel.project 0 1) (set.singleton (tuple 30 3))))))
+(assert (= p0 (lambda ((t (Tuple Int Int))) (> (+ ((_ tuple.select 0) t) ((_ tuple.select 1) t)) 30))))
+(check-sat)
+;answer: unsat
+;-----------------------------------------------------------
 ; test name: testMergeMinus
 ;Translating sql query: SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 EXCEPT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30
 ;Translating sql query: SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 EXCEPT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30
@@ -190,8 +203,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const DEPT (Set (Tuple Int String)))
+(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
 (declare-const p1 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int String String Int Int Int Int Int Int) Bool))
@@ -296,8 +309,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const DEPT (Set (Tuple Int String)))
+(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const p0 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const p2 (-> (Tuple Int String String Int Int Int Int Int Int Int String) Bool))
 (declare-const f1 (-> (Tuple Int String String Int Int Int Int Int Int Int String) (Tuple Int)))
@@ -454,8 +467,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const DEPT (Set (Tuple Int String)))
+(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const p0 (-> (Tuple Int String Int) Bool))
 (declare-const p1 (-> (Tuple Int String Int) Bool))
 (declare-const p2 (-> (Tuple Int String) Bool))
@@ -560,8 +573,8 @@
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
 (set-option :strings-exp true)
-(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const DEPT (Set (Tuple Int String)))
+(declare-const EMP (Set (Tuple Int String String Int Int Int Int Int Int)))
 (declare-const p1 (-> (Tuple Int String String Int Int Int Int Int Int Int String Int) Bool))
 (declare-const p2 (-> (Tuple Int String) Bool))
 (declare-const p3 (-> (Tuple Int String) Bool))

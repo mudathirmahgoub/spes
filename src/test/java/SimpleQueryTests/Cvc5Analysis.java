@@ -44,6 +44,7 @@ public class Cvc5Analysis
     }
     catch (Exception e)
     {
+      e.printStackTrace();
       System.out.println("fail compile");
       cannotCompile.println(name);
       cannotCompile.println("---------------------------------------------------");
@@ -61,6 +62,7 @@ public class Cvc5Analysis
       try
       {
         long startTime = System.currentTimeMillis();
+        //Cvc5BagsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
         Cvc5SetsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)

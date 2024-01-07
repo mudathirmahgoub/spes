@@ -372,12 +372,11 @@ public class Cvc5SetsTranslator
           k = Kind.STRING_SUBSTR;
           Term[] argTerms = getArgTerms(constructor, t, call);
           assert (argTerms.length >= 2);
-          // decrease indices by 1 since smt is 0 based, whereas SQL is 1 based
+          // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
           argTerms[1] = solver.simplify(solver.mkTerm(Kind.SUB, argTerms[1], one));
           if (argTerms.length == 3)
           {
             // SELECT SUBSTRING('abcdef' from 2 for 3) = bcd
-            argTerms[2] = solver.simplify(solver.mkTerm(Kind.SUB, argTerms[2], one));
             return solver.mkTerm(k, argTerms);
           }
 

@@ -245,7 +245,7 @@
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsCalc
 ;Translating sql query: SELECT * FROM (SELECT UPPER(SUBSTRING(t6.X FROM 1 FOR 2) || SUBSTRING(t6.X FROM 3)) AS U, SUBSTRING(t6.X FROM 1 FOR 1) AS S FROM (SELECT * FROM (SELECT 'table' AS X FROM (VALUES  (TRUE)) AS t UNION SELECT 'view' FROM (VALUES  (TRUE)) AS t1) AS t3 UNION SELECT 'foreign table' FROM (VALUES  (TRUE)) AS t4) AS t6) AS t7 WHERE t7.U = 'TABLE'
-;Translating sql query: SELECT 'TABL' AS U, 't' AS S FROM (VALUES  (TRUE)) AS t9
+;Translating sql query: SELECT 'TABLE' AS U, 't' AS S FROM (VALUES  (TRUE)) AS t9
 (set-logic HO_ALL)
 (set-option :fmf-bound true)
 (set-option :uf-lazy-ll true)
@@ -262,7 +262,7 @@
 (assert (= f3 (lambda ((t (Tuple String))) (tuple (str.to_upper (str.++ (str.substr ((_ tuple.select 0) t) 0 1) (str.substr ((_ tuple.select 0) t) 2 (str.len ((_ tuple.select 0) t))))) (str.substr ((_ tuple.select 0) t) 0 0)))))
 (assert (not (= ((_ rel.project 0 1) (set.filter p4 (set.map f3 (set.union ((_ rel.project 0) (set.union (set.map f0 (set.singleton (tuple true))) (set.map f1 (set.singleton (tuple true))))) (set.map f2 (set.singleton (tuple true))))))) (set.map f5 (set.singleton (tuple true))))))
 (assert (= p4 (lambda ((t (Tuple String String))) (= ((_ tuple.select 0) t) "TABLE"))))
-(assert (= f5 (lambda ((t (Tuple Bool))) (tuple "TABL" "t"))))
+(assert (= f5 (lambda ((t (Tuple Bool))) (tuple "TABLE" "t"))))
 (check-sat)
 ;answer: sat
 (get-model)

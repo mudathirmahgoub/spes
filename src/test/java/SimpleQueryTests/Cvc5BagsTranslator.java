@@ -1,4 +1,5 @@
 package SimpleQueryTests;
+import com.google.common.collect.ImmutableList;
 import io.github.cvc5.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,9 +12,12 @@ import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalFilter;
+import org.apache.calcite.rel.logical.LogicalIntersect;
 import org.apache.calcite.rel.logical.LogicalJoin;
+import org.apache.calcite.rel.logical.LogicalMinus;
 import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.logical.LogicalUnion;
+import org.apache.calcite.rel.logical.LogicalValues;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactoryImpl;
 import org.apache.calcite.rel.type.RelDataTypeField;
@@ -22,6 +26,7 @@ import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.type.BasicSqlType;
+import org.apache.calcite.util.ImmutableBitSet;
 
 public class Cvc5BagsTranslator
 {
@@ -30,6 +35,9 @@ public class Cvc5BagsTranslator
   private static Solver solver;
   private static int functionIndex = 0;
   private static PrintWriter writer = null;
+  private static Term zero;
+  private static Term one;
+
   static
   {
     try
@@ -118,6 +126,27 @@ public class Cvc5BagsTranslator
     }
     if (n instanceof LogicalAggregate)
     {
+      LogicalAggregate aggregate = (LogicalAggregate) n;
+      if (aggregate.getAggCallList().isEmpty())
+      {
+        // it is similar to duplicate removal of a projection
+        Term child = translate(aggregate.getInput());
+        ImmutableBitSet bitSet = aggregate.getGroupSet();
+        // ((_ table.project indices) child)
+        int[] indices = new int[bitSet.asList().size()];
+        int index = 0;
+        for (int i = 0; i < indices.length; i++)
+        {
+          if (bitSet.get(i))
+          {
+            indices[index] = i;
+            index++;
+          }
+        }
+        Op op = solver.mkOp(Kind.TABLE_PROJECT, indices);
+        Term ret = solver.mkTerm(op, child);
+        return ret;
+      }
       return null;
       // LogicalAggregate aggregate = (LogicalAggregate) n;
       // List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
@@ -151,7 +180,62 @@ public class Cvc5BagsTranslator
       }
       return result;
     }
+    if (n instanceof LogicalMinus)
+    {
+      LogicalMinus minus = (LogicalMinus) n;
+      Term a = translate(minus.getInput(0));
+      Term b = translate(minus.getInput(1));
+      Term difference = minus.all ? solver.mkTerm(Kind.BAG_DIFFERENCE_SUBTRACT, a, b)
+                                  : solver.mkTerm(Kind.BAG_DIFFERENCE_REMOVE, a, b);
+      return difference;
+    }
+    if (n instanceof LogicalIntersect)
+    {
+      LogicalIntersect intersect = (LogicalIntersect) n;
+      Term a = translate(intersect.getInput(0));
+      Term b = translate(intersect.getInput(1));
+      Term difference = solver.mkTerm(Kind.BAG_INTER_MIN, a, b);
+      return difference;
+    }
+    if (n instanceof LogicalValues)
+    {
+      return translate((LogicalValues) n);
+    }
     return null;
+  }
+
+  private static Term translate(LogicalValues values)
+  {
+    ImmutableList<ImmutableList<RexLiteral>> sqlTuples = values.getTuples();
+    Term[] smtTuples = new Term[sqlTuples.size()];
+    for (int i = 0; i < sqlTuples.size(); i++)
+    {
+      ImmutableList<RexLiteral> tuple = sqlTuples.get(i);
+      Term[] terms = new Term[tuple.size()];
+      for (int j = 0; j < tuple.size(); j++)
+      {
+        terms[j] = translate(tuple.get(j));
+      }
+      Term smtTuple = solver.mkTuple(terms);
+      Term singleton = solver.mkTerm(Kind.BAG_MAKE, smtTuple, one);
+      smtTuples[i] = singleton;
+    }
+    if (smtTuples.length == 0)
+    {
+      Sort sort = getSort(values.getRowType());
+      Term empty = solver.mkEmptyBag(sort);
+      return empty;
+    }
+    if (smtTuples.length == 1)
+    {
+      return smtTuples[0];
+    }
+    Term union = smtTuples[0];
+    for (int i = 1; i < smtTuples.length; i++)
+    {
+      union = solver.mkTerm(Kind.BAG_UNION_DISJOINT, union, smtTuples[i]);
+    }
+    return union;
   }
   private static Term translateJoin(LogicalJoin n) throws CVC5ApiException
   {
@@ -259,26 +343,7 @@ public class Cvc5BagsTranslator
     }
     else if (expr instanceof RexLiteral)
     {
-      RexLiteral literal = (RexLiteral) expr;
-      if (literal.getType().toString().equals("INTEGER"))
-      {
-        int integer = RexLiteral.intValue(literal);
-        return solver.mkInteger(integer);
-      }
-      if (literal.getType().toString().equals("VARCHAR"))
-      {
-        String string = RexLiteral.stringValue(literal);
-        return solver.mkString(string);
-      }
-      if (literal.getType().toString().equals("BOOLEAN"))
-      {
-        boolean value = RexLiteral.booleanValue(literal);
-        return solver.mkBoolean(value);
-      }
-      else
-      {
-        throw new RuntimeException(literal.toString());
-      }
+      return translate(expr);
     }
     else if (expr instanceof RexCall)
     {
@@ -302,7 +367,30 @@ public class Cvc5BagsTranslator
         case "/": k = Kind.DIVISION; break;
         case "AND": k = Kind.AND; break;
         case "OR": k = Kind.OR; break;
+        case "NOT": k = Kind.NOT; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
+        case "SUBSTRING":
+        {
+          k = Kind.STRING_SUBSTR;
+          Term[] argTerms = getArgTerms(constructor, t, call);
+          assert (argTerms.length >= 2);
+          // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
+          argTerms[1] = solver.simplify(solver.mkTerm(Kind.SUB, argTerms[1], one));
+          if (argTerms.length == 3)
+          {
+            // SELECT SUBSTRING('abcdef' from 2 for 3) = bcd
+            return solver.mkTerm(k, argTerms);
+          }
+
+          // SELECT SUBSTRING('abcdef' from 2) = bcdef
+          Term[] arguments = new Term[3];
+          arguments[0] = argTerms[0];
+          arguments[1] = argTerms[1];
+          arguments[2] = solver.simplify(solver.mkTerm(Kind.STRING_LENGTH, argTerms[0]));
+
+          return solver.mkTerm(k, arguments);
+        }
+        case "||": k = Kind.STRING_CONCAT; break;
         case "CASE": k = Kind.ITE; break;
         default:
         {
@@ -311,17 +399,48 @@ public class Cvc5BagsTranslator
           System.exit(0);
         }
       }
-      List<RexNode> operands = call.getOperands();
-      Term[] argTerms = new Term[operands.size()];
-      for (int i = 0; i < operands.size(); i++)
-      {
-        argTerms[i] = translateRowExpr(operands.get(i), constructor, t);
-      }
+      Term[] argTerms = getArgTerms(constructor, t, call);
       return solver.mkTerm(k, argTerms);
     }
     else
     {
       throw new RuntimeException(expr.toString());
+    }
+  }
+
+  private static Term[] getArgTerms(DatatypeConstructor constructor, Term t, RexCall call)
+  {
+    List<RexNode> operands = call.getOperands();
+    Term[] argTerms = new Term[operands.size()];
+    for (int i = 0; i < operands.size(); i++)
+    {
+      argTerms[i] = translateRowExpr(operands.get(i), constructor, t);
+    }
+    return argTerms;
+  }
+
+  private static Term translate(RexNode expr)
+  {
+    RexLiteral literal = (RexLiteral) expr;
+    String typeString = literal.getType().toString();
+    if (typeString.equals("INTEGER"))
+    {
+      int integer = RexLiteral.intValue(literal);
+      return solver.mkInteger(integer);
+    }
+    if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
+    {
+      String string = RexLiteral.stringValue(literal);
+      return solver.mkString(string);
+    }
+    if (typeString.equals("BOOLEAN"))
+    {
+      boolean value = RexLiteral.booleanValue(literal);
+      return solver.mkBoolean(value);
+    }
+    else
+    {
+      throw new RuntimeException(literal.toString());
     }
   }
 
@@ -364,15 +483,16 @@ public class Cvc5BagsTranslator
       else if (relDataType instanceof BasicSqlType)
       {
         BasicSqlType basicSqlType = (BasicSqlType) relDataType;
-        if (basicSqlType.getSqlTypeName().toString().equals("INTEGER"))
+        String typeString = basicSqlType.getSqlTypeName().toString();
+        if (typeString.equals("INTEGER"))
         {
           columnSorts.add(solver.getIntegerSort());
         }
-        else if (basicSqlType.getSqlTypeName().toString().equals("VARCHAR"))
+        else if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
         {
           columnSorts.add(solver.getStringSort());
         }
-        else if (basicSqlType.getSqlTypeName().toString().equals("BOOLEAN"))
+        else if (typeString.equals("BOOLEAN"))
         {
           columnSorts.add(solver.getBooleanSort());
         }
@@ -405,6 +525,8 @@ public class Cvc5BagsTranslator
     solver.setOption("dag-thresh", "0");
     solver.setOption("uf-lazy-ll", "true");
     solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "3000");
+    solver.setOption("tlimit-per", "6000");
+    zero = solver.mkInteger(0);
+    one = solver.mkInteger(1);
   }
 }

@@ -1,0 +1,9 @@
+Test Name,comment
+testEmptySort,compares two empty tables but we don't know the type of the second table
+testPushFilterWithRank,Uses RANK() OVER PARTITION BY clause which uses list semantics
+testSortUnionTranspose,Uses FETCH NEXT 10 ROWS ONLY clause which uses list semantics
+testPushFilterWithRankExpr,Uses RANK() OVER PARTITION BY clause which uses list semantics
+testEmptySortLimitZero,"Two issues FETCH NEXT 0 ROWS ONLY, and compares empty tables but we don't know the type of the second table"
+testSortUnionTranspose2,"Order by clauses can be removed, but it defeats the purpose of the test"
+testSortUnionTranspose3,FETCH NEXT 0 ROWS ONLY
+,

@@ -66,16 +66,16 @@ public class Cvc5Analysis
       try
       {
         long startTime = System.currentTimeMillis();
+        Cvc5AbstractTranslator translator;
         if (isSetSemantics)
         {
-          Cvc5SetsTranslator translator = new Cvc5SetsTranslator(isNullable, writer);
-          translator.translate(name, logicPlan, sql1, logicPlan2, sql2);
+          translator = new Cvc5SetsTranslator(isNullable, writer);
         }
         else
         {
-          Cvc5BagsTranslator.writer = writer;
-          Cvc5BagsTranslator.translate(name, logicPlan, sql1, logicPlan2, sql2);
+          translator = new Cvc5BagsTranslator(isNullable, writer);
         }
+        translator.translate(name, logicPlan, sql1, logicPlan2, sql2);
       }
       catch (Exception e)
       {

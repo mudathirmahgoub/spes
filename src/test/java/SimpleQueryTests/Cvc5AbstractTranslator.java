@@ -1,8 +1,6 @@
 package SimpleQueryTests;
 import com.google.common.collect.ImmutableList;
 import io.github.cvc5.*;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,17 +26,44 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.calcite.util.ImmutableBitSet;
 
-public class Cvc5BagsTranslator
+public abstract class Cvc5AbstractTranslator
 {
-  public static HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
-  public static HashMap<String, Term> definedFunctions = new HashMap<>();
-  private static Solver solver;
-  private static int functionIndex = 0;
-  public static PrintWriter writer = null;
-  private static Term zero;
-  private static Term one;
-   
-  public static Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
+  protected final PrintWriter writer;
+  protected final boolean isNullable;
+  public HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
+  public HashMap<String, Term> definedFunctions = new HashMap<>();
+  protected Solver solver;
+  protected int functionIndex = 0;
+  protected Term zero;
+  protected Term one;
+
+  public Cvc5AbstractTranslator(boolean isNullable, PrintWriter writer)
+  {
+    this.isNullable = isNullable;
+    this.writer = writer;
+  }
+
+  protected abstract boolean isSetSemantics();
+
+  public void reset() throws CVC5ApiException
+  {
+    tables.clear();
+    definedFunctions.clear();
+    functionIndex = 0;
+    Context.deletePointers();
+    solver = new Solver();
+    solver.setLogic("HO_ALL");
+    solver.setOption("produce-models", "true");
+    solver.setOption("debug-check-models", "true");
+    solver.setOption("dag-thresh", "0");
+    solver.setOption("uf-lazy-ll", "true");
+    solver.setOption("fmf-bound", "true");
+    solver.setOption("tlimit-per", "6000");
+    zero = solver.mkInteger(0);
+    one = solver.mkInteger(1);
+  }
+
+  public Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
       throws CVC5ApiException
   {
     reset();
@@ -59,20 +84,20 @@ public class Cvc5BagsTranslator
     return result;
   }
 
-  private static void println(Object object)
+  protected void println(Object object)
   {
     writer.println(object);
     System.out.println(object);
     writer.flush();
   }
-  private static void print(Object object)
+  protected void print(Object object)
   {
     writer.print(object);
     System.out.print(object);
     writer.flush();
   }
 
-  private static void printSmtProblem()
+  protected void printSmtProblem()
   {
     println("(set-logic HO_ALL)\r\n" + //
         "(set-option :fmf-bound true)\r\n" + //
@@ -101,90 +126,45 @@ public class Cvc5BagsTranslator
     println("(check-sat)");
   }
 
-  public static Term translate(RelNode n, String sql) throws CVC5ApiException
+  public Term translate(RelNode n, String sql) throws CVC5ApiException
   {
     println(";Translating sql query: " + sql);
     return translate(n);
   }
-  public static Term translate(RelNode n) throws CVC5ApiException
+
+  public Term translate(RelNode n) throws CVC5ApiException
   {
     if (n instanceof EnumerableTableScan)
     {
-      Term ret = translateTable((EnumerableTableScan) n);
-      return ret;
+      return translate((EnumerableTableScan) n);
     }
     if (n instanceof LogicalAggregate)
     {
-      LogicalAggregate aggregate = (LogicalAggregate) n;
-      if (aggregate.getAggCallList().isEmpty())
-      {
-        // it is similar to duplicate removal of a projection
-        Term child = translate(aggregate.getInput());
-        ImmutableBitSet bitSet = aggregate.getGroupSet();
-        // ((_ table.project indices) child)
-        int[] indices = new int[bitSet.asList().size()];
-        int index = 0;
-        for (int i = 0; i < indices.length; i++)
-        {
-          if (bitSet.get(i))
-          {
-            indices[index] = i;
-            index++;
-          }
-        }
-        Op op = solver.mkOp(Kind.TABLE_PROJECT, indices);
-        Term ret = solver.mkTerm(op, child);
-        return ret;
-      }
-      return null;
-      // LogicalAggregate aggregate = (LogicalAggregate) n;
-      // List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
-      // List<RexNode> rowNodes = aggregate.getChildExps();
-      // ImmutableList<ImmutableBitSet> bitSets = aggregate.getGroupSets();
-      // ImmutableBitSet bitSet = aggregate.getGroupSet();
-      // return translate(aggregate.getInput());
+      return translate((LogicalAggregate) n);
     }
     if (n instanceof LogicalProject)
     {
-      return translateProject((LogicalProject) n);
+      return translate((LogicalProject) n);
     }
     if (n instanceof LogicalFilter)
     {
-      return translateFilter((LogicalFilter) n);
+      return translate((LogicalFilter) n);
     }
     if (n instanceof LogicalJoin)
     {
-      return translateJoin((LogicalJoin) n);
+      return translate((LogicalJoin) n);
     }
     if (n instanceof LogicalUnion)
     {
-      LogicalUnion union = (LogicalUnion) n;
-      List<RelNode> inputs = n.getInputs();
-      Kind k = union.all ? Kind.BAG_UNION_DISJOINT : Kind.BAG_UNION_MAX;
-      Term result = translate(inputs.get(0));
-      result = solver.mkTerm(k, result, translate(inputs.get(1)));
-      for (int i = 2; i < inputs.size(); i++)
-      {
-        result = solver.mkTerm(k, result, translate(inputs.get(i)));
-      }
-      return result;
+      return translate((LogicalUnion) n);
     }
     if (n instanceof LogicalMinus)
     {
-      LogicalMinus minus = (LogicalMinus) n;
-      Term a = translate(minus.getInput(0));
-      Term b = translate(minus.getInput(1));
-      Term difference = minus.all ? solver.mkTerm(Kind.BAG_DIFFERENCE_SUBTRACT, a, b)
-                                  : solver.mkTerm(Kind.BAG_DIFFERENCE_REMOVE, a, b);
-      return difference;
+      return translate((LogicalMinus) n);
     }
     if (n instanceof LogicalIntersect)
     {
-      LogicalIntersect intersect = (LogicalIntersect) n;
-      Term a = translate(intersect.getInput(0));
-      Term b = translate(intersect.getInput(1));
-      Term difference = solver.mkTerm(Kind.BAG_INTER_MIN, a, b);
-      return difference;
+      return translate((LogicalIntersect) n);
     }
     if (n instanceof LogicalValues)
     {
@@ -193,7 +173,54 @@ public class Cvc5BagsTranslator
     return null;
   }
 
-  private static Term translate(LogicalValues values)
+  private Term translate(LogicalIntersect intersect) throws CVC5ApiException
+  {
+    Term a = translate(intersect.getInput(0));
+    Term b = translate(intersect.getInput(1));
+    Term difference = solver.mkTerm(getIntersectionKind(), a, b);
+    return difference;
+  }
+
+  protected abstract Kind getIntersectionKind();
+
+  protected abstract Term translate(LogicalMinus minus) throws CVC5ApiException;
+
+  private Term translate(LogicalAggregate aggregate) throws CVC5ApiException
+  {
+    if (aggregate.getAggCallList().isEmpty())
+    {
+      // it is similar to duplicate removal of a projection
+      Term child = translate(aggregate.getInput());
+      ImmutableBitSet bitSet = aggregate.getGroupSet();
+      // ((_ table.project indices) child)
+      int[] indices = new int[bitSet.asList().size()];
+      int index = 0;
+      for (int i = 0; i < indices.length; i++)
+      {
+        if (bitSet.get(i))
+        {
+          indices[index] = i;
+          index++;
+        }
+      }
+      Op op = solver.mkOp(getProjectKind(), indices);
+      Term ret = solver.mkTerm(op, child);
+      return ret;
+    }
+    return null;
+    // LogicalAggregate aggregate = (LogicalAggregate) n;
+    // List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
+    // List<RexNode> rowNodes = aggregate.getChildExps();
+    // ImmutableList<ImmutableBitSet> bitSets = aggregate.getGroupSets();
+    // ImmutableBitSet bitSet = aggregate.getGroupSet();
+    // return translate(aggregate.getInput());
+  }
+
+  protected abstract Term translate(LogicalUnion n) throws CVC5ApiException;
+
+  protected abstract Kind getProjectKind();
+
+  protected Term translate(LogicalValues values)
   {
     ImmutableList<ImmutableList<RexLiteral>> sqlTuples = values.getTuples();
     Term[] smtTuples = new Term[sqlTuples.size()];
@@ -206,13 +233,13 @@ public class Cvc5BagsTranslator
         terms[j] = translate(tuple.get(j));
       }
       Term smtTuple = solver.mkTuple(terms);
-      Term singleton = solver.mkTerm(Kind.BAG_MAKE, smtTuple, one);
+      Term singleton = mkSingleton(smtTuple);
       smtTuples[i] = singleton;
     }
     if (smtTuples.length == 0)
     {
       Sort sort = getSort(values.getRowType());
-      Term empty = solver.mkEmptyBag(sort);
+      Term empty = mkEmptyTable(sort);
       return empty;
     }
     if (smtTuples.length == 1)
@@ -222,15 +249,22 @@ public class Cvc5BagsTranslator
     Term union = smtTuples[0];
     for (int i = 1; i < smtTuples.length; i++)
     {
-      union = solver.mkTerm(Kind.BAG_UNION_DISJOINT, union, smtTuples[i]);
+      union = solver.mkTerm(getUnionAllKind(), union, smtTuples[i]);
     }
     return union;
   }
-  private static Term translateJoin(LogicalJoin n) throws CVC5ApiException
+
+  protected abstract Kind getUnionAllKind();
+
+  protected abstract Term mkEmptyTable(Sort sort);
+
+  protected abstract Term mkSingleton(Term smtTuple);
+
+  protected Term translate(LogicalJoin n) throws CVC5ApiException
   {
     Term left = translate(n.getLeft());
     Term right = translate(n.getRight());
-    Term product = solver.mkTerm(Kind.TABLE_PRODUCT, left, right);
+    Term product = solver.mkTerm(getProductKind(), left, right);
     if (!n.getCondition().isAlwaysTrue())
     {
       product = applyFilter(n.getCondition(), product);
@@ -241,27 +275,33 @@ public class Cvc5BagsTranslator
       default: throw new RuntimeException(n.toString());
     }
   }
-  private static Term translateFilter(LogicalFilter n) throws CVC5ApiException
+
+  protected abstract Kind getProductKind();
+
+  protected Term translate(LogicalFilter n) throws CVC5ApiException
   {
-    // (bag.filter (lambda (t (Tuple ...) ) ... ) input)
+    // (set.filter (lambda (t (Tuple ...) ) ... ) input)
     Term child = translate(n.getInput());
     return applyFilter(n.getCondition(), child);
   }
 
-  private static Term applyFilter(RexNode condition, Term table)
+  protected Term applyFilter(RexNode condition, Term table)
   {
-    Sort tupleSort = table.getSort().getBagElementSort();
+    Sort tupleSort = isSetSemantics() ? table.getSort().getSetElementSort()
+                                      : table.getSort().getBagElementSort();
     Datatype datatype = tupleSort.getDatatype();
     DatatypeConstructor constructor = datatype.getConstructor(0);
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
     Term body = translateRowExpr(condition, constructor, t);
     Term p = defineFun(t, functionType, body, "p");
-    Term ret = solver.mkTerm(Kind.BAG_FILTER, p, table);
+    Term ret = solver.mkTerm(getFilterKind(), p, table);
     return ret;
   }
 
-  private static Term defineFun(Term t, Sort functionType, Term body, String prefix)
+  protected abstract Kind getFilterKind();
+
+  protected Term defineFun(Term t, Sort functionType, Term body, String prefix)
   {
     String name = prefix + functionIndex;
     Term f = solver.defineFun(name, new Term[] {t}, functionType, body, true);
@@ -269,9 +309,9 @@ public class Cvc5BagsTranslator
     definedFunctions.put(name, f);
     return f;
   }
-  private static Term translateProject(LogicalProject project) throws CVC5ApiException
+  protected Term translate(LogicalProject project) throws CVC5ApiException
   {
-    // check whether to use table.project or bag.map
+    // check whether to use table.project or set.map
     boolean isTableProject = true;
     List<RexNode> exprs = project.getChildExps();
     int[] indices = new int[exprs.size()];
@@ -292,14 +332,15 @@ public class Cvc5BagsTranslator
     if (isTableProject)
     {
       // ((_ table.project indices) input)
-      Op op = solver.mkOp(Kind.TABLE_PROJECT, indices);
+      Op op = solver.mkOp(getProjectKind(), indices);
       Term ret = solver.mkTerm(op, child);
       return ret;
     }
     else
     {
-      // (bag.map (lambda (t (Tuple ...) ) ... ) input)
-      Sort argType = child.getSort().getBagElementSort();
+      // (set.map (lambda (t (Tuple ...) ) ... ) input)
+      Sort argType = isSetSemantics() ? child.getSort().getSetElementSort()
+                                      : child.getSort().getBagElementSort();
       Term t = solver.mkVar(argType, "t");
       Sort functionType = getSort(project.getRowType());
 
@@ -312,12 +353,14 @@ public class Cvc5BagsTranslator
       }
       Term body = solver.mkTuple(terms);
       Term f = defineFun(t, functionType, body, "f");
-      Term ret = solver.mkTerm(Kind.BAG_MAP, f, child);
+      Term ret = solver.mkTerm(getMapKind(), f, child);
       return ret;
     }
   }
 
-  private static Term translateRowExpr(RexNode expr, DatatypeConstructor constructor, Term t)
+  protected abstract Kind getMapKind();
+
+  protected Term translateRowExpr(RexNode expr, DatatypeConstructor constructor, Term t)
   {
     if (expr instanceof RexInputRef)
     {
@@ -397,7 +440,7 @@ public class Cvc5BagsTranslator
     }
   }
 
-  private static Term[] getArgTerms(DatatypeConstructor constructor, Term t, RexCall call)
+  protected Term[] getArgTerms(DatatypeConstructor constructor, Term t, RexCall call)
   {
     List<RexNode> operands = call.getOperands();
     Term[] argTerms = new Term[operands.size()];
@@ -408,7 +451,7 @@ public class Cvc5BagsTranslator
     return argTerms;
   }
 
-  private static Term translate(RexNode expr)
+  protected Term translate(RexNode expr)
   {
     RexLiteral literal = (RexLiteral) expr;
     String typeString = literal.getType().toString();
@@ -433,7 +476,7 @@ public class Cvc5BagsTranslator
     }
   }
 
-  private static Term translateTable(EnumerableTableScan table)
+  protected Term translate(EnumerableTableScan table)
   {
     if (tables.containsKey(table))
     {
@@ -441,13 +484,15 @@ public class Cvc5BagsTranslator
     }
     String tableName = String.join("_", table.getTable().getQualifiedName());
     Sort tupleSort = getSort(table.getRowType());
-    Sort tableSort = solver.mkBagSort(tupleSort);
+    Sort tableSort = mkTableSort(tupleSort);
     Term cvc5Table = solver.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
     return cvc5Table;
   }
 
-  private static Sort getSort(RelDataType rowType)
+  protected abstract Sort mkTableSort(Sort tupleSort);
+
+  protected Sort getSort(RelDataType rowType)
   {
     List<Sort> columnSorts = new ArrayList<>();
     for (RelDataTypeField type : rowType.getFieldList())
@@ -499,23 +544,5 @@ public class Cvc5BagsTranslator
     }
     Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
     return tupleSort;
-  }
-
-  public static void reset() throws CVC5ApiException
-  {
-    tables.clear();
-    definedFunctions.clear();
-    functionIndex = 0;
-    Context.deletePointers();
-    solver = new Solver();
-    solver.setLogic("HO_ALL");
-    solver.setOption("produce-models", "true");
-    solver.setOption("debug-check-models", "true");
-    solver.setOption("dag-thresh", "0");
-    solver.setOption("uf-lazy-ll", "true");
-    solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "3000");
-    zero = solver.mkInteger(0);
-    one = solver.mkInteger(1);
   }
 }

@@ -10,7 +10,7 @@ public class Cvc5Analysis
 {
   public static void main(String[] args) throws Exception
   {
-    boolean isSetSemantics = false;
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {

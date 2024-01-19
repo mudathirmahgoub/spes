@@ -498,16 +498,19 @@ public abstract class Cvc5AbstractTranslator
     for (RelDataTypeField type : rowType.getFieldList())
     {
       RelDataType relDataType = type.getType();
+      boolean isNullableType = isNullable ? relDataType.isNullable() : false;
       if (relDataType instanceof RelDataTypeFactoryImpl.JavaType)
       {
         RelDataTypeFactoryImpl.JavaType javaType = (RelDataTypeFactoryImpl.JavaType) type.getType();
         if (javaType.getJavaClass() == java.lang.Integer.class)
         {
-          columnSorts.add(solver.getIntegerSort());
+          Sort sort = getIntFieldSort(isNullableType);
+          columnSorts.add(sort);
         }
         else if (javaType.getJavaClass() == java.lang.String.class)
         {
-          columnSorts.add(solver.getStringSort());
+          Sort sort = getStringFieldSort(isNullableType);
+          columnSorts.add(sort);
         }
         else
         {
@@ -520,15 +523,18 @@ public abstract class Cvc5AbstractTranslator
         String typeString = basicSqlType.getSqlTypeName().toString();
         if (typeString.equals("INTEGER"))
         {
-          columnSorts.add(solver.getIntegerSort());
+          Sort sort = getIntFieldSort(isNullableType);
+          columnSorts.add(sort);
         }
         else if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
         {
-          columnSorts.add(solver.getStringSort());
+          Sort sort = getStringFieldSort(isNullableType);
+          columnSorts.add(sort);
         }
         else if (typeString.equals("BOOLEAN"))
         {
-          columnSorts.add(solver.getBooleanSort());
+          Sort sort = getBooleanFieldSort(isNullableType);
+          columnSorts.add(sort);
         }
         else
         {
@@ -544,5 +550,33 @@ public abstract class Cvc5AbstractTranslator
     }
     Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
     return tupleSort;
+  }
+
+  private Sort getIntFieldSort(boolean isNullableType)
+  {
+    Sort sort = solver.getIntegerSort();
+    if (isNullableType)
+    {
+      sort = solver.mkNullableSort(sort);
+    }
+    return sort;
+  }
+  private Sort getStringFieldSort(boolean isNullableType)
+  {
+    Sort sort = solver.getStringSort();
+    if (isNullableType)
+    {
+      sort = solver.mkNullableSort(sort);
+    }
+    return sort;
+  }
+  private Sort getBooleanFieldSort(boolean isNullableType)
+  {
+    Sort sort = solver.getBooleanSort();
+    if (isNullableType)
+    {
+      sort = solver.mkNullableSort(sort);
+    }
+    return sort;
   }
 }

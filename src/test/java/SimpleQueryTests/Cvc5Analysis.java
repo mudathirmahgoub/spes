@@ -10,7 +10,7 @@ public class Cvc5Analysis
 {
   public static void verify(String sql1, String sql2, String name) throws Exception
   {
-    if ((contains(sql1)) || (contains(sql2)))
+    if (!(isSupported(sql1) && isSupported(sql2)))
     {
       return;
     }
@@ -64,16 +64,16 @@ public class Cvc5Analysis
     }
   }
 
-  static public boolean contains(String sql)
+  static public boolean isSupported(String sql)
   {
     String[] keyWords = {"ROW", "ORDER", "CAST"};
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))
       {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
   }
 }

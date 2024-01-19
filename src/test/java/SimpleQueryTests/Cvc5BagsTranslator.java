@@ -20,6 +20,12 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Sort getElementSort(Sort sort)
+  {
+    return sort.getBagElementSort();
+  }
+
+  @Override
   protected Kind getProjectKind()
   {
     return Kind.TABLE_PROJECT;
@@ -54,6 +60,13 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   {
     return Kind.BAG_UNION_DISJOINT;
   }
+
+  @Override
+  protected Kind getDifferenceRemoveKind()
+  {
+    return Kind.BAG_DIFFERENCE_REMOVE;
+  }
+
 
   @Override
   protected Sort mkTableSort(Sort tupleSort)

@@ -20,6 +20,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Sort getElementSort(Sort sort)
+  {
+    return sort.getSetElementSort();
+  }
+
+  @Override
   protected Kind getProjectKind()
   {
     return Kind.RELATION_PROJECT;
@@ -53,6 +59,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   protected Kind getUnionAllKind()
   {
     return Kind.SET_UNION;
+  }
+
+  @Override
+  protected Kind getDifferenceRemoveKind()
+  {
+    return Kind.SET_MINUS;
   }
 
   @Override

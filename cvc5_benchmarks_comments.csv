@@ -6,4 +6,4 @@ testPushFilterWithRankExpr,Uses RANK() OVER PARTITION BY clause which uses list 
 testEmptySortLimitZero,"Two issues FETCH NEXT 0 ROWS ONLY, and compares empty tables but we don't know the type of the second table"
 testSortUnionTranspose2,"Order by clauses can be removed, but it defeats the purpose of the test"
 testSortUnionTranspose3,FETCH NEXT 0 ROWS ONLY
-,
+testSemiJoinTrim,"Not supported by SPES because it has exists keyword. However, it should be supported by cvc5 as long as the query is translated properly using inner join between dept and emp. However, Calcite translates it by adding a boolean true to the inner select and then using aggregate function min for it."

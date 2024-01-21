@@ -116,10 +116,10 @@ public class SimpleAnalysis {
     }
 
     public static void main(String[] args) throws Exception {
-        File f = new File("testData/no_aggregation_no_null_no_cast.json");
+        File f = new File("testData/no_aggregation.json");
         JsonParser parser = new JsonParser();
         JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
-        FileWriter prove = new FileWriter("no_aggregation_no_null_no_cast.txt");
+        FileWriter prove = new FileWriter("no_aggregation.txt");
         BufferedWriter bw = new BufferedWriter(prove);
         PrintWriter out = new PrintWriter(bw);
         FileWriter notProve = new FileWriter("cannotProve.txt");

@@ -29,7 +29,7 @@ public class Cvc5Analysis
       writer = new PrintWriter(new File("output_bags.smt2"));
     }
 
-    File f = new File("testData/no_aggregation_no_null_no_cast.json");
+    File f = new File("testData/no_aggregation.json");
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
     for (int i = 0; i < array.size(); i++)

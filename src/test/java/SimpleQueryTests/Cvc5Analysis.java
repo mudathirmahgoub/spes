@@ -4,13 +4,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.calcite.rel.RelNode;
 
 public class Cvc5Analysis
 {
+  public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    boolean isSetSemantics = false;
+    List<String> spesProvenTests = Files.readAllLines(Paths.get("no_aggregation_no_null_no_cast.txt"));
+        
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {
@@ -32,6 +40,25 @@ public class Cvc5Analysis
       String name = testCase.get("name").getAsString();
       verify(query1, query2, name, writer, isSetSemantics);
     }
+    
+    System.out.println("Proved by spes and not cvc5:");
+    for (String test : spesProvenTests) 
+    {
+      if(cvc5ProvenTests.contains(test))
+      {
+        continue;
+      }  
+      System.out.println(test);
+    }
+    System.out.println("Proved by cvc5 and not spes:");
+    for (String test : cvc5ProvenTests) 
+    {
+      if(spesProvenTests.contains(test))
+      {
+        continue;
+      }  
+      System.out.println(test);
+    }
   }
 
   public static void verify(
@@ -43,6 +70,7 @@ public class Cvc5Analysis
       return;
     }
     boolean isNullable = isNullable(sql1) || isNullable(sql2);
+    isNullable = true;
     RelNode logicPlan = null;
     RelNode logicPlan2 = null;
     boolean compile = false;

@@ -16,7 +16,7 @@
 },
 {
   "name": "testEmptyFilterProjectUnion",
-  "q1": "SELECT * FROM (SELECT * FROM (VALUES  (10, 1),  (30, 3)) AS t UNION ALL SELECT * FROM (VALUES  (20, 2)) AS t0) AS t1 WHERE t1.X + t1.Y > 30",
+  "q1": "SELECT * FROM (SELECT * FROM (VALUES  (10, 1),  (30, 3)) AS t UNION ALL SELECT * FROM (VALUES  (20, 2)) AS t0) AS t1 WHERE t1.EXPR$0 + t1.EXPR$1 > 30",
   "q2": "SELECT * FROM (VALUES  (30, 3)) AS t3"
 },
 {

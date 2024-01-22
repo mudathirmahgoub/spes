@@ -67,6 +67,11 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     return Kind.BAG_DIFFERENCE_REMOVE;
   }
 
+  @Override
+  protected Kind getAggregateKind()
+  {
+    return Kind.TABLE_AGGREGATE;
+  }
 
   @Override
   protected Sort mkTableSort(Sort tupleSort)

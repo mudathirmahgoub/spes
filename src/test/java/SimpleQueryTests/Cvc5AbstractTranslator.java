@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalFilter;
 import org.apache.calcite.rel.logical.LogicalIntersect;
@@ -223,33 +224,166 @@ public abstract class Cvc5AbstractTranslator
 
   private Term translate(LogicalAggregate aggregate) throws CVC5ApiException
   {
+    Term child = translate(aggregate.getInput());
+    // get the indices of the group set
+    ImmutableBitSet bitSet = aggregate.getGroupSet();
+    int[] indices = getGroupIndices(bitSet);
     if (aggregate.getAggCallList().isEmpty())
     {
       // it is similar to duplicate removal of a projection
-      Term child = translate(aggregate.getInput());
-      ImmutableBitSet bitSet = aggregate.getGroupSet();
+
       // ((_ table.project indices) child)
-      int[] indices = new int[bitSet.asList().size()];
-      int index = 0;
-      for (int i = 0; i < indices.length; i++)
-      {
-        if (bitSet.get(i))
-        {
-          indices[index] = i;
-          index++;
-        }
-      }
       Op op = solver.mkOp(getProjectKind(), indices);
       Term ret = solver.mkTerm(op, child);
       return ret;
     }
-    return null;
-    // LogicalAggregate aggregate = (LogicalAggregate) n;
-    // List<AggregateCall> aggregateCalls = aggregate.getAggCallList();
-    // List<RexNode> rowNodes = aggregate.getChildExps();
-    // ImmutableList<ImmutableBitSet> bitSets = aggregate.getGroupSets();
-    // ImmutableBitSet bitSet = aggregate.getGroupSet();
-    // return translate(aggregate.getInput());
+
+    List<AggregateCall> calls = aggregate.getAggCallList();
+    // construct a lambda function that handles all aggregate functions
+    Sort xTupleSort = getElementSort(child.getSort());
+    Term x = solver.mkVar(xTupleSort, "x");
+    String name = String.join("_", calls.stream().map(s -> s.getAggregation().getName()).toList())
+                      .toLowerCase();
+    Sort yTupleSort = getSort(aggregate.getRowType());
+    Term y = solver.mkVar(yTupleSort, "y");
+    int yTupleLength = yTupleSort.getTupleLength();
+    Sort[] yTupleSorts = yTupleSort.getTupleSorts();
+    Term[] tupleElements = new Term[yTupleLength];
+    Term[] initialValues = new Term[yTupleLength];
+    // add grouping elements
+    int yIndex = 0;
+    for (int index : indices)
+    {
+      Term tupleSelect = mkTupleSelect(xTupleSort, x, index);
+      tupleElements[yIndex] = tupleSelect;
+      // initial value is needed for grouping fields
+      initialValues[yIndex] = solver.mkNullableNull(yTupleSorts[yIndex]);
+      yIndex++;
+    }
+
+    // add aggregate functions
+    for (int j = 0; j < calls.size(); j++)
+    {
+      AggregateCall call = calls.get(j);
+      List<Integer> argList = call.getArgList();
+      Term yTupleSelect = mkTupleSelect(yTupleSort, y, yIndex);
+      if (yTupleSelect.getSort().isNullable())
+      {
+        yTupleSelect = solver.mkNullableVal(yTupleSelect);
+      }
+      if (argList.isEmpty())
+      {
+        mkCountFun(tupleElements, initialValues, yIndex, yTupleSelect);
+      }
+      else
+      {
+        mkAggregateFun(
+            xTupleSort, x, yTupleSort, yTupleSelect, y, tupleElements, initialValues, yIndex, call);
+      }
+      yIndex++;
+    }
+
+    Term body = solver.mkTuple(tupleElements);
+    Term initialValue = solver.mkTuple(initialValues);
+    Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name);
+    Op op = solver.mkOp(getAggregateKind(), indices);
+    Term ret = solver.mkTerm(op, new Term[] {f, initialValue, child});
+    return ret;
+  }
+
+  private void mkAggregateFun(Sort xTupleSort,
+      Term x,
+      Sort yTupleSort,
+      Term yTupleSelect,
+      Term y,
+      Term[] tupleElements,
+      Term[] initialValues,
+      int yIndex,
+      AggregateCall call)
+  {
+    int xIndex = call.getArgList().get(0);
+    Term xTupleSelect = mkTupleSelect(xTupleSort, x, xIndex);
+    switch (call.getAggregation().kind)
+    {
+      case COUNT:
+      {
+        mkCountFun(tupleElements, initialValues, yIndex, yTupleSelect);
+      }
+      break;
+      case SUM:
+      {
+        if (xTupleSelect.getSort().isNullable())
+        {
+          Term isNull = solver.mkNullableIsNull(xTupleSelect);
+          Term val = solver.mkNullableVal(xTupleSelect);
+          Term ite = solver.mkTerm(Kind.ITE, isNull, zero, val);
+          Term result = solver.mkTerm(Kind.ADD, ite, yTupleSelect);
+          tupleElements[yIndex] = solver.mkNullableSome(result);
+          initialValues[yIndex] = solver.mkNullableSome(zero);
+        }
+      }
+      case MIN:
+      {
+        if (xTupleSelect.getSort().isNullable())
+        {
+          Term isNull = solver.mkNullableIsNull(xTupleSelect);
+          Term val = solver.mkNullableVal(xTupleSelect);
+          Term ite = solver.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
+          Term lt = solver.mkTerm(Kind.LT, ite, yTupleSelect);
+          Term result = solver.mkTerm(Kind.ITE, lt, ite, yTupleSelect);
+          tupleElements[yIndex] = solver.mkNullableSome(result);
+          initialValues[yIndex] = solver.mkNullableSome(zero);
+        }
+      }
+      case MAX:
+      {
+        if (xTupleSelect.getSort().isNullable())
+        {
+          Term isNull = solver.mkNullableIsNull(xTupleSelect);
+          Term val = solver.mkNullableVal(xTupleSelect);
+          Term ite = solver.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
+          Term gt = solver.mkTerm(Kind.GT, ite, yTupleSelect);
+          Term result = solver.mkTerm(Kind.ITE, gt, ite, yTupleSelect);
+          tupleElements[yIndex] = solver.mkNullableSome(result);
+          initialValues[yIndex] = solver.mkNullableSome(zero);
+        }
+      }
+      break;
+      default: break;
+    }
+  }
+
+  private void mkCountFun(Term[] tupleElements, Term[] initialValues, int yIndex, Term yTupleSelect)
+  {
+    Term result = solver.mkTerm(Kind.ADD, yTupleSelect, one);
+    tupleElements[yIndex] = solver.mkNullableSome(result);
+    initialValues[yIndex] = solver.mkNullableSome(zero);
+  }
+
+  private Term mkTupleSelect(Sort tupleSort, Term t, int index)
+  {
+    Datatype datatype = tupleSort.getDatatype();
+    DatatypeConstructor constructor = datatype.getConstructor(0);
+    Term selectorTerm = constructor.getSelector(index).getTerm();
+    Term selectedTerm = solver.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
+    return selectedTerm;
+  }
+
+  protected abstract Kind getAggregateKind();
+
+  private int[] getGroupIndices(ImmutableBitSet bitSet)
+  {
+    int[] indices = new int[bitSet.asList().size()];
+    int index = 0;
+    for (int i = 0; i < indices.length; i++)
+    {
+      if (bitSet.get(i))
+      {
+        indices[index] = i;
+        index++;
+      }
+    }
+    return indices;
   }
 
   protected abstract Term translate(LogicalUnion n) throws CVC5ApiException;
@@ -367,7 +501,7 @@ public abstract class Cvc5AbstractTranslator
     }
     Term productTuple = solver.mkTuple(terms);
 
-    Term f = defineFun(t, productTupleSort, productTuple, "leftJoin");
+    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "leftJoin");
     Term mapF = solver.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
@@ -412,7 +546,7 @@ public abstract class Cvc5AbstractTranslator
     }
     Term productTuple = solver.mkTuple(terms);
 
-    Term f = defineFun(t, productTupleSort, productTuple, "rightJoin");
+    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "rightJoin");
     Term mapF = solver.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
@@ -444,17 +578,17 @@ public abstract class Cvc5AbstractTranslator
       nullConstraints.add(body);
       body = solver.mkTerm(Kind.AND, nullConstraints.toArray(new Term[0]));
     }
-    Term p = defineFun(t, functionType, body, "p");
+    Term p = defineFun(new Term[] {t}, functionType, body, "p");
     Term ret = solver.mkTerm(getFilterKind(), p, table);
     return ret;
   }
 
   protected abstract Kind getFilterKind();
 
-  protected Term defineFun(Term t, Sort functionType, Term body, String prefix)
+  protected Term defineFun(Term[] vars, Sort functionType, Term body, String prefix)
   {
     String name = prefix + functionIndex;
-    Term f = solver.defineFun(name, new Term[] {t}, functionType, body, true);
+    Term f = solver.defineFun(name, vars, functionType, body, true);
     functionIndex++;
     definedFunctions.put(name, f);
     return f;
@@ -501,7 +635,7 @@ public abstract class Cvc5AbstractTranslator
         terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null);
       }
       Term body = solver.mkTuple(terms);
-      Term f = defineFun(t, functionType, body, "f");
+      Term f = defineFun(new Term[] {t}, functionType, body, "f");
       Term ret = solver.mkTerm(getMapKind(), f, child);
       return ret;
     }
@@ -783,7 +917,7 @@ public abstract class Cvc5AbstractTranslator
       {
         BasicSqlType basicSqlType = (BasicSqlType) relDataType;
         String typeString = basicSqlType.getSqlTypeName().toString();
-        if (typeString.equals("INTEGER"))
+        if (typeString.equals("INTEGER") || typeString.equals("BIGINT"))
         {
           Sort sort = getIntFieldSort(isNullableType);
           columnSorts.add(sort);

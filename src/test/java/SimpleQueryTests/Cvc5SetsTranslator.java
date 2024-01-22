@@ -68,6 +68,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getAggregateKind()
+  {
+    return Kind.RELATION_AGGREGATE;
+  }
+
+  @Override
   protected Sort mkTableSort(Sort tupleSort)
   {
     return solver.mkSetSort(tupleSort);

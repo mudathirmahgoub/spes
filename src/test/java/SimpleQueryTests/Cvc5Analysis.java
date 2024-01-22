@@ -18,7 +18,7 @@ public class Cvc5Analysis
   {
     List<String> spesProvenTests = Files.readAllLines(Paths.get("no_aggregation_no_null_no_cast.txt"));
         
-    boolean isSetSemantics = true;
+    boolean isSetSemantics = false;
     PrintWriter writer;
     if (isSetSemantics)
     {
@@ -85,9 +85,11 @@ public class Cvc5Analysis
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      e.printStackTrace();            
       System.out.println("fail compile");
-      return;
+      System.out.println("test: " + name);
+      System.exit(1);
+      //return;
     }
     if (compile)
     {

@@ -9,3 +9,10 @@ testSortUnionTranspose3,FETCH NEXT 0 ROWS ONLY
 testSemiJoinTrim,"Not supported by SPES because it has exists keyword. However, it should be supported by cvc5 as long as the query is translated properly using inner join between dept and emp. However, Calcite translates it by adding a boolean true to the inner select and then using aggregate function min for it."
 testExpandFilterInComposite,the sql query uses in keyword. Calcite translates that into an aggregation query with count functions
 testWhereOrSubQuery,the sql query contains in keyword.
+testEmptyProject2,"Calcite can't parse (values), so I modified the test to be parsed."
+testPushSemiJoinPastJoinRuleRight, "Calciate can't compile the query whereas postgres can"
+testPushSemiJoinPastProject, "It uses SQL trim functions. I think we can support it. For now it is excluded"
+testExpandJoinScalar,"SINGLE_VALUE function is not understood"
+testExpandProjectScalar,"SINGLE_VALUE function is not understood"
+testExpandFilterScalar,"SINGLE_VALUE function is not understood"
+testPullConstantIntoJoin2,"weird parsing error Conversion to relational algebra failed to preserve datatypes:"

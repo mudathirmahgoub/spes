@@ -32,6 +32,7 @@ import org.apache.calcite.util.ImmutableBitSet;
 public abstract class Cvc5AbstractTranslator
 {
   protected final PrintWriter writer;
+  private StringBuilder prologue = new StringBuilder();
   protected final boolean isNullable;
   public HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
   public HashMap<String, Term> definedFunctions = new HashMap<>();
@@ -41,11 +42,14 @@ public abstract class Cvc5AbstractTranslator
   protected Term one;
   protected Term trueTerm;
   protected Term falseTerm;
+  protected final long startTime;
+  public static long totalTime = 0;
 
   public Cvc5AbstractTranslator(boolean isNullable, PrintWriter writer)
   {
     this.isNullable = isNullable;
     this.writer = writer;
+    startTime = System.currentTimeMillis();
   }
 
   protected abstract boolean isSetSemantics();
@@ -58,16 +62,24 @@ public abstract class Cvc5AbstractTranslator
     Context.deletePointers();
     solver = new Solver();
     solver.setLogic("HO_ALL");
-    solver.setOption("produce-models", "true");
-    solver.setOption("debug-check-models", "true");
-    solver.setOption("dag-thresh", "0");
-    solver.setOption("uf-lazy-ll", "true");
-    solver.setOption("fmf-bound", "true");
-    solver.setOption("tlimit-per", "6000");
+    prologue.append("(set-logic HO_ALL)\n");
+    setOption("produce-models", "true");
+    setOption("debug-check-models", "true");
+    setOption("dag-thresh", "0");
+    setOption("uf-lazy-ll", "true");
+    setOption("fmf-bound", "true");
+    setOption("tlimit-per", "6000");
+    setOption("strings-exp", "true");
     zero = solver.mkInteger(0);
     one = solver.mkInteger(1);
     trueTerm = solver.mkBoolean(true);
     falseTerm = solver.mkBoolean(false);
+  }
+
+  private void setOption(String option, String value)
+  {
+    solver.setOption(option, value);
+    prologue.append("(set-option :" + option + " " + value + ")\n");
   }
 
   public Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
@@ -81,23 +93,33 @@ public abstract class Cvc5AbstractTranslator
     solver.assertFormula(q1.eqTerm(q2).notTerm());
     printSmtProblem();
     Result result = solver.checkSat();
+    long stopTime = System.currentTimeMillis();
+    long duration = stopTime - startTime;
+    totalTime += duration;
     println(";answer: " + result);
+    println("; duration: " + duration + " ms.");
     if (result.isSat())
     {
       println("(get-model)");
       Term[] terms = tables.values().toArray(new Term[0]);
-      println(solver.getModel(new Sort[0], terms));
+      String model = solver.getModel(new Sort[0], terms);
+      for (String line : model.split("\n"))
+      {
+        println("; " + line);
+      }
+
       println("; q1");
       println("(get-value (" + q1 + "))");
-      println(solver.getValue(q1));
+      println("; " + solver.getValue(q1));
       println("; q2");
       println("(get-value (" + q2 + "))");
-      println(solver.getValue(q2));
+      println("; " + solver.getValue(q2));
     }
     if (result.isUnsat())
     {
       Cvc5Analysis.cvc5ProvenTests.add(name);
     }
+    print("(reset)\n");
     return result;
   }
 
@@ -116,10 +138,7 @@ public abstract class Cvc5AbstractTranslator
 
   protected void printSmtProblem()
   {
-    println("(set-logic HO_ALL)\r\n" + //
-        "(set-option :fmf-bound true)\r\n" + //
-        "(set-option :uf-lazy-ll true)\r\n" + //
-        "(set-option :strings-exp true)");
+    println(prologue.toString());
 
     Term[] terms = tables.values().toArray(new Term[0]);
     for (Term term : terms)
@@ -589,7 +608,7 @@ public abstract class Cvc5AbstractTranslator
           k = Kind.ITE;
           {
             // condition part should not be nullable
-            if(argTerms[0].getSort().isNullable())
+            if (argTerms[0].getSort().isNullable())
             {
               argTerms[0] = solver.mkNullableVal(argTerms[0]);
             }
@@ -603,7 +622,7 @@ public abstract class Cvc5AbstractTranslator
               if (!argTerms[2].getSort().isNullable())
               {
                 argTerms[2] = solver.mkNullableSome(argTerms[2]);
-              }              
+              }
             }
             return solver.mkTerm(k, argTerms);
           }

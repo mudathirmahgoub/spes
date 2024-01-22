@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.calcite.rel.RelNode;
 
 public class Cvc5Analysis
@@ -16,9 +15,10 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    List<String> spesProvenTests = Files.readAllLines(Paths.get("no_aggregation_no_null_no_cast.txt"));
-        
-    boolean isSetSemantics = false;
+    List<String> spesProvenTests =
+        Files.readAllLines(Paths.get("no_aggregation_no_null_no_cast.txt"));
+
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {
@@ -40,23 +40,25 @@ public class Cvc5Analysis
       String name = testCase.get("name").getAsString();
       verify(query1, query2, name, writer, isSetSemantics);
     }
-    
+
+    writer.println("; total time: " + Cvc5AbstractTranslator.totalTime + " ms.");
+    writer.close();
     System.out.println("Proved by spes and not cvc5:");
-    for (String test : spesProvenTests) 
+    for (String test : spesProvenTests)
     {
-      if(cvc5ProvenTests.contains(test))
+      if (cvc5ProvenTests.contains(test))
       {
         continue;
-      }  
+      }
       System.out.println(test);
     }
     System.out.println("Proved by cvc5 and not spes:");
-    for (String test : cvc5ProvenTests) 
+    for (String test : cvc5ProvenTests)
     {
-      if(spesProvenTests.contains(test))
+      if (spesProvenTests.contains(test))
       {
         continue;
-      }  
+      }
       System.out.println(test);
     }
   }
@@ -85,17 +87,16 @@ public class Cvc5Analysis
     }
     catch (Exception e)
     {
-      e.printStackTrace();            
+      e.printStackTrace();
       System.out.println("fail compile");
       System.out.println("test: " + name);
       System.exit(1);
-      //return;
+      // return;
     }
     if (compile)
     {
       try
       {
-        long startTime = System.currentTimeMillis();
         Cvc5AbstractTranslator translator;
         if (isSetSemantics)
         {

@@ -572,7 +572,7 @@ public abstract class Cvc5AbstractTranslator
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
     List<Term> nullConstraints = new ArrayList<>();
-    Term body = translateRowExpr(condition, constructor, t, true, nullConstraints);
+    Term body = translateRowExpr(condition, constructor, t, true, nullConstraints, "");
     if (body.getSort().isNullable())
     {
       nullConstraints.add(solver.mkNullableIsSome(body));
@@ -637,7 +637,7 @@ public abstract class Cvc5AbstractTranslator
       Term[] terms = new Term[exprs.size()];
       for (int i = 0; i < terms.length; i++)
       {
-        terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null);
+        terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null, "");
       }
       Term body = solver.mkTuple(terms);
       Term f = defineFun(new Term[] {t}, functionType, body, "f");
@@ -652,7 +652,8 @@ public abstract class Cvc5AbstractTranslator
       DatatypeConstructor constructor,
       Term t,
       boolean isFilter,
-      List<Term> nullConstraints)
+      List<Term> nullConstraints,
+      String operator)
   {
     if (expr instanceof RexInputRef)
     {
@@ -665,7 +666,7 @@ public abstract class Cvc5AbstractTranslator
       // if the type is nullable, extract the value
       if (isNullable)
       {
-        if (isFilter)
+        if (isFilter && !operator.equals("IS NULL") && !operator.equals("IS NOT NULL"))
         {
           nullConstraints.add(solver.mkNullableIsSome(selectedTerm));
           selectedTerm = solver.mkNullableVal(selectedTerm);
@@ -690,8 +691,8 @@ public abstract class Cvc5AbstractTranslator
       Kind k;
       if (call.op.toString().equals("CAST"))
       {
-        Term ret =
-            translateRowExpr(call.getOperands().get(0), constructor, t, isFilter, nullConstraints);
+        Term ret = translateRowExpr(
+            call.getOperands().get(0), constructor, t, isFilter, nullConstraints, "");
         return ret;
       }
       Term[] argTerms = getArgTerms(constructor, t, call, isFilter, nullConstraints);
@@ -820,7 +821,8 @@ public abstract class Cvc5AbstractTranslator
     Term[] argTerms = new Term[operands.size()];
     for (int i = 0; i < operands.size(); i++)
     {
-      argTerms[i] = translateRowExpr(operands.get(i), constructor, t, isFilter, nullConstraints);
+      argTerms[i] = translateRowExpr(
+          operands.get(i), constructor, t, isFilter, nullConstraints, call.op.toString());
     }
     return argTerms;
   }

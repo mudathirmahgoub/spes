@@ -1,3 +1,5 @@
+-- testPullNull
+
 truncate table emp
 
 insert into emp values
@@ -18,3 +20,6 @@ WHERE
 EMP0.DEPTNO = 7 AND 
 EMP0.MGR IS NULL AND 
 EMP0.EMPNO = 10;
+
+--The two queries are actually equivalent if we consider the column names. 
+-- Sal and Comm are swapped. 

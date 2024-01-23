@@ -36,7 +36,7 @@ public abstract class Cvc5AbstractTranslator
   private StringBuilder prologue = new StringBuilder();
   protected final boolean isNullable;
   public HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
-  public HashMap<String, Term> definedFunctions = new HashMap<>();
+  public HashMap<String, Term> declaredFunctions = new HashMap<>();
   protected Solver solver;
   protected int functionIndex = 0;
   protected Term zero;
@@ -58,7 +58,7 @@ public abstract class Cvc5AbstractTranslator
   public void reset() throws CVC5ApiException
   {
     tables.clear();
-    definedFunctions.clear();
+    declaredFunctions.clear();
     functionIndex = 0;
     Context.deletePointers();
     solver = new Solver();
@@ -89,8 +89,11 @@ public abstract class Cvc5AbstractTranslator
     reset();
     println(";-----------------------------------------------------------");
     println("; test name: " + name);
-    Term q1 = translate(n1, sql1);
-    Term q2 = translate(n2, sql2);
+    Term q1Term = translate(n1, sql1);
+    Term q2Term = translate(n2, sql2);
+    // declare a variable for q1, q2.
+    Term q1 = defineFun(new Term[0], q1Term.getSort(), q1Term, "q1", false);
+    Term q2 = defineFun(new Term[0], q2Term.getSort(), q2Term, "q2", false);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
     printSmtProblem();
     Result result = solver.checkSat();
@@ -148,7 +151,7 @@ public abstract class Cvc5AbstractTranslator
       print(term + " ");
       println(term.getSort() + ")");
     }
-    for (Map.Entry<String, Term> entry : definedFunctions.entrySet())
+    for (Map.Entry<String, Term> entry : declaredFunctions.entrySet())
     {
       print("(declare-const ");
       print(entry.getKey() + " ");
@@ -285,7 +288,7 @@ public abstract class Cvc5AbstractTranslator
 
     Term body = solver.mkTuple(tupleElements);
     Term initialValue = solver.mkTuple(initialValues);
-    Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name);
+    Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name, true);
     Op op = solver.mkOp(getAggregateKind(), indices);
     Term ret = solver.mkTerm(op, new Term[] {f, initialValue, child});
     return ret;
@@ -501,7 +504,7 @@ public abstract class Cvc5AbstractTranslator
     }
     Term productTuple = solver.mkTuple(terms);
 
-    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "leftJoin");
+    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "leftJoin", true);
     Term mapF = solver.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
@@ -546,7 +549,7 @@ public abstract class Cvc5AbstractTranslator
     }
     Term productTuple = solver.mkTuple(terms);
 
-    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "rightJoin");
+    Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "rightJoin", true);
     Term mapF = solver.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
@@ -583,21 +586,40 @@ public abstract class Cvc5AbstractTranslator
       nullConstraints.add(body);
       body = solver.mkTerm(Kind.AND, nullConstraints.toArray(new Term[0]));
     }
-    Term p = defineFun(new Term[] {t}, functionType, body, "p");
+    Term p = defineFun(new Term[] {t}, functionType, body, "p", true);
     Term ret = solver.mkTerm(getFilterKind(), p, table);
     return ret;
   }
 
   protected abstract Kind getFilterKind();
 
-  protected Term defineFun(Term[] vars, Sort functionType, Term body, String prefix)
+  protected Term defineFun(
+      Term[] vars, Sort functionType, Term body, String prefix, boolean includeIndex)
   {
-    String name = prefix + functionIndex;
+    String name = prefix;
+    if (includeIndex)
+    {
+      name = prefix + functionIndex;
+    }
     Term f = solver.defineFun(name, vars, functionType, body, true);
     functionIndex++;
-    definedFunctions.put(name, f);
+    declaredFunctions.put(name, f);
     return f;
   }
+
+  protected Term declareFun(Sort[] args, Sort functionType, String prefix, boolean includeIndex)
+  {
+    String name = prefix;
+    if (includeIndex)
+    {
+      name = prefix + functionIndex;
+    }
+    Term f = solver.declareFun(name, args, functionType);
+    functionIndex++;
+    declaredFunctions.put(name, f);
+    return f;
+  }
+
   protected Term translate(LogicalProject project) throws CVC5ApiException
   {
     // check whether to use table.project or set.map
@@ -640,7 +662,7 @@ public abstract class Cvc5AbstractTranslator
         terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null, "");
       }
       Term body = solver.mkTuple(terms);
-      Term f = defineFun(new Term[] {t}, functionType, body, "f");
+      Term f = defineFun(new Term[] {t}, functionType, body, "f", true);
       Term ret = solver.mkTerm(getMapKind(), f, child);
       return ret;
     }

@@ -829,7 +829,7 @@ public abstract class Cvc5AbstractTranslator
   {
     RexLiteral literal = (RexLiteral) expr;
     String typeString = literal.getType().toString();
-    if (typeString.equals("INTEGER"))
+    if (typeString.equals("INTEGER") || typeString.equals("BIGINT"))
     {
       if (literal.getValue() == null)
       {

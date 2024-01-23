@@ -1,0 +1,12 @@
+[
+  {
+    "name": "testEmptyAggregateEmptyKey",
+    "q1": "SELECT SUM(t.EXPR$0) FROM (SELECT * FROM (VALUES(0)) WHERE FALSE) AS t",
+    "q2": "SELECT SUM(t1.EXPR$0) FROM (SELECT * FROM (VALUES(0)) WHERE FALSE) AS t1"
+  },
+  {
+    "name": "testPushSumNullableNOGBYThroughUnion",
+    "q1": "SELECT SUM(t.MGR) FROM (SELECT * FROM EMP AS EMP UNION ALL SELECT * FROM EMP AS EMP0) AS t",
+    "q2": "SELECT SUM(t6.sum1) FROM (SELECT SUM(EMP1.MGR) as sum1 FROM EMP AS EMP1 UNION ALL SELECT SUM(EMP2.MGR) as sum2 FROM EMP AS EMP2) AS t6"
+  }
+]

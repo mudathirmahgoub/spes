@@ -15,10 +15,12 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
+    //File f = new File("testData/no_aggregation.json");
+    File f = new File("testData/test.json");
     List<String> spesProvenTests =
         Files.readAllLines(Paths.get("no_aggregation.txt"));
 
-    boolean isSetSemantics = false;
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {
@@ -29,7 +31,6 @@ public class Cvc5Analysis
       writer = new PrintWriter(new File("output_bags.smt2"));
     }
 
-    File f = new File("testData/no_aggregation.json");
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
     for (int i = 0; i < array.size(); i++)

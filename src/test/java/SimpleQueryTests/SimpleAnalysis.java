@@ -164,7 +164,7 @@ public class SimpleAnalysis {
         out4.close();
     }
     static public boolean contains(String sql){
-        String[] keyWords ={"VALUE","EXISTS","ROW","ORDER","CAST","INTERSECT","EXCEPT", " IN "};
+        String[] keyWords ={"ORDER"};
         for (String keyWord : keyWords) {
             if (sql.contains(keyWord)) {
                 return true;

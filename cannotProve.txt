@@ -1,3 +1,56 @@
+testPullNull
+LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8])
+  LogicalFilter(condition=[AND(=(CAST($7):INTEGER, 7), =(CAST($0):INTEGER, 10), IS NULL($3), =(CAST($0):INTEGER, 10))])
+    EnumerableTableScan(table=[[EMP]])
+
+LogicalProject(EMPNO=[10], ENAME=[$1], JOB=[$2], MGR=[null:INTEGER], HIREDATE=[$4], SAL=[$6], COMM=[$5], DEPTNO=[7], SLACKER=[$8])
+  LogicalFilter(condition=[AND(=(CAST($7):INTEGER, 7), IS NULL($3), =(CAST($0):INTEGER, 10))])
+    EnumerableTableScan(table=[[EMP]])
+
+testWhereInCorrelated
+LogicalProject(SAL=[$6])
+  LogicalJoin(condition=[AND(=($2, $10), =($0, $9))], joinType=[inner])
+    EnumerableTableScan(table=[[EMP]])
+    LogicalAggregate(group=[{0, 1}])
+      LogicalProject(DEPTNO=[$0], NAME0=[$2])
+        LogicalFilter(condition=[=($2, CAST($1):VARCHAR)])
+          LogicalProject(DEPTNO=[$0], NAME=[$1], NAME0=[CAST($1):VARCHAR])
+            EnumerableTableScan(table=[[DEPT]])
+
+LogicalProject(SAL=[$6])
+  LogicalJoin(condition=[AND(=($9, $12), =($0, $10))], joinType=[inner])
+    LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8], JOB0=[CAST($2):VARCHAR])
+      EnumerableTableScan(table=[[EMP]])
+    LogicalProject(DEPTNO=[$0], NAME=[$1], NAME0=[CAST($1):VARCHAR])
+      EnumerableTableScan(table=[[DEPT]])
+
+testDecorrelateTwoIn
+LogicalProject(SAL=[$6])
+  LogicalJoin(condition=[AND(=($1, $12), =($0, $11))], joinType=[inner])
+    LogicalJoin(condition=[AND(=($2, $10), =($0, $9))], joinType=[inner])
+      EnumerableTableScan(table=[[EMP]])
+      LogicalAggregate(group=[{0, 1}])
+        LogicalProject(DEPTNO=[$0], NAME0=[$2])
+          LogicalFilter(condition=[=($2, CAST($1):VARCHAR)])
+            LogicalProject(DEPTNO=[$0], NAME=[$1], NAME0=[CAST($1):VARCHAR])
+              EnumerableTableScan(table=[[DEPT]])
+    LogicalAggregate(group=[{0, 1}])
+      LogicalProject(EMPNO=[$0], ENAME0=[$9])
+        LogicalFilter(condition=[=($9, CAST($1):VARCHAR)])
+          LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8], ENAME0=[CAST($1):VARCHAR])
+            EnumerableTableScan(table=[[EMP]])
+
+LogicalProject(SAL=[$6])
+  LogicalJoin(condition=[AND(=($11, $14), =($0, $12))], joinType=[inner])
+    LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8], DEPTNO0=[$10], NAME=[$11], ENAME0=[CAST($1):VARCHAR])
+      LogicalJoin(condition=[AND(=($9, $12), =($0, $10))], joinType=[inner])
+        LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8], JOB0=[CAST($2):VARCHAR])
+          EnumerableTableScan(table=[[EMP]])
+        LogicalProject(DEPTNO=[$0], NAME=[$1], NAME0=[CAST($1):VARCHAR])
+          EnumerableTableScan(table=[[DEPT]])
+    LogicalProject(EMPNO=[$0], ENAME=[$1], ENAME0=[CAST($1):VARCHAR])
+      EnumerableTableScan(table=[[EMP]])
+
 testPullConstantIntoJoin
 LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], COMM=[$5], SAL=[$6], DEPTNO=[$7], SLACKER=[$8], DEPTNO0=[$9], NAME=[$10])
   LogicalJoin(condition=[=($0, $9)], joinType=[left])

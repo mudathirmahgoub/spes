@@ -573,6 +573,11 @@ public abstract class Cvc5AbstractTranslator
     Sort functionType = solver.getBooleanSort();
     List<Term> nullConstraints = new ArrayList<>();
     Term body = translateRowExpr(condition, constructor, t, true, nullConstraints);
+    if (body.getSort().isNullable())
+    {
+      nullConstraints.add(solver.mkNullableIsSome(body));
+      body = solver.mkNullableVal(body);
+    }
     if (!nullConstraints.isEmpty())
     {
       nullConstraints.add(body);

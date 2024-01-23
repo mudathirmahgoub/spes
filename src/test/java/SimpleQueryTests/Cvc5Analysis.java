@@ -119,7 +119,7 @@ public class Cvc5Analysis
 
   static public boolean isSupported(String sql)
   {
-    String[] keyWords = {"ROW", "ORDER", "CAST"};
+    String[] keyWords = {"ORDER"};
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))

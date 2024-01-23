@@ -41,6 +41,31 @@
 ; duration: 8 ms.
 (reset)
 ;-----------------------------------------------------------
+; test name: testPullNull
+;Translating sql query: SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 AND EMP.EMPNO = 10 AND EMP.MGR IS NULL AND EMP.EMPNO = 10
+;Translating sql query: SELECT 10 AS EMPNO, EMP0.ENAME, EMP0.JOB, CAST(NULL AS INT) AS MGR, EMP0.HIREDATE, EMP0.SAL, EMP0.COMM, 7 AS DEPTNO, EMP0.SLACKER FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 7 AND EMP0.MGR IS NULL AND EMP0.EMPNO = 10
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 3) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 7) t)) 7) (= (nullable.val ((_ tuple.select 0) t)) 10) (nullable.is_null ((_ tuple.select 3) t)) (= (nullable.val ((_ tuple.select 0) t)) 10))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 3) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 7) t)) 7) (nullable.is_null ((_ tuple.select 3) t)) (= (nullable.val ((_ tuple.select 0) t)) 10))))))
+(assert (not (= ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) (bag.map f2 (bag.filter p1 EMP)))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) ((_ tuple.select 1) t) ((_ tuple.select 2) t) (as nullable.null (Nullable Int)) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) (nullable.some 7) ((_ tuple.select 8) t)))))
+(check-sat)
+;answer: unsat
+; duration: 279 ms.
+(reset)
+;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProjectFilter
 ;Translating sql query: SELECT t.EXPR$0 + t.EXPR$1 AS X, t.EXPR$1 AS B, t.EXPR$0 AS A FROM (VALUES  (10, 1),  (30, 7),  (20, 3)) AS t WHERE t.EXPR$0 - t.EXPR$1 < 21
 ;Translating sql query: SELECT * FROM (VALUES  (11, 1, 10),  (23, 3, 20)) AS t2
@@ -57,10 +82,10 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 1) t)) (< (- (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 1) t))) 21)))))
 (assert (not (= (bag.map f1 (bag.filter p0 (bag.union_disjoint (bag.union_disjoint (bag (tuple (nullable.some 10) (nullable.some 1)) 1) (bag (tuple (nullable.some 30) (nullable.some 7)) 1)) (bag (tuple (nullable.some 20) (nullable.some 3)) 1)))) ((_ table.project 0 1 2) (bag.union_disjoint (bag (tuple (nullable.some 11) (nullable.some 1) (nullable.some 10)) 1) (bag (tuple (nullable.some 23) (nullable.some 3) (nullable.some 20)) 1))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_700 Int) (BOUND_VARIABLE_701 Int)) (+ BOUND_VARIABLE_700 BOUND_VARIABLE_701)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_3723 Int) (BOUND_VARIABLE_3724 Int)) (+ BOUND_VARIABLE_3723 BOUND_VARIABLE_3724)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
 (check-sat)
 ;answer: unsat
-; duration: 7 ms.
+; duration: 10 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinus
@@ -91,7 +116,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 8868 ms.
+; duration: 9259 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus
@@ -111,7 +136,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (> (nullable.val ((_ tuple.select 0) t)) 30)))))
 (check-sat)
 ;answer: unsat
-; duration: 325 ms.
+; duration: 310 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProject
@@ -128,10 +153,10 @@
 
 (declare-const f0 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= (bag.map f0 (bag.union_disjoint (bag (tuple (nullable.some 10) (nullable.some 1)) 1) (bag (tuple (nullable.some 20) (nullable.some 3)) 1))) ((_ table.project 0) (bag.union_disjoint (bag (tuple (nullable.some 11)) 1) (bag (tuple (nullable.some 23)) 1))))))
-(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_135520 Int) (BOUND_VARIABLE_135521 Int)) (+ BOUND_VARIABLE_135520 BOUND_VARIABLE_135521)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))))))
+(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_139624 Int) (BOUND_VARIABLE_139625 Int)) (+ BOUND_VARIABLE_139624 BOUND_VARIABLE_139625)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))))))
 (check-sat)
 ;answer: unsat
-; duration: 5 ms.
+; duration: 4 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderFilter
@@ -172,7 +197,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 0) t)) 7) (= (nullable.val ((_ tuple.select 0) t)) 8))))))
 (check-sat)
 ;answer: unsat
-; duration: 29 ms.
+; duration: 26 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoin
@@ -187,8 +212,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (nullable.val ((_ tuple.select 7) t)) (nullable.val ((_ tuple.select 9) t)))))))
@@ -196,7 +221,7 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (nullable.val ((_ tuple.select 7) t)) (nullable.val ((_ tuple.select 9) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6040 ms.
+; duration: 6007 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion
@@ -221,7 +246,7 @@
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (tuple (nullable.some 2) ((_ tuple.select 0) t) ((_ tuple.select 1) t)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6057 ms.
+; duration: 6083 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNot
@@ -241,14 +266,14 @@
 (declare-const p3 (-> (Tuple (Nullable Bool)) Bool))
 (declare-const f0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Bool))))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Bool))))
-(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_200504 Bool) (BOUND_VARIABLE_200505 Bool)) (and BOUND_VARIABLE_200504 BOUND_VARIABLE_200505)) (nullable.lift (lambda ((BOUND_VARIABLE_200496 Int) (BOUND_VARIABLE_200497 Int)) (> BOUND_VARIABLE_200496 BOUND_VARIABLE_200497)) ((_ tuple.select 6) t) (nullable.some 1000)) (as nullable.null (Nullable Bool)))))))
+(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_204408 Bool) (BOUND_VARIABLE_204409 Bool)) (and BOUND_VARIABLE_204408 BOUND_VARIABLE_204409)) (nullable.lift (lambda ((BOUND_VARIABLE_204400 Int) (BOUND_VARIABLE_204401 Int)) (> BOUND_VARIABLE_204400 BOUND_VARIABLE_204401)) ((_ tuple.select 6) t) (nullable.some 1000)) (as nullable.null (Nullable Bool)))))))
 (assert (= p1 (lambda ((t (Tuple (Nullable Bool)))) (and (nullable.is_some ((_ tuple.select 0) t)) (not (nullable.val ((_ tuple.select 0) t)))))))
-(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_200545 Bool) (BOUND_VARIABLE_200546 Bool)) (and BOUND_VARIABLE_200545 BOUND_VARIABLE_200546)) (nullable.lift (lambda ((BOUND_VARIABLE_200539 Int) (BOUND_VARIABLE_200540 Int)) (> BOUND_VARIABLE_200539 BOUND_VARIABLE_200540)) ((_ tuple.select 6) t) (nullable.some 1000)) (as nullable.null (Nullable Bool)))))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_204449 Bool) (BOUND_VARIABLE_204450 Bool)) (and BOUND_VARIABLE_204449 BOUND_VARIABLE_204450)) (nullable.lift (lambda ((BOUND_VARIABLE_204443 Int) (BOUND_VARIABLE_204444 Int)) (> BOUND_VARIABLE_204443 BOUND_VARIABLE_204444)) ((_ tuple.select 6) t) (nullable.some 1000)) (as nullable.null (Nullable Bool)))))))
 (assert (not (= ((_ table.project 0) (bag.filter p1 (bag.map f0 EMP))) ((_ table.project 0) (bag.filter p3 (bag.map f2 EMP))))))
 (assert (= p3 (lambda ((t (Tuple (Nullable Bool)))) (and (nullable.is_some ((_ tuple.select 0) t)) (not (nullable.val ((_ tuple.select 0) t)))))))
 (check-sat)
 ;answer: unsat
-; duration: 207 ms.
+; duration: 223 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testWhereInCorrelated
@@ -280,7 +305,29 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 9) t)) (nullable.is_some ((_ tuple.select 12) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 10) t)) (and (= (nullable.val ((_ tuple.select 9) t)) (nullable.val ((_ tuple.select 12) t))) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 10) t))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 7777 ms.
+; duration: 8193 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstantsRequiresExecutor
+;Translating sql query: SELECT * FROM (VALUES  (1, 2)) AS t WHERE 1 + 2 > 3 + CAST(NULL AS INT)
+;Translating sql query: SELECT * FROM (VALUES  (1, 2)) AS t1 WHERE 1 + 2 > 3 + CAST(NULL AS INT)
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
+(declare-const p1 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
+(assert (not (= ((_ table.project 0 1) (bag.filter p0 (bag (tuple (nullable.some 1) (nullable.some 2)) 1))) ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 1) (nullable.some 2)) 1))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_284038 Int) (BOUND_VARIABLE_284039 Int)) (> BOUND_VARIABLE_284038 BOUND_VARIABLE_284039)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_284030 Int) (BOUND_VARIABLE_284031 Int)) (+ BOUND_VARIABLE_284030 BOUND_VARIABLE_284031)) (nullable.some 3) (as nullable.null (Nullable Int))))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_284038 Int) (BOUND_VARIABLE_284039 Int)) (> BOUND_VARIABLE_284038 BOUND_VARIABLE_284039)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_284030 Int) (BOUND_VARIABLE_284031 Int)) (+ BOUND_VARIABLE_284030 BOUND_VARIABLE_284031)) (nullable.some 3) (as nullable.null (Nullable Int)))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_284069 Int) (BOUND_VARIABLE_284070 Int)) (> BOUND_VARIABLE_284069 BOUND_VARIABLE_284070)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_284063 Int) (BOUND_VARIABLE_284064 Int)) (+ BOUND_VARIABLE_284063 BOUND_VARIABLE_284064)) (nullable.some 3) (as nullable.null (Nullable Int))))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_284069 Int) (BOUND_VARIABLE_284070 Int)) (> BOUND_VARIABLE_284069 BOUND_VARIABLE_284070)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_284063 Int) (BOUND_VARIABLE_284064 Int)) (+ BOUND_VARIABLE_284063 BOUND_VARIABLE_284064)) (nullable.some 3) (as nullable.null (Nullable Int)))))))))
+(check-sat)
+;answer: unsat
+; duration: 213 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsProjectNullable*
@@ -305,7 +352,7 @@
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6215 ms.
+; duration: 6007 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePreventProjectPullUp
@@ -336,7 +383,7 @@
 (assert (= f5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6055 ms.
+; duration: 6049 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin3way
@@ -375,7 +422,7 @@
 (assert (= f9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6216 ms.
+; duration: 6125 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRight
@@ -390,8 +437,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
@@ -401,7 +448,7 @@
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 9) t)) (nullable.is_some ((_ tuple.select 18) t)) (= (nullable.val ((_ tuple.select 9) t)) (nullable.val ((_ tuple.select 18) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 23359 ms.
+; duration: 24004 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceExpressionsNot
@@ -423,7 +470,7 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Bool)))) (and (nullable.is_some ((_ tuple.select 0) t)) (not (nullable.val ((_ tuple.select 0) t)))))))
 (check-sat)
 ;answer: unsat
-; duration: 1224 ms.
+; duration: 1424 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceProject
@@ -456,7 +503,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6009 ms.
+; duration: 6023 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsCalc
@@ -480,13 +527,75 @@
 (assert (= f0 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "table")))))
 (assert (= f1 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "view")))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "foreign table")))))
-(assert (= f3 (lambda ((t (Tuple (Nullable String)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_697056 String)) (str.to_upper BOUND_VARIABLE_697056)) (nullable.lift (lambda ((BOUND_VARIABLE_697049 String) (BOUND_VARIABLE_697050 String)) (str.++ BOUND_VARIABLE_697049 BOUND_VARIABLE_697050)) (nullable.lift (lambda ((BOUND_VARIABLE_697027 String) (BOUND_VARIABLE_697028 Int) (BOUND_VARIABLE_697029 Int)) (str.substr BOUND_VARIABLE_697027 BOUND_VARIABLE_697028 BOUND_VARIABLE_697029)) ((_ tuple.select 0) t) (nullable.some 0) (nullable.some (nullable.val (nullable.some 2)))) (nullable.lift (lambda ((BOUND_VARIABLE_697042 String) (BOUND_VARIABLE_697043 Int) (BOUND_VARIABLE_697044 Int)) (str.substr BOUND_VARIABLE_697042 BOUND_VARIABLE_697043 BOUND_VARIABLE_697044)) ((_ tuple.select 0) t) (nullable.some 2) (nullable.some (str.len (nullable.val ((_ tuple.select 0) t))))))) (nullable.lift (lambda ((BOUND_VARIABLE_697063 String) (BOUND_VARIABLE_697064 Int) (BOUND_VARIABLE_697065 Int)) (str.substr BOUND_VARIABLE_697063 BOUND_VARIABLE_697064 BOUND_VARIABLE_697065)) ((_ tuple.select 0) t) (nullable.some 0) (nullable.some (nullable.val (nullable.some 1))))))))
+(assert (= f3 (lambda ((t (Tuple (Nullable String)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_691178 String)) (str.to_upper BOUND_VARIABLE_691178)) (nullable.lift (lambda ((BOUND_VARIABLE_691171 String) (BOUND_VARIABLE_691172 String)) (str.++ BOUND_VARIABLE_691171 BOUND_VARIABLE_691172)) (nullable.lift (lambda ((BOUND_VARIABLE_691149 String) (BOUND_VARIABLE_691150 Int) (BOUND_VARIABLE_691151 Int)) (str.substr BOUND_VARIABLE_691149 BOUND_VARIABLE_691150 BOUND_VARIABLE_691151)) ((_ tuple.select 0) t) (nullable.some 0) (nullable.some (nullable.val (nullable.some 2)))) (nullable.lift (lambda ((BOUND_VARIABLE_691164 String) (BOUND_VARIABLE_691165 Int) (BOUND_VARIABLE_691166 Int)) (str.substr BOUND_VARIABLE_691164 BOUND_VARIABLE_691165 BOUND_VARIABLE_691166)) ((_ tuple.select 0) t) (nullable.some 2) (nullable.some (str.len (nullable.val ((_ tuple.select 0) t))))))) (nullable.lift (lambda ((BOUND_VARIABLE_691185 String) (BOUND_VARIABLE_691186 Int) (BOUND_VARIABLE_691187 Int)) (str.substr BOUND_VARIABLE_691185 BOUND_VARIABLE_691186 BOUND_VARIABLE_691187)) ((_ tuple.select 0) t) (nullable.some 0) (nullable.some (nullable.val (nullable.some 1))))))))
 (assert (not (= ((_ table.project 0 1) (bag.filter p4 (bag.map f3 (bag.union_max ((_ table.project 0) (bag.union_max (bag.map f0 (bag (tuple (nullable.some true)) 1)) (bag.map f1 (bag (tuple (nullable.some true)) 1)))) (bag.map f2 (bag (tuple (nullable.some true)) 1)))))) (bag.map f5 (bag (tuple (nullable.some true)) 1)))))
 (assert (= p4 (lambda ((t (Tuple (Nullable String) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 0) t)) (= (nullable.val ((_ tuple.select 0) t)) "TABLE")))))
 (assert (= f5 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "TABLE") (nullable.some "t")))))
 (check-sat)
 ;answer: unsat
-; duration: 115 ms.
+; duration: 108 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstantsDup2
+;Translating sql query: SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 AND EMP.DEPTNO = 8 AND EMP.EMPNO = 10 AND EMP.MGR IS NULL AND EMP.EMPNO = 10
+;Translating sql query: SELECT 10 AS EMPNO, t0.ENAME, t0.JOB, CAST(NULL AS INT) AS MGR, t0.HIREDATE, t0.SAL, t0.COMM, t0.DEPTNO, t0.SLACKER FROM (SELECT * FROM EMP WHERE FALSE) AS t0
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 3) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 7) t)) 7) (= (nullable.val ((_ tuple.select 7) t)) 8) (= (nullable.val ((_ tuple.select 0) t)) 10) (nullable.is_null ((_ tuple.select 3) t)) (= (nullable.val ((_ tuple.select 0) t)) 10))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) false)))
+(assert (not (= ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) (bag.map f2 (bag.filter p1 EMP)))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) ((_ tuple.select 1) t) ((_ tuple.select 2) t) (as nullable.null (Nullable Int)) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
+(check-sat)
+;answer: unsat
+; duration: 187 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstantsNull
+;Translating sql query: SELECT * FROM (SELECT * FROM (SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP) AS t WHERE t.N IS NULL AND t.N IS NULL) AS t0 WHERE t0.N IS NULL
+;Translating sql query: SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP0
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p1 (-> (Tuple (Nullable Int)) Bool))
+(declare-const p2 (-> (Tuple (Nullable Int)) Bool))
+(declare-const f0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
+(declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
+(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (nullable.is_null ((_ tuple.select 0) t)) (nullable.is_null ((_ tuple.select 0) t)))))))
+(assert (not (= ((_ table.project 0) (bag.filter p2 ((_ table.project 0) (bag.filter p1 (bag.map f0 EMP))))) (bag.map f3 EMP))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_null ((_ tuple.select 0) t))))))
+(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int))))))
+(check-sat)
+;answer: sat
+; duration: 263 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))) 1))
+; )
+; q1
+(get-value (((_ table.project 0) (bag.filter p2 ((_ table.project 0) (bag.filter p1 (bag.map f0 EMP)))))))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value ((bag.map f3 EMP)))
+; (bag (tuple (as nullable.null (Nullable Int))) 1)
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegatedInverted
@@ -507,7 +616,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (> (nullable.val ((_ tuple.select 0) t)) 10) (<= (nullable.val ((_ tuple.select 0) t)) 10))))))
 (check-sat)
 ;answer: unsat
-; duration: 33 ms.
+; duration: 32 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
@@ -537,7 +646,7 @@
 (assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 22) t)) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 22) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6035 ms.
+; duration: 6040 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testExtractJoinFilterRule
@@ -552,8 +661,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) (Tuple (Nullable Int))))
@@ -565,7 +674,7 @@
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6222 ms.
+; duration: 6240 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceFullOuterJoin
@@ -604,7 +713,7 @@
 (assert (= f9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6106 ms.
+; duration: 6072 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testDecorrelateTwoIn
@@ -619,8 +728,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const f6 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String)) Bool))
 (declare-const f7 (-> (Tuple (Nullable Int) (Nullable String)) (Tuple (Nullable Int) (Nullable String) (Nullable String))))
@@ -648,7 +757,7 @@
 (assert (= p11 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable String) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 11) t)) (nullable.is_some ((_ tuple.select 14) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 12) t)) (and (= (nullable.val ((_ tuple.select 11) t)) (nullable.val ((_ tuple.select 14) t))) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 12) t))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6256 ms.
+; duration: 6151 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeFilter
@@ -673,7 +782,7 @@
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 0) t)) (= (nullable.val ((_ tuple.select 0) t)) 10)))))
 (check-sat)
 ;answer: unsat
-; duration: 1704 ms.
+; duration: 1825 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastSetOp
@@ -692,7 +801,7 @@
 (assert (not (= ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) EMP) ((_ table.project 0 1 2 3 4 5 6 7 8) EMP))) (bag.union_disjoint ((_ table.project 6) EMP) ((_ table.project 6) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6878 ms.
+; duration: 7182 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinusRightDeep
@@ -723,7 +832,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6135 ms.
+; duration: 6187 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoin
@@ -747,7 +856,7 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (nullable.val ((_ tuple.select 7) t)) (nullable.val ((_ tuple.select 9) t)))))))
 (check-sat)
 ;answer: unsat
-; duration: 261 ms.
+; duration: 297 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNull
@@ -768,7 +877,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 0) t)) 10) (nullable.is_null ((_ tuple.select 0) t)))))))
 (check-sat)
 ;answer: unsat
-; duration: 31 ms.
+; duration: 36 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin
@@ -801,7 +910,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6012 ms.
+; duration: 6025 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToRightOuter
@@ -816,8 +925,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const rightJoin7 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f8 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
@@ -839,7 +948,7 @@
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6168 ms.
+; duration: 6190 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegated
@@ -860,7 +969,33 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (and (= (nullable.val ((_ tuple.select 0) t)) 10) (not (= (nullable.val ((_ tuple.select 0) t)) 10)))))))
 (check-sat)
 ;answer: unsat
-; duration: 127 ms.
+; duration: 171 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceNullableCase
+;Translating sql query: SELECT CASE WHEN 1 = 2 THEN CAST(t0.EXPR$0 AS INTEGER) ELSE 2 END FROM (VALUES  (1)) AS t LEFT JOIN (VALUES  (1)) AS t0 ON TRUE
+;Translating sql query: SELECT CAST(2 AS INTEGER) FROM (VALUES  (1)) AS t2 LEFT JOIN (VALUES  (1)) AS t3 ON TRUE
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const leftJoin0 (-> (Tuple (Nullable Int)) (Tuple (Nullable Int) (Nullable Int))))
+(declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
+(declare-const leftJoin2 (-> (Tuple (Nullable Int)) (Tuple (Nullable Int) (Nullable Int))))
+(declare-const f3 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
+(assert (not (= (bag.map f1 (bag.union_disjoint (bag.map leftJoin0 (bag.difference_remove (bag (tuple (nullable.some 1)) 1) ((_ table.project 0) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1))))) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1)))) (bag.map f3 (bag.union_disjoint (bag.map leftJoin2 (bag.difference_remove (bag (tuple (nullable.some 1)) 1) ((_ table.project 0) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1))))) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1)))))))
+(assert (= leftJoin0 (lambda ((t (Tuple (Nullable Int)))) (tuple ((_ tuple.select 0) t) (as nullable.null (Nullable Int))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.some 2)))))
+(assert (= leftJoin2 (lambda ((t (Tuple (Nullable Int)))) (tuple ((_ tuple.select 0) t) (as nullable.null (Nullable Int))))))
+(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.some 2)))))
+(check-sat)
+;answer: unsat
+; duration: 7 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConstantEquiPredicate
@@ -887,7 +1022,7 @@
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6009 ms.
+; duration: 6014 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesToEmpty
@@ -906,10 +1041,10 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 1) t)) (< (- (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 1) t))) 0)))))
 (assert (not (= (bag.map f1 (bag.filter p0 (bag.union_disjoint (bag (tuple (nullable.some 10) (nullable.some 1)) 1) (bag (tuple (nullable.some 30) (nullable.some 7)) 1)))) ((_ table.project 0 1 2) (bag.difference_remove ((_ table.project 0 1 2) (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1 2) (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1043744 Int) (BOUND_VARIABLE_1043745 Int)) (+ BOUND_VARIABLE_1043744 BOUND_VARIABLE_1043745)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1033781 Int) (BOUND_VARIABLE_1033782 Int)) (+ BOUND_VARIABLE_1033781 BOUND_VARIABLE_1033782)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
 (check-sat)
 ;answer: unsat
-; duration: 112 ms.
+; duration: 111 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter
@@ -930,13 +1065,13 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 5) t)) (nullable.is_some ((_ tuple.select 1) t)) (and (= (nullable.val ((_ tuple.select 6) t)) (* 10 (nullable.val ((_ tuple.select 5) t)))) (= (str.to_upper (nullable.val ((_ tuple.select 1) t))) "FOO"))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1043880 Int) (BOUND_VARIABLE_1043881 Int)) (+ BOUND_VARIABLE_1043880 BOUND_VARIABLE_1043881)) ((_ tuple.select 0) t) ((_ tuple.select 7) t))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1033917 Int) (BOUND_VARIABLE_1033918 Int)) (+ BOUND_VARIABLE_1033917 BOUND_VARIABLE_1033918)) ((_ tuple.select 0) t) ((_ tuple.select 7) t))))))
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 2) t)) (nullable.is_some ((_ tuple.select 3) t)) (nullable.is_some ((_ tuple.select 1) t)) (and (= (nullable.val ((_ tuple.select 2) t)) (* 10 (nullable.val ((_ tuple.select 3) t)))) (= (str.to_upper (nullable.val ((_ tuple.select 1) t))) "FOO"))))))
 (assert (not (= (bag.map f1 (bag.filter p0 EMP)) (bag.map f3 (bag.filter p2 ((_ table.project 0 1 6 5 7) EMP))))))
-(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1043949 Int) (BOUND_VARIABLE_1043950 Int)) (+ BOUND_VARIABLE_1043949 BOUND_VARIABLE_1043950)) ((_ tuple.select 0) t) ((_ tuple.select 4) t))))))
+(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1033986 Int) (BOUND_VARIABLE_1033987 Int)) (+ BOUND_VARIABLE_1033986 BOUND_VARIABLE_1033987)) ((_ tuple.select 0) t) ((_ tuple.select 4) t))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6007 ms.
+; duration: 6014 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushFilterThroughSemiJoin
@@ -964,7 +1099,7 @@
 (assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 2) t)) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 2) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 18001 ms.
+; duration: 18603 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion3way
@@ -1005,7 +1140,7 @@
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6909 ms.
+; duration: 7020 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinRight
@@ -1020,8 +1155,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p4 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int)) Bool))
@@ -1078,7 +1213,29 @@
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6257 ms.
+; duration: 6239 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstants2
+;Translating sql query: SELECT CAST(CASE WHEN NULL IS NULL THEN 2 IS NULL WHEN 2 IS NULL THEN NULL IS NULL ELSE NULL = 2 END AS BOOLEAN) FROM (VALUES  (0)) AS t
+;Translating sql query: SELECT FALSE FROM (VALUES  (0)) AS t2
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const f0 (-> (Tuple (Nullable Int)) (Tuple (Nullable Bool))))
+(declare-const f1 (-> (Tuple (Nullable Int)) (Tuple (Nullable Bool))))
+(assert (not (= (bag.map f0 (bag (tuple (nullable.some 0)) 1)) (bag.map f1 (bag (tuple (nullable.some 0)) 1)))))
+(assert (= f0 (lambda ((t (Tuple (Nullable Int)))) (tuple (nullable.some false)))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int)))) (tuple (nullable.some false)))))
+(check-sat)
+;answer: unsat
+; duration: 129 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnRight
@@ -1097,7 +1254,7 @@
 (assert (not (= ((_ table.project 6) (table.product EMP (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) EMP) ((_ table.project 0 1 2 3 4 5 6 7 8) EMP)))) ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 9784 ms.
+; duration: 9876 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToInner
@@ -1112,8 +1269,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f8 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
@@ -1135,7 +1292,7 @@
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6520 ms.
+; duration: 6530 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceOrCaseWhen
@@ -1153,12 +1310,12 @@
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (or (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_1571398 Int) (BOUND_VARIABLE_1571399 Int)) (= BOUND_VARIABLE_1571398 BOUND_VARIABLE_1571399)) ((_ tuple.select 6) t) (nullable.some 1000))) (as nullable.null (Nullable Int)) (nullable.some 1))) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_1571412 Int) (BOUND_VARIABLE_1571413 Int)) (= BOUND_VARIABLE_1571412 BOUND_VARIABLE_1571413)) ((_ tuple.select 6) t) (nullable.some 2000))) (as nullable.null (Nullable Int)) (nullable.some 1))))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (or (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_1560291 Int) (BOUND_VARIABLE_1560292 Int)) (= BOUND_VARIABLE_1560291 BOUND_VARIABLE_1560292)) ((_ tuple.select 6) t) (nullable.some 1000))) (as nullable.null (Nullable Int)) (nullable.some 1))) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_1560305 Int) (BOUND_VARIABLE_1560306 Int)) (= BOUND_VARIABLE_1560305 BOUND_VARIABLE_1560306)) ((_ tuple.select 6) t) (nullable.some 2000))) (as nullable.null (Nullable Int)) (nullable.some 1))))))))
 (assert (not (= ((_ table.project 6) (bag.filter p0 EMP)) ((_ table.project 6) (bag.filter p1 EMP)))))
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (or (= (nullable.val ((_ tuple.select 6) t)) 1000) (= (nullable.val ((_ tuple.select 6) t)) 2000))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6117 ms.
+; duration: 6084 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionAll
@@ -1189,7 +1346,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 15005 ms.
+; duration: 14809 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testLeftOuterJoinSimplificationToInner
@@ -1204,8 +1361,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f6 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
@@ -1223,7 +1380,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6719 ms.
+; duration: 6689 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus2
@@ -1245,7 +1402,41 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (> (nullable.val ((_ tuple.select 0) t)) 50)))))
 (check-sat)
 ;answer: unsat
-; duration: 87 ms.
+; duration: 122 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstants
+;Translating sql query: SELECT 1 + 2, t0.DEPTNO + (3 + 4), 5 + 6 + t0.DEPTNO, CAST(NULL AS INT), CASE WHEN 2 IS NOT NULL THEN 2 ELSE NULL END, ROW(7 + 8) FROM (SELECT DEPT.DEPTNO, DEPT.NAME, t.EMPNO, t.ENAME, t.JOB, t.MGR, t.HIREDATE, t.SAL, t.COMM, t.DEPTNO AS DEPTNO0, t.SLACKER FROM DEPT AS DEPT INNER JOIN (SELECT EMP.EMPNO, EMP.ENAME, EMP.JOB, EMP.MGR, EMP.HIREDATE, EMP.SAL, EMP.COMM, EMP.DEPTNO, EMP.SLACKER, EMP.DEPTNO + (5 - 5) AS f9 FROM EMP AS EMP) AS t ON DEPT.DEPTNO = t.f9) AS t0 WHERE t0.DEPTNO = 7 + 8 AND t0.DEPTNO = 8 + 7 AND t0.DEPTNO = CASE WHEN 2 IS NOT NULL THEN 2 ELSE NULL END
+;Translating sql query: SELECT 3, 22, 26, CAST(NULL AS INT), CAST(2 AS INTEGER), ROW(15) FROM (SELECT * FROM (VALUES(0,0,0,0,0,0)) WHERE FALSE) AS t3
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const f6 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const p5 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const f0 (-> (Tuple (Nullable Int) (Nullable String)) (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
+(declare-const f1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const f4 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (nullable.lift (lambda ((BOUND_VARIABLE_1825893 Int) (BOUND_VARIABLE_1825894 Int)) (+ BOUND_VARIABLE_1825893 BOUND_VARIABLE_1825894)) ((_ tuple.select 7) t) (nullable.lift (lambda ((BOUND_VARIABLE_1825887 Int) (BOUND_VARIABLE_1825888 Int)) (- BOUND_VARIABLE_1825887 BOUND_VARIABLE_1825888)) (nullable.some 5) (nullable.some 5)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 2) t)) (nullable.is_some ((_ tuple.select 12) t)) (= (nullable.val ((_ tuple.select 2) t)) (nullable.val ((_ tuple.select 12) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_1825998 Bool) (BOUND_VARIABLE_1825999 Bool) (BOUND_VARIABLE_1826000 Bool)) (and BOUND_VARIABLE_1825998 BOUND_VARIABLE_1825999 BOUND_VARIABLE_1826000)) (nullable.some (= (nullable.val ((_ tuple.select 0) t)) (+ 7 8))) (nullable.some (= (nullable.val ((_ tuple.select 0) t)) (+ 8 7))) (nullable.lift (lambda ((BOUND_VARIABLE_1825990 Int) (BOUND_VARIABLE_1825991 Int)) (= BOUND_VARIABLE_1825990 BOUND_VARIABLE_1825991)) (nullable.some (nullable.val ((_ tuple.select 0) t))) (ite (nullable.is_some (nullable.some 2)) (nullable.some 2) (as nullable.null (Nullable Int)))))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_1825998 Bool) (BOUND_VARIABLE_1825999 Bool) (BOUND_VARIABLE_1826000 Bool)) (and BOUND_VARIABLE_1825998 BOUND_VARIABLE_1825999 BOUND_VARIABLE_1826000)) (nullable.some (= (nullable.val ((_ tuple.select 0) t)) (+ 7 8))) (nullable.some (= (nullable.val ((_ tuple.select 0) t)) (+ 8 7))) (nullable.lift (lambda ((BOUND_VARIABLE_1825990 Int) (BOUND_VARIABLE_1825991 Int)) (= BOUND_VARIABLE_1825990 BOUND_VARIABLE_1825991)) (nullable.some (nullable.val ((_ tuple.select 0) t))) (ite (nullable.is_some (nullable.some 2)) (nullable.some 2) (as nullable.null (Nullable Int))))))))))
+(assert (not (= (bag.map f4 (bag.filter p3 ((_ table.project 0 1 3 4 5 6 7 8 9 10 11) (bag.filter p2 (table.product (bag.map f0 DEPT) (bag.map f1 EMP)))))) (bag.map f6 (bag.filter p5 (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))))))
+(assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_1826041 Int) (BOUND_VARIABLE_1826042 Int)) (+ BOUND_VARIABLE_1826041 BOUND_VARIABLE_1826042)) (nullable.some 1) (nullable.some 2)) (nullable.lift (lambda ((BOUND_VARIABLE_1826056 Int) (BOUND_VARIABLE_1826057 Int)) (+ BOUND_VARIABLE_1826056 BOUND_VARIABLE_1826057)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_1826050 Int) (BOUND_VARIABLE_1826051 Int)) (+ BOUND_VARIABLE_1826050 BOUND_VARIABLE_1826051)) (nullable.some 3) (nullable.some 4))) (nullable.lift (lambda ((BOUND_VARIABLE_1826068 Int) (BOUND_VARIABLE_1826069 Int)) (+ BOUND_VARIABLE_1826068 BOUND_VARIABLE_1826069)) (nullable.lift (lambda ((BOUND_VARIABLE_1826062 Int) (BOUND_VARIABLE_1826063 Int)) (+ BOUND_VARIABLE_1826062 BOUND_VARIABLE_1826063)) (nullable.some 5) (nullable.some 6)) ((_ tuple.select 0) t)) (as nullable.null (Nullable Int)) (nullable.some 2) (nullable.lift (lambda ((BOUND_VARIABLE_1826074 Int) (BOUND_VARIABLE_1826075 Int)) (+ BOUND_VARIABLE_1826074 BOUND_VARIABLE_1826075)) (nullable.some 7) (nullable.some 8))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) false)))
+(assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 3) (nullable.some 22) (nullable.some 26) (as nullable.null (Nullable Int)) (nullable.some 2) (nullable.some 15)))))
+(check-sat)
+;answer: unsat
+; duration: 41 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
@@ -1275,7 +1466,7 @@
 (assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (nullable.val ((_ tuple.select 7) t)) (nullable.val ((_ tuple.select 9) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 8585 ms.
+; duration: 8629 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionDistinct
@@ -1306,7 +1497,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10806 ms.
+; duration: 11146 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceNoPullUpExprs
@@ -1337,7 +1528,7 @@
 (assert (= f5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6433 ms.
+; duration: 6686 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyProject
@@ -1356,12 +1547,12 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 1) t)) (> (+ (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 1) t))) 50)))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_2091896 Int) (BOUND_VARIABLE_2091897 Int)) (+ BOUND_VARIABLE_2091896 BOUND_VARIABLE_2091897)) (nullable.lift (lambda ((BOUND_VARIABLE_2091890 Int) (BOUND_VARIABLE_2091891 Int)) (+ BOUND_VARIABLE_2091890 BOUND_VARIABLE_2091891)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 0) t))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_2078935 Int) (BOUND_VARIABLE_2078936 Int)) (+ BOUND_VARIABLE_2078935 BOUND_VARIABLE_2078936)) (nullable.lift (lambda ((BOUND_VARIABLE_2078929 Int) (BOUND_VARIABLE_2078930 Int)) (+ BOUND_VARIABLE_2078929 BOUND_VARIABLE_2078930)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 0) t))))))
 (assert (not (= (bag.map f1 (bag.filter p0 (bag.union_disjoint (bag (tuple (nullable.some 10) (nullable.some 1)) 1) (bag (tuple (nullable.some 30) (nullable.some 3)) 1)))) (bag.map f2 (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))))
-(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_2091919 Int) (BOUND_VARIABLE_2091920 Int)) (+ BOUND_VARIABLE_2091919 BOUND_VARIABLE_2091920)) (nullable.lift (lambda ((BOUND_VARIABLE_2091913 Int) (BOUND_VARIABLE_2091914 Int)) (+ BOUND_VARIABLE_2091913 BOUND_VARIABLE_2091914)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 0) t))))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_2078958 Int) (BOUND_VARIABLE_2078959 Int)) (+ BOUND_VARIABLE_2078958 BOUND_VARIABLE_2078959)) (nullable.lift (lambda ((BOUND_VARIABLE_2078952 Int) (BOUND_VARIABLE_2078953 Int)) (+ BOUND_VARIABLE_2078952 BOUND_VARIABLE_2078953)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 0) t))))))
 (check-sat)
 ;answer: unsat
-; duration: 129 ms.
+; duration: 140 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConjunctInPullUp
@@ -1394,7 +1585,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6010 ms.
+; duration: 6013 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastFilter
@@ -1409,8 +1600,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1422,7 +1613,7 @@
 (assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 2) t)) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 2) t)))))))
 (check-sat)
 ;answer: unknown (INCOMPLETE)
-; duration: 4254 ms.
+; duration: 4598 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoFilter
@@ -1449,7 +1640,7 @@
 (assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (> 15 (nullable.val ((_ tuple.select 0) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6157 ms.
+; duration: 6163 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePullUpThruAlias
@@ -1482,7 +1673,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6227 ms.
+; duration: 6625 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeSetOpMixed
@@ -1513,7 +1704,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6100 ms.
+; duration: 6163 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNotNull
@@ -1536,7 +1727,7 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (= (nullable.val ((_ tuple.select 0) t)) 10)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6313 ms.
+; duration: 6229 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyIntersect
@@ -1556,7 +1747,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (> (nullable.val ((_ tuple.select 0) t)) 50)))))
 (check-sat)
 ;answer: unsat
-; duration: 81 ms.
+; duration: 129 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoProject
@@ -1577,13 +1768,13 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 10)))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 7) t) (nullable.lift (lambda ((BOUND_VARIABLE_2284805 Int) (BOUND_VARIABLE_2284806 Int)) (+ BOUND_VARIABLE_2284805 BOUND_VARIABLE_2284806)) ((_ tuple.select 7) t) (nullable.some 1)) (nullable.lift (lambda ((BOUND_VARIABLE_2284812 Int) (BOUND_VARIABLE_2284813 Int)) (+ BOUND_VARIABLE_2284812 BOUND_VARIABLE_2284813)) ((_ tuple.select 0) t) ((_ tuple.select 7) t))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 7) t) (nullable.lift (lambda ((BOUND_VARIABLE_2268895 Int) (BOUND_VARIABLE_2268896 Int)) (+ BOUND_VARIABLE_2268895 BOUND_VARIABLE_2268896)) ((_ tuple.select 7) t) (nullable.some 1)) (nullable.lift (lambda ((BOUND_VARIABLE_2268902 Int) (BOUND_VARIABLE_2268903 Int)) (+ BOUND_VARIABLE_2268902 BOUND_VARIABLE_2268903)) ((_ tuple.select 0) t) ((_ tuple.select 7) t))))))
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 10)))))
 (assert (not (= (bag.map f1 (bag.filter p0 EMP)) (bag.map f3 (bag.filter p2 EMP)))))
-(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) (nullable.some 11) (nullable.lift (lambda ((BOUND_VARIABLE_2284842 Int) (BOUND_VARIABLE_2284843 Int)) (+ BOUND_VARIABLE_2284842 BOUND_VARIABLE_2284843)) ((_ tuple.select 0) t) (nullable.some 10))))))
+(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) (nullable.some 11) (nullable.lift (lambda ((BOUND_VARIABLE_2268932 Int) (BOUND_VARIABLE_2268933 Int)) (+ BOUND_VARIABLE_2268932 BOUND_VARIABLE_2268933)) ((_ tuple.select 0) t) (nullable.some 10))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6013 ms.
+; duration: 6012 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnionAlwaysTrue
@@ -1616,7 +1807,7 @@
 (assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 1) t)) (= (nullable.val ((_ tuple.select 0) t)) (nullable.val ((_ tuple.select 1) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 27348 ms.
+; duration: 26541 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeIntersect
@@ -1647,7 +1838,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unsat
-; duration: 6827 ms.
+; duration: 7001 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAddRedundantSemiJoinRule
@@ -1662,8 +1853,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)) Bool))
@@ -1677,11 +1868,11 @@
 (assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: sat
-; duration: 2595 ms.
+; duration: 2624 ms.
 (get-model)
 ; (
-; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 2))
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "A")) 2))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 2))
 ; )
 ; q1
 (get-value ((bag.map f1 (bag.filter p0 (table.product EMP DEPT)))))
@@ -1714,7 +1905,7 @@
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some ((_ tuple.select 7) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (nullable.val ((_ tuple.select 7) t)) (nullable.val ((_ tuple.select 9) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6128 ms.
+; duration: 6124 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRightOuterJoinSimplificationToInner
@@ -1748,7 +1939,7 @@
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6110 ms.
+; duration: 6095 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinCondDownToProject
@@ -1770,13 +1961,13 @@
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable String)) (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (nullable.is_some ((_ tuple.select 9) t)) (= (+ (nullable.val ((_ tuple.select 0) t)) 10) (* (nullable.val ((_ tuple.select 9) t)) 2))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) (nullable.lift (lambda ((BOUND_VARIABLE_2788507 Int) (BOUND_VARIABLE_2788508 Int)) (+ BOUND_VARIABLE_2788507 BOUND_VARIABLE_2788508)) ((_ tuple.select 0) t) (nullable.some 10))))))
-(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (nullable.lift (lambda ((BOUND_VARIABLE_2788571 Int) (BOUND_VARIABLE_2788572 Int)) (* BOUND_VARIABLE_2788571 BOUND_VARIABLE_2788572)) ((_ tuple.select 7) t) (nullable.some 2))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) (nullable.lift (lambda ((BOUND_VARIABLE_2773899 Int) (BOUND_VARIABLE_2773900 Int)) (+ BOUND_VARIABLE_2773899 BOUND_VARIABLE_2773900)) ((_ tuple.select 0) t) (nullable.some 10))))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (nullable.lift (lambda ((BOUND_VARIABLE_2773923 Int) (BOUND_VARIABLE_2773924 Int)) (* BOUND_VARIABLE_2773923 BOUND_VARIABLE_2773924)) ((_ tuple.select 7) t) (nullable.some 2))))))
 (assert (not (= ((_ table.project 0 9) (bag.filter p0 (table.product DEPT EMP))) ((_ table.project 0 10) (bag.filter p3 (table.product (bag.map f1 DEPT) (bag.map f2 EMP)))))))
 (assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 2) t)) (nullable.is_some ((_ tuple.select 12) t)) (= (nullable.val ((_ tuple.select 2) t)) (nullable.val ((_ tuple.select 12) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6151 ms.
+; duration: 6147 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRightWithFilter
@@ -1791,8 +1982,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String)) Bool))
 (declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1804,7 +1995,7 @@
 (assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 9) t)) (nullable.is_some ((_ tuple.select 18) t)) (= (nullable.val ((_ tuple.select 9) t)) (nullable.val ((_ tuple.select 18) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6236 ms.
+; duration: 6235 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToLeftOuter
@@ -1819,8 +2010,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f8 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
@@ -1842,7 +2033,7 @@
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6154 ms.
+; duration: 6149 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion
@@ -1879,7 +2070,7 @@
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6211 ms.
+; duration: 6193 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoJoin
@@ -1911,7 +2102,7 @@
 (assert (= leftJoin5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6135 ms.
+; duration: 6220 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSwapOuterJoin
@@ -1926,8 +2117,8 @@
 (set-option :tlimit-per 6000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const leftJoin1 (-> (Tuple (Nullable Int) (Nullable String)) (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1943,7 +2134,7 @@
 (assert (= f5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6268 ms.
+; duration: 6264 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnLeft
@@ -1962,7 +2153,7 @@
 (assert (not (= ((_ table.project 6) (table.product (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) EMP) ((_ table.project 0 1 2 3 4 5 6 7 8) EMP)) EMP)) ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6162 ms.
+; duration: 6131 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed2
@@ -1993,7 +2184,29 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 15292 ms.
+; duration: 16257 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstantsEliminatesFilter
+;Translating sql query: SELECT * FROM (VALUES  (1, 2)) AS t WHERE 1 + 2 > 3 + CAST(NULL AS INT)
+;Translating sql query: SELECT * FROM (SELECT * FROM (VALUES(0, 0)) WHERE FALSE) AS t1
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
+(declare-const p1 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
+(assert (not (= ((_ table.project 0 1) (bag.filter p0 (bag (tuple (nullable.some 1) (nullable.some 2)) 1))) ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_3265349 Int) (BOUND_VARIABLE_3265350 Int)) (> BOUND_VARIABLE_3265349 BOUND_VARIABLE_3265350)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_3265343 Int) (BOUND_VARIABLE_3265344 Int)) (+ BOUND_VARIABLE_3265343 BOUND_VARIABLE_3265344)) (nullable.some 3) (as nullable.null (Nullable Int))))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_3265349 Int) (BOUND_VARIABLE_3265350 Int)) (> BOUND_VARIABLE_3265349 BOUND_VARIABLE_3265350)) (nullable.some (+ 1 2)) (nullable.lift (lambda ((BOUND_VARIABLE_3265343 Int) (BOUND_VARIABLE_3265344 Int)) (+ BOUND_VARIABLE_3265343 BOUND_VARIABLE_3265344)) (nullable.some 3) (as nullable.null (Nullable Int)))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) false)))
+(check-sat)
+;answer: unsat
+; duration: 759 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter2*
@@ -2016,7 +2229,7 @@
 (assert (= p1 (lambda ((t (Tuple (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 0) t)) (< (nullable.val ((_ tuple.select 0) t)) 10)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6725 ms.
+; duration: 6006 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSemiJoinReduceConstants
@@ -2047,7 +2260,7 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 1) t)) (nullable.is_some ((_ tuple.select 2) t)) (= (nullable.val ((_ tuple.select 1) t)) (nullable.val ((_ tuple.select 2) t)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6097 ms.
+; duration: 6086 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinLeft
@@ -2073,7 +2286,7 @@
 (assert (= leftJoin2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String))))))
 (check-sat)
 ;answer: unsat
-; duration: 1600 ms.
+; duration: 1477 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNestedCaseWhen
@@ -2091,12 +2304,12 @@
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (ite (= (nullable.val ((_ tuple.select 6) t)) 1000) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_3344925 Int) (BOUND_VARIABLE_3344926 Int)) (= BOUND_VARIABLE_3344925 BOUND_VARIABLE_3344926)) ((_ tuple.select 6) t) (nullable.some 1000))) (as nullable.null (Nullable Int)) (nullable.some 1))) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_3344936 Int) (BOUND_VARIABLE_3344937 Int)) (= BOUND_VARIABLE_3344936 BOUND_VARIABLE_3344937)) ((_ tuple.select 6) t) (nullable.some 2000))) (as nullable.null (Nullable Int)) (nullable.some 1))))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (ite (= (nullable.val ((_ tuple.select 6) t)) 1000) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_3333584 Int) (BOUND_VARIABLE_3333585 Int)) (= BOUND_VARIABLE_3333584 BOUND_VARIABLE_3333585)) ((_ tuple.select 6) t) (nullable.some 1000))) (as nullable.null (Nullable Int)) (nullable.some 1))) (nullable.is_null (ite (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_3333595 Int) (BOUND_VARIABLE_3333596 Int)) (= BOUND_VARIABLE_3333595 BOUND_VARIABLE_3333596)) ((_ tuple.select 6) t) (nullable.some 2000))) (as nullable.null (Nullable Int)) (nullable.some 1))))))))
 (assert (not (= ((_ table.project 6) (bag.filter p0 EMP)) ((_ table.project 6) (bag.filter p1 EMP)))))
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (nullable.is_some ((_ tuple.select 6) t)) (ite (= (nullable.val ((_ tuple.select 6) t)) 1000) (= (nullable.val ((_ tuple.select 6) t)) 1000) (= (nullable.val ((_ tuple.select 6) t)) 2000))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6025 ms.
+; duration: 6088 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceRightOuterJoin
@@ -2137,7 +2350,7 @@
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6093 ms.
+; duration: 6303 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceComplexPredicate
@@ -2174,7 +2387,7 @@
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6176 ms.
+; duration: 6161 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAlreadyFalseEliminatesFilter
@@ -2194,7 +2407,7 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) false)))
 (check-sat)
 ;answer: unsat
-; duration: 119 ms.
+; duration: 147 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion2
@@ -2221,7 +2434,7 @@
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1) ((_ tuple.select 7) t) ((_ tuple.select 2) t)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6111 ms.
+; duration: 6007 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion3
@@ -2250,7 +2463,7 @@
 (assert (= f4 (lambda ((t (Tuple (Nullable Int)))) (tuple (nullable.some 2) (nullable.some 3)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6314 ms.
+; duration: 6285 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed
@@ -2281,6 +2494,6 @@
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 30)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 6082 ms.
+; duration: 28701 ms.
 (reset)
-; total time: 450254 ms.
+; total time: 478251 ms.

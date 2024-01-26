@@ -721,12 +721,51 @@ public abstract class Cvc5AbstractTranslator
       switch (call.op.toString())
       {
         case "=": k = Kind.EQUAL; break;
+        case "<>": k = Kind.DISTINCT; break;
         case "+": k = Kind.ADD; break;
         case "-": k = Kind.SUB; break;
-        case ">": k = Kind.GT; break;
-        case "<": k = Kind.LT; break;
-        case ">=": k = Kind.GEQ; break;
-        case "<=": k = Kind.LEQ; break;
+        case ">":
+        {
+          k = Kind.GT;
+          Sort sort = getSort(call.operands.get(0).getType());
+          if (sort.isString() || (sort.isNullable() && sort.getNullableElementSort().isString()))
+          {
+            k = Kind.STRING_LT;
+            swap(argTerms, 0, 1);
+          }
+          break;
+        }
+        case "<":
+        {
+          k = Kind.LT;
+          Sort sort = getSort(call.operands.get(0).getType());
+          if (sort.isString() || (sort.isNullable() && sort.getNullableElementSort().isString()))
+          {
+            k = Kind.STRING_LT;
+          }
+          break;
+        }
+        case ">=":
+        {
+          k = Kind.GEQ;
+          Sort sort = getSort(call.operands.get(0).getType());
+          if (sort.isString() || (sort.isNullable() && sort.getNullableElementSort().isString()))
+          {
+            k = Kind.STRING_LEQ;
+            swap(argTerms, 0, 1);
+          }
+          break;
+        }
+        case "<=":
+        {
+          k = Kind.LEQ;
+          Sort sort = getSort(call.operands.get(0).getType());
+          if (sort.isString() || (sort.isNullable() && sort.getNullableElementSort().isString()))
+          {
+            k = Kind.STRING_LEQ;
+          }
+          break;
+        }
         case "*": k = Kind.MULT; break;
         case "/": k = Kind.DIVISION; break;
         case "AND": k = Kind.AND; break;
@@ -811,7 +850,7 @@ public abstract class Cvc5AbstractTranslator
         {
           println(call);
           k = Kind.UNDEFINED_KIND;
-          System.exit(0);
+          System.exit(1);
         }
       }
       boolean needsLifting =
@@ -831,6 +870,13 @@ public abstract class Cvc5AbstractTranslator
     {
       throw new RuntimeException(expr.toString());
     }
+  }
+
+  private void swap(Term[] argTerms, int i, int j)
+  {
+    Term temp = argTerms[i];
+    argTerms[i] = argTerms[j];
+    argTerms[j] = temp;
   }
 
   protected Term[] getArgTerms(DatatypeConstructor constructor,
@@ -917,64 +963,72 @@ public abstract class Cvc5AbstractTranslator
 
   protected abstract Sort mkTableSort(Sort tupleSort);
 
-  protected Sort getSort(RelDataType rowType)
+  protected Sort getSort(RelDataType relDataType)
   {
-    List<Sort> columnSorts = new ArrayList<>();
-    for (RelDataTypeField type : rowType.getFieldList())
+    if (relDataType.getFieldList() != null)
     {
-      RelDataType relDataType = type.getType();
-      boolean isNullableType = isNullable ? relDataType.isNullable() : false;
-      if (relDataType instanceof RelDataTypeFactoryImpl.JavaType)
+      List<Sort> columnSorts = new ArrayList<>();
+      for (RelDataTypeField type : relDataType.getFieldList())
       {
-        RelDataTypeFactoryImpl.JavaType javaType = (RelDataTypeFactoryImpl.JavaType) type.getType();
-        if (javaType.getJavaClass() == java.lang.Integer.class)
-        {
-          Sort sort = getIntFieldSort(isNullableType);
-          columnSorts.add(sort);
-        }
-        else if (javaType.getJavaClass() == java.lang.String.class)
-        {
-          Sort sort = getStringFieldSort(isNullableType);
-          columnSorts.add(sort);
-        }
-        else
-        {
-          throw new RuntimeException("Unsupported sql type: " + type);
-        }
+        columnSorts.add(getFieldSort(type.getType()));
       }
-      else if (relDataType instanceof BasicSqlType)
+      Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
+      return tupleSort;
+    }
+    return getFieldSort(relDataType);
+  }
+
+  protected Sort getFieldSort(RelDataType type)
+  {
+    boolean isNullableType = isNullable ? type.isNullable() : false;
+    if (type instanceof RelDataTypeFactoryImpl.JavaType)
+    {
+      RelDataTypeFactoryImpl.JavaType javaType = (RelDataTypeFactoryImpl.JavaType) type;
+      if (javaType.getJavaClass() == java.lang.Integer.class)
       {
-        BasicSqlType basicSqlType = (BasicSqlType) relDataType;
-        String typeString = basicSqlType.getSqlTypeName().toString();
-        if (typeString.equals("INTEGER") || typeString.equals("BIGINT"))
-        {
-          Sort sort = getIntFieldSort(isNullableType);
-          columnSorts.add(sort);
-        }
-        else if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
-        {
-          Sort sort = getStringFieldSort(isNullableType);
-          columnSorts.add(sort);
-        }
-        else if (typeString.equals("BOOLEAN"))
-        {
-          Sort sort = getBooleanFieldSort(isNullableType);
-          columnSorts.add(sort);
-        }
-        else
-        {
-          print("Unsupported sql type: " + type);
-          System.exit(0);
-          throw new RuntimeException("Unsupported sql type: " + type);
-        }
+        Sort sort = getIntFieldSort(isNullableType);
+        return sort;
+      }
+      else if (javaType.getJavaClass() == java.lang.String.class)
+      {
+        Sort sort = getStringFieldSort(isNullableType);
+        return sort;
       }
       else
       {
         throw new RuntimeException("Unsupported sql type: " + type);
       }
     }
-    Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
-    return tupleSort;
+    else if (type instanceof BasicSqlType)
+    {
+      BasicSqlType basicSqlType = (BasicSqlType) type;
+      String typeString = basicSqlType.getSqlTypeName().toString();
+      if (typeString.equals("INTEGER") || typeString.equals("BIGINT"))
+      {
+        Sort sort = getIntFieldSort(isNullableType);
+        return sort;
+      }
+      else if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
+      {
+        Sort sort = getStringFieldSort(isNullableType);
+        return sort;
+      }
+      else if (typeString.equals("BOOLEAN"))
+      {
+        Sort sort = getBooleanFieldSort(isNullableType);
+        return sort;
+      }
+      else
+      {
+        print("Unsupported sql type: " + type);
+        System.exit(1);
+        throw new RuntimeException("Unsupported sql type: " + type);
+      }
+    }
+    else
+    {
+      throw new RuntimeException("Unsupported sql type: " + type);
+    }
   }
 
   private Sort getIntFieldSort(boolean isNullableType)

@@ -833,7 +833,16 @@ public abstract class Cvc5AbstractTranslator
           Sort sort = argTerms[0].getSort();
           if (sort.isNullable())
           {
-            return solver.mkNullableLift(Kind.NOT, new Term[] {argTerms[0]});
+            Term isSome = solver.mkNullableIsSome(argTerms[0]);
+            if (isFilter)
+            {
+              nullConstraints.add(isSome);
+            }
+            else
+            {
+              Term val = solver.mkNullableVal(argTerms[0]);
+              argTerms[0] = isSome.andTerm(val);
+            }
           }
           return argTerms[0].notTerm();
         }

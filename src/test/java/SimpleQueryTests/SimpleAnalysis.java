@@ -116,19 +116,19 @@ public class SimpleAnalysis {
     }
 
     public static void main(String[] args) throws Exception {
-        File f = new File("testData/no_aggregation.json");
+        File f = new File("testData/no_aggregation_sat.json");
         JsonParser parser = new JsonParser();
         JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
-        FileWriter prove = new FileWriter("no_aggregation.txt");
+        FileWriter prove = new FileWriter("no_aggregation_sat.txt");
         BufferedWriter bw = new BufferedWriter(prove);
         PrintWriter out = new PrintWriter(bw);
-        FileWriter notProve = new FileWriter("cannotProve.txt");
+        FileWriter notProve = new FileWriter("cannotProve_sat.txt");
         BufferedWriter bw2 = new BufferedWriter(notProve);
         PrintWriter out2 = new PrintWriter(bw2);
-        FileWriter notCompile = new FileWriter("cannotCompile.txt");
+        FileWriter notCompile = new FileWriter("cannotCompile_sat.txt");
         BufferedWriter bw3 = new BufferedWriter(notCompile);
         PrintWriter out3 = new PrintWriter(bw3);
-        FileWriter bug = new FileWriter("bug.txt");
+        FileWriter bug = new FileWriter("bug_sat.txt");
         BufferedWriter bw4 = new BufferedWriter(bug);
         PrintWriter out4 = new PrintWriter(bw4);
         int count = 0;

@@ -20,15 +20,15 @@ public class Cvc5Analysis
     List<String> spesProvenTests =
         Files.readAllLines(Paths.get("no_aggregation.txt"));
 
-    boolean isSetSemantics = false;
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {
-      writer = new PrintWriter(new File("output_sets.smt2"));
+      writer = new PrintWriter(new File("output_sets_sat.smt2"));
     }
     else
     {
-      writer = new PrintWriter(new File("output_bags.smt2"));
+      writer = new PrintWriter(new File("output_bags_sat.smt2"));
     }
 
     JsonParser parser = new JsonParser();

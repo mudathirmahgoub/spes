@@ -1,0 +1,314 @@
+testEmptyProject2
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyFilterProjectUnion
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.UnionParser.constructRelNode(UnionParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:20)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceValuesUnderProjectFilter
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testMergeMinus
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.getInputs()" because "node" is null
+AlgeRule.AlgeRule.pullUpNormalize(AlgeRule.java:18)
+AlgeRule.AlgeRule.normalize(AlgeRule.java:10)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:66)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyMinus
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceValuesUnderProject
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceValuesUnderFilter
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsDup
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceNot
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "SymbolicRexNode.SymbolicColumn.getSymbolicValue()" because "this.output" is null
+SymbolicRexNode.RexNodeBase.getOutputValue(RexNodeBase.java:26)
+SymbolicRexNode.BoolPredicate.getOrNodeSymbolicColumn(BoolPredicate.java:79)
+SymbolicRexNode.BoolPredicate.buildExpr(BoolPredicate.java:36)
+SymbolicRexNode.BoolPredicate.<init>(BoolPredicate.java:19)
+SymbolicRexNode.RexNodeConverter.rexCallConstraints(RexNodeConverter.java:48)
+SymbolicRexNode.RexNodeConverter.rexConstraints(RexNodeConverter.java:30)
+SymbolicRexNode.BoolPredicate.buildNotExpr(BoolPredicate.java:51)
+SymbolicRexNode.BoolPredicate.buildExpr(BoolPredicate.java:26)
+SymbolicRexNode.BoolPredicate.<init>(BoolPredicate.java:19)
+SymbolicRexNode.RexNodeConverter.rexCallConstraints(RexNodeConverter.java:48)
+SymbolicRexNode.RexNodeConverter.rexConstraints(RexNodeConverter.java:30)
+SymbolicRexNode.BoolPredicate.getAndNodeSymbolicColumn(BoolPredicate.java:61)
+AlgeRule.SPJ2Empty.preCondition(SPJ2Empty.java:32)
+AlgeRule.AlgeRule.simplifyBaseRules(AlgeRule.java:37)
+AlgeRule.AlgeRule.pullUpNormalize(AlgeRule.java:22)
+AlgeRule.AlgeRule.normalize(AlgeRule.java:10)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:67)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsRequiresExecutor
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceExpressionsNot
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsCalc
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.UnionParser.constructRelNode(UnionParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.UnionParser.constructRelNode(UnionParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:20)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsNegatedInverted
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testMergeMinusRightDeep
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.getInputs()" because "node" is null
+AlgeRule.AlgeRule.pullUpNormalize(AlgeRule.java:18)
+AlgeRule.AlgeRule.normalize(AlgeRule.java:10)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:66)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyJoin
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsIsNull
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsNegated
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceNullableCase
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.getOutputExpr()" because "leftInput" is null
+AlgeNodeParser.JoinParser.innerJoin(JoinParser.java:111)
+AlgeNodeParser.JoinParser.innerJoinAll(JoinParser.java:98)
+AlgeNodeParser.JoinParser.constructRelNode(JoinParser.java:37)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceValuesToEmpty
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyJoinRight
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.JoinParser.constructRelNode(JoinParser.java:34)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstants2
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyMinus2
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.getInputs()" because "node" is null
+AlgeRule.AlgeRule.pullUpNormalize(AlgeRule.java:18)
+AlgeRule.AlgeRule.normalize(AlgeRule.java:10)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:66)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstants
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyProject
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testMergeSetOpMixed
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.UnionParser.constructRelNode(UnionParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyIntersect
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testMergeIntersect
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.getInputs()" because "node" is null
+AlgeRule.AlgeRule.pullUpNormalize(AlgeRule.java:18)
+AlgeRule.AlgeRule.normalize(AlgeRule.java:10)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:66)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testReduceConstantsEliminatesFilter
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testEmptyJoinLeft
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:65)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------
+testAlreadyFalseEliminatesFilter
+---------------------------------------------------
+java.lang.NullPointerException: Cannot invoke "AlgeNode.AlgeNode.toString()" because "inputNode" is null
+AlgeNodeParser.FilterParser.constructRelNode(FilterParser.java:28)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+AlgeNodeParser.ProjectParser.constructRelNode(ProjectParser.java:18)
+AlgeNodeParser.AlgeNodeParserPair.constructAlgeNode(AlgeNodeParserPair.java:44)
+SimpleQueryTests.SimpleAnalysis.BeVerified(SimpleAnalysis.java:64)
+SimpleQueryTests.SimpleAnalysis.main(SimpleAnalysis.java:146)
+---------------------------------------------------

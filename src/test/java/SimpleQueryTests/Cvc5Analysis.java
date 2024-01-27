@@ -20,7 +20,7 @@ public class Cvc5Analysis
     List<String> spesProvenTests =
         Files.readAllLines(Paths.get("no_aggregation.txt"));
 
-    boolean isSetSemantics = true;
+    boolean isSetSemantics = false;
     PrintWriter writer;
     if (isSetSemantics)
     {

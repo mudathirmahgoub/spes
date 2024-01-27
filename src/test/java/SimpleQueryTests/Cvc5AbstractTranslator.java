@@ -65,7 +65,7 @@ public abstract class Cvc5AbstractTranslator
     solver.setLogic("HO_ALL");
     prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
-    setOption("debug-check-models", "true");
+    // setOption("debug-check-models", "true");
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");
@@ -828,6 +828,15 @@ public abstract class Cvc5AbstractTranslator
             return solver.mkTerm(k, argTerms);
           }
         case "IS TRUE": return argTerms[0];
+        case "IS NOT TRUE":
+        {
+          Sort sort = argTerms[0].getSort();
+          if (sort.isNullable())
+          {
+            return solver.mkNullableLift(Kind.NOT, new Term[] {argTerms[0]});
+          }
+          return argTerms[0].notTerm();
+        }
         case "IS NULL":
         {
           argTerms = getArgTerms(constructor, t, call, false, null);

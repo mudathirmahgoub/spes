@@ -131,7 +131,6 @@ public abstract class Cvc5AbstractTranslator
       try (Connection connection = DriverManager.getConnection(url))
       {
         Statement statement = connection.createStatement();
-        boolean isModelSound = false;
         String query1 = postgres(sql1);
         String query2 = postgres(sql2);
         if (!tables.isEmpty())
@@ -182,21 +181,14 @@ public abstract class Cvc5AbstractTranslator
             }
           }
         }
-        ResultSet rs1 = statement.executeQuery(query1 + " EXCEPT ALL " + query2);
-        while (rs1.next())
-        {
-          isModelSound = true;
-          String string = checkModelSoundness(rs1);          
-          println("; query1 except all query2:  " + string);
-        }
+        String query1MinusQuery2 = query1 + " EXCEPT ALL " + query2;
+        ResultSet rs1 = statement.executeQuery(query1MinusQuery2);
+        boolean isModelSound = checkModelSoundness(rs1, query1MinusQuery2);
 
-        ResultSet rs2 = statement.executeQuery(query2 + " EXCEPT ALL " + query1);
-        while (rs2.next())
-        {
-          isModelSound = true;
-          String string = checkModelSoundness(rs2);
-          println("; query2 except all query1:  " + string);
-        }
+        String query2MinusQuery1 = query2 + " EXCEPT ALL " + query1;
+        ResultSet rs2 = statement.executeQuery(query2MinusQuery1);
+        isModelSound |= checkModelSoundness(rs2, query2MinusQuery1);
+
         println(";Model soundness: " + isModelSound);
         connection.close();
       }
@@ -263,29 +255,48 @@ public abstract class Cvc5AbstractTranslator
   {
     String query = sql1.replaceAll("EXPR\\$0", "column1")
                        .replaceAll("EXPR\\$1", "column2")
-                       .replaceAll("EXPR\\$2", "column3");
+                       .replaceAll("EXPR\\$2", "column3")
+                       .replaceAll("EXPR\\$3", "column4")
+                       .replaceAll("EXPR\\$4", "column5")
+                       .replaceAll("EXPR\\$5", "column6")
+                       .replaceAll("EXPR\\$6", "column7")
+                       .replaceAll("EXPR\\$7", "column8")
+                       .replaceAll("EXPR\\$8", "column9")
+                       .replaceAll("EXPR\\$9", "column10");
     return query;
   }
 
-  private String checkModelSoundness(ResultSet rs) throws SQLException
+  private boolean checkModelSoundness(ResultSet rs, String query) throws SQLException
   {
     ResultSetMetaData rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     StringBuilder builder = new StringBuilder();
+    boolean isSound = false;
     while (rs.next())
     {
       builder.append(";(");
-      for (int i = 0; i < count; i++)
+      for (int i = 1; i <= count; i++)
       {
-        builder.append(rs.getObject(i).toString());
-        if (i < count - 1)
+        Object value = rs.getObject(i);
+        if (value == null)
+        {
+          builder.append("NULL");
+        }
+        else
+        {
+          builder.append(rs.getObject(i).toString());
+        }
+        if (i < count)
         {
           builder.append(",");
         }
       }
       builder.append(")\n");
+      isSound = true;
     }
-    return builder.toString();
+    println("; " + query);
+    println(builder.toString());
+    return isSound;
   }
 
   protected void println(Object object)

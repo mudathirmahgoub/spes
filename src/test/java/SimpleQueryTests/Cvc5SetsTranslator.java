@@ -1,6 +1,7 @@
 package SimpleQueryTests;
 import io.github.cvc5.*;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalMinus;
@@ -74,6 +75,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getEmptyKind()
+  {
+    return Kind.SET_EMPTY;
+  }
+
+  @Override
   protected Sort mkTableSort(Sort tupleSort)
   {
     return solver.mkSetSort(tupleSort);
@@ -111,5 +118,29 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
       result = solver.mkTerm(k, result, translate(inputs.get(i)));
     }
     return result;
+  }
+
+  @Override
+  protected List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException
+  {
+    List<List<Object>> rows = new ArrayList<>();
+    Kind k = tableValue.getKind();
+    if (k == getEmptyKind())
+    {
+      return rows;
+    }
+    if (k == Kind.SET_SINGLETON)
+    {
+      List<Object> tupleValues = getTupleValues(tableValue.getChild(0));
+      rows.add(tupleValues);
+      return rows;
+    }
+    if (k == Kind.SET_UNION)
+    {
+      rows.addAll(getTableRows(tableValue.getChild(0)));
+      rows.addAll(getTableRows(tableValue.getChild(1)));
+      return rows;
+    }
+    throw new RuntimeException("Unsupported kind in term: " + tableValue);
   }
 }

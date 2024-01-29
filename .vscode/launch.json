@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "PostgresDatabase",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.PostgresDatabase",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "Postgres",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.Postgres",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
             "name": "BenchmarkFilter",
             "request": "launch",
             "mainClass": "SimpleQueryTests.BenchmarkFilter",

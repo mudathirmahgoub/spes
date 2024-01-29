@@ -2,6 +2,13 @@ package SimpleQueryTests;
 import com.google.common.collect.ImmutableList;
 import io.github.cvc5.*;
 import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,12 +72,13 @@ public abstract class Cvc5AbstractTranslator
     solver.setLogic("HO_ALL");
     prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
-    // setOption("debug-check-models", "true");
+    setOption("debug-check-models", "true");
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");
     setOption("tlimit-per", "6000");
     setOption("strings-exp", "true");
+    setOption("simplification", "none");
     zero = solver.mkInteger(0);
     one = solver.mkInteger(1);
     trueTerm = solver.mkBoolean(true);
@@ -118,6 +126,84 @@ public abstract class Cvc5AbstractTranslator
       println("; q2");
       println("(get-value (" + q2 + "))");
       println("; " + solver.getValue(q2));
+
+      String url = "jdbc:postgresql://localhost/spes?user=postgres&password=abc";
+      try (Connection connection = DriverManager.getConnection(url))
+      {
+        Statement statement = connection.createStatement();
+        boolean isModelSound = false;
+        String query1 = postgres(sql1);
+        String query2 = postgres(sql2);
+        if (!tables.isEmpty())
+        {
+          statement.execute("TRUNCATE TABLE EMP");
+          statement.execute("TRUNCATE TABLE DEPT");
+          statement.execute("TRUNCATE TABLE ACCOUNT");
+          for (Map.Entry<EnumerableTableScan, Term> entry : tables.entrySet())
+          {
+            String table = getTableName(entry.getKey());
+            Term tableValue = solver.getValue(entry.getValue());
+            List<List<Object>> rows = getTableRows(tableValue);
+            if (!rows.isEmpty())
+            {
+              String insertStatement = "insert into " + table + " values";
+              for (int i = 0; i < rows.size(); i++)
+              {
+                insertStatement += "(";
+                List<Object> row = rows.get(i);
+                for (int j = 0; j < row.size(); j++)
+                {
+                  Object fieldValue = row.get(j);
+                  if (fieldValue == null)
+                  {
+                    insertStatement += "NULL";
+                  }
+                  else if (fieldValue instanceof BigInteger)
+                  {
+                    insertStatement += fieldValue;
+                  }
+                  else if (fieldValue instanceof String)
+                  {
+                    insertStatement += "'" + fieldValue + "'";
+                  }
+                  if (j < row.size() - 1)
+                  {
+                    insertStatement += ",";
+                  }
+                }
+                insertStatement += ")";
+                if (i < rows.size() - 1)
+                {
+                  insertStatement += ",";
+                }
+              }
+              println("; " + insertStatement);
+              statement.execute(insertStatement);
+            }
+          }
+        }
+        ResultSet rs1 = statement.executeQuery(query1 + " EXCEPT ALL " + query2);
+        while (rs1.next())
+        {
+          isModelSound = true;
+          String string = checkModelSoundness(rs1);          
+          println("; query1 except all query2:  " + string);
+        }
+
+        ResultSet rs2 = statement.executeQuery(query2 + " EXCEPT ALL " + query1);
+        while (rs2.next())
+        {
+          isModelSound = true;
+          String string = checkModelSoundness(rs2);
+          println("; query2 except all query1:  " + string);
+        }
+        println(";Model soundness: " + isModelSound);
+        connection.close();
+      }
+      catch (SQLException e)
+      {
+        e.printStackTrace();
+      }
     }
     if (result.isUnsat())
     {
@@ -125,6 +211,81 @@ public abstract class Cvc5AbstractTranslator
     }
     print("(reset)\n");
     return result;
+  }
+
+  protected abstract List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException;
+
+  protected abstract Kind getEmptyKind();
+
+  protected List<Object> getTupleValues(Term tuple)
+  {
+    List<Object> tupleValues = new ArrayList<>();
+    Term[] fields = tuple.getTupleValue();
+    for (int i = 0; i < fields.length; i++)
+    {
+      if (fields[i].getSort().isNullable())
+      {
+        Term isSome = solver.simplify(solver.mkNullableIsSome(fields[i]));
+        if (isSome.getBooleanValue())
+        {
+          Term cvc5Value = solver.simplify(solver.mkNullableVal(fields[i]));
+          Object javaValue = getFieldValue(cvc5Value);
+          tupleValues.add(javaValue);
+        }
+        else
+        {
+          tupleValues.add(null);
+        }
+      }
+      else
+      {
+        Object javaValue = getFieldValue(fields[i]);
+        tupleValues.add(javaValue);
+      }
+    }
+    return tupleValues;
+  }
+
+  private Object getFieldValue(Term field)
+  {
+    if (field.isIntegerValue())
+    {
+      return field.getIntegerValue();
+    }
+    else if (field.isStringValue())
+    {
+      return field.getStringValue();
+    }
+    throw new RuntimeException("Unsupported type: " + field.getSort());
+  }
+
+  private String postgres(String sql1)
+  {
+    String query = sql1.replaceAll("EXPR\\$0", "column1")
+                       .replaceAll("EXPR\\$1", "column2")
+                       .replaceAll("EXPR\\$2", "column3");
+    return query;
+  }
+
+  private String checkModelSoundness(ResultSet rs) throws SQLException
+  {
+    ResultSetMetaData rsMeta = rs.getMetaData();
+    int count = rsMeta.getColumnCount();
+    StringBuilder builder = new StringBuilder();
+    while (rs.next())
+    {
+      builder.append(";(");
+      for (int i = 0; i < count; i++)
+      {
+        builder.append(rs.getObject(i).toString());
+        if (i < count - 1)
+        {
+          builder.append(",");
+        }
+      }
+      builder.append(")\n");
+    }
+    return builder.toString();
   }
 
   protected void println(Object object)
@@ -971,12 +1132,18 @@ public abstract class Cvc5AbstractTranslator
     {
       return tables.get(table);
     }
-    String tableName = String.join("_", table.getTable().getQualifiedName());
+    String tableName = getTableName(table);
     Sort tupleSort = getSort(table.getRowType());
     Sort tableSort = mkTableSort(tupleSort);
     Term cvc5Table = solver.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
     return cvc5Table;
+  }
+
+  private String getTableName(EnumerableTableScan table)
+  {
+    String tableName = String.join("_", table.getTable().getQualifiedName());
+    return tableName;
   }
 
   protected abstract Sort mkTableSort(Sort tupleSort);

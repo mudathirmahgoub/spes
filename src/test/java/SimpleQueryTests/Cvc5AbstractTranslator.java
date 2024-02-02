@@ -78,7 +78,7 @@ public abstract class Cvc5AbstractTranslator
     setOption("fmf-bound", "true");
     setOption("tlimit-per", "10000");
     setOption("strings-exp", "true");
-    setOption("simplification", "none");
+    //setOption("simplification", "none");
     zero = solver.mkInteger(0);
     one = solver.mkInteger(1);
     trueTerm = solver.mkBoolean(true);

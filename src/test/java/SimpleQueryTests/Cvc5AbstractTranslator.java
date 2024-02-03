@@ -72,7 +72,7 @@ public abstract class Cvc5AbstractTranslator
     solver.setLogic("HO_ALL");
     prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
-    setOption("debug-check-models", "true");
+    setOption("check-models", "true");
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");

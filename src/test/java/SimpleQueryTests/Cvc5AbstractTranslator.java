@@ -78,7 +78,7 @@ public abstract class Cvc5AbstractTranslator
     setOption("fmf-bound", "true");
     setOption("tlimit-per", "10000");
     setOption("strings-exp", "true");
-    //setOption("simplification", "none");
+    // setOption("simplification", "none");
     zero = solver.mkInteger(0);
     one = solver.mkInteger(1);
     trueTerm = solver.mkBoolean(true);
@@ -181,11 +181,13 @@ public abstract class Cvc5AbstractTranslator
             }
           }
         }
-        String query1MinusQuery2 = query1 + " EXCEPT ALL " + query2;
+        String query1MinusQuery2 =
+            "SELECT * FROM (" + query1 + ") AS q1 EXCEPT ALL SELECT * FROM (" + query2 + ") AS q2;";
         ResultSet rs1 = statement.executeQuery(query1MinusQuery2);
         boolean isModelSound = checkModelSoundness(rs1, query1MinusQuery2);
 
-        String query2MinusQuery1 = query2 + " EXCEPT ALL " + query1;
+        String query2MinusQuery1 =
+            "SELECT * FROM (" + query2 + ") AS q2 EXCEPT ALL SELECT * FROM (" + query1 + ") AS q1;";
         ResultSet rs2 = statement.executeQuery(query2MinusQuery1);
         isModelSound |= checkModelSoundness(rs2, query2MinusQuery1);
 

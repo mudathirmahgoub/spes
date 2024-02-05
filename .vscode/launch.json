@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "JsonToText",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.JsonToText",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
             "name": "PostgresDatabase",
             "request": "launch",
             "mainClass": "SimpleQueryTests.PostgresDatabase",

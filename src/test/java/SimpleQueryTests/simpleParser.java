@@ -1,17 +1,16 @@
 package SimpleQueryTests;
 
 import SimpleQueryTests.tableSchema.ACCOUNT;
+import SimpleQueryTests.tableSchema.ANON;
 import SimpleQueryTests.tableSchema.BONUS;
 import SimpleQueryTests.tableSchema.DEPT;
 import SimpleQueryTests.tableSchema.EMP;
-import java.lang.reflect.Type;
+import SimpleQueryTests.tableSchema.T;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
-import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
@@ -39,6 +38,8 @@ public class simpleParser
     defaultSchema.add("DEPT", new DEPT());
     defaultSchema.add("BONUS", new BONUS());
     defaultSchema.add("ACCOUNT", new ACCOUNT());
+    defaultSchema.add("T", new T());
+    defaultSchema.add("ANON", new ANON());
   }
 
   public RelNode getRelNode(String sql)

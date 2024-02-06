@@ -15,7 +15,7 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/spark_tests.json");
+    File f = new File("testData/test.json");
     //File f = new File("testData/test.json");    
 
     boolean isSetSemantics = false;

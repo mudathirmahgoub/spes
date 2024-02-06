@@ -22,7 +22,7 @@ public class T implements Table
     @SuppressWarnings("deprecation")
     RelDataTypeFactory.FieldInfoBuilder b = typeFactory.builder();
     RelDataType stringType = typeFactory.createJavaType(String.class);
-    RelDataType integerType = typeFactory.createJavaType(String.class);
+    RelDataType integerType = typeFactory.createJavaType(Integer.class);
     RelDataType stringNotNull = typeFactory.createTypeWithNullability(stringType, false);
     RelDataType integerNotNull = typeFactory.createTypeWithNullability(integerType, false);
     b.add("K0", stringNotNull);

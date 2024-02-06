@@ -21,7 +21,7 @@ public class ANON implements Table
   {
     @SuppressWarnings("deprecation")
     RelDataTypeFactory.FieldInfoBuilder b = typeFactory.builder();
-    RelDataType integerType = typeFactory.createJavaType(String.class);
+    RelDataType integerType = typeFactory.createJavaType(Integer.class);
     b.add("C", integerType);
     return b.build();
   }

@@ -15,20 +15,18 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/no_aggregation_sat.json");
-    //File f = new File("testData/test.json");
-    List<String> spesProvenTests =
-        Files.readAllLines(Paths.get("no_aggregation_sat.txt"));
+    File f = new File("testData/spark_tests.json");
+    //File f = new File("testData/test.json");    
 
     boolean isSetSemantics = false;
     PrintWriter writer;
     if (isSetSemantics)
     {
-      writer = new PrintWriter(new File("no_aggregation_set_sat.smt2"));
+      writer = new PrintWriter(new File("spark_tests_sets.smt2"));
     }
     else
     {
-      writer = new PrintWriter(new File("no_aggregation_bags_sat.smt2"));
+      writer = new PrintWriter(new File("spark_tests_bags.smt2"));
     }
 
     JsonParser parser = new JsonParser();
@@ -43,25 +41,28 @@ public class Cvc5Analysis
     }
 
     writer.println("; total time: " + Cvc5AbstractTranslator.totalTime + " ms.");
+    writer.println("; sat answers    : " + Cvc5AbstractTranslator.satAnswers);
+    writer.println("; unsat answers  : " + Cvc5AbstractTranslator.unsatAnswers);
+    writer.println("; unknown answers: " + Cvc5AbstractTranslator.unknownAnswers);
     writer.close();
-    System.out.println("Proved by spes and not cvc5:");
-    for (String test : spesProvenTests)
-    {
-      if (cvc5ProvenTests.contains(test))
-      {
-        continue;
-      }
-      System.out.println(test);
-    }
-    System.out.println("Proved by cvc5 and not spes:");
-    for (String test : cvc5ProvenTests)
-    {
-      if (spesProvenTests.contains(test))
-      {
-        continue;
-      }
-      System.out.println(test);
-    }
+    // System.out.println("Proved by spes and not cvc5:");
+    // for (String test : spesProvenTests)
+    // {
+    //   if (cvc5ProvenTests.contains(test))
+    //   {
+    //     continue;
+    //   }
+    //   System.out.println(test);
+    // }
+    // System.out.println("Proved by cvc5 and not spes:");
+    // for (String test : cvc5ProvenTests)
+    // {
+    //   if (spesProvenTests.contains(test))
+    //   {
+    //     continue;
+    //   }
+    //   System.out.println(test);
+    // }
   }
 
   public static void verify(

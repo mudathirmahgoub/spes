@@ -52,6 +52,9 @@ public abstract class Cvc5AbstractTranslator
   protected Term falseTerm;
   protected final long startTime;
   public static long totalTime = 0;
+  public static int unsatAnswers = 0;
+  public static int satAnswers = 0;
+  public static int unknownAnswers = 0;
 
   public Cvc5AbstractTranslator(boolean isNullable, PrintWriter writer)
   {
@@ -112,6 +115,7 @@ public abstract class Cvc5AbstractTranslator
     println("; duration: " + duration + " ms.");
     if (result.isSat())
     {
+      satAnswers++;
       println("(get-model)");
       Term[] terms = tables.values().toArray(new Term[0]);
       String model = solver.getModel(new Sort[0], terms);
@@ -201,6 +205,12 @@ public abstract class Cvc5AbstractTranslator
     }
     if (result.isUnsat())
     {
+      unsatAnswers++;
+      Cvc5Analysis.cvc5ProvenTests.add(name);
+    }
+    if (result.isUnknown())
+    {
+      unknownAnswers++;
       Cvc5Analysis.cvc5ProvenTests.add(name);
     }
     print("(reset)\n");

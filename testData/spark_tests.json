@@ -81,7 +81,7 @@
   },
   {
     "name": "17",
-    "q1": "SELECT dept.deptno <=> dept.deptno FROM dept AS dept",
+    "q1": "SELECT dept.deptno = dept.deptno FROM dept AS dept",
     "q2": "SELECT TRUE FROM dept AS dept"
   },
   {
@@ -111,58 +111,58 @@
   },
   {
     "name": "23",
-    "q1": "SELECT IF(2>1, deptno, name) FROM dept",
+    "q1": "SELECT CASE WHEN 2>1 THEN deptno ELSE deptno + 1 END FROM dept",
     "q2": "SELECT deptno FROM dept"
   },
   {
     "name": "24",
-    "q1": "SELECT IF(null, deptno, name) FROM dept",
+    "q1": "SELECT CASE WHEN CAST(NULL AS BOOLEAN) THEN '' ELSE name END FROM dept",
     "q2": "SELECT name FROM dept"
   },
   {
     "name": "25",
-    "q1": "SELECT IF(deptno = 1, TRUE, FALSE) FROM dept",
-    "q2": "SELECT (deptno = 1) <=> TRUE FROM dept"
+    "q1": "SELECT CASE WHEN deptno = 1 THEN TRUE ELSE FALSE END FROM dept",
+    "q2": "SELECT (deptno = 1) = TRUE FROM dept"
   },
   {
     "name": "26",
-    "q1": "SELECT IF(deptno IS NULL, null, FALSE) FROM dept",
-    "q2": "SELECT deptno IS NULL AND null FROM dept"
+    "q1": "SELECT CASE WHEN deptno IS NULL THEN null ELSE FALSE END FROM dept",
+    "q2": "SELECT deptno IS NULL AND CAST(null AS BOOLEAN) FROM dept"
   },
   {
     "name": "27",
-    "q1": "SELECT IF(deptno IS NULL, FALSE, null) FROM dept",
-    "q2": "SELECT NOT(deptno IS NULL) AND null FROM dept"
+    "q1": "SELECT CASE WHEN deptno IS NULL THEN FALSE ELSE null END FROM dept",
+    "q2": "SELECT NOT(deptno IS NULL) AND CAST(null AS BOOLEAN) FROM dept"
   },
   {
     "name": "28",
-    "q1": "SELECT IF(deptno = 1, name, name) FROM dept",
+    "q1": "SELECT CASE WHEN deptno = 1 THEN name ELSE name END FROM dept",
     "q2": "SELECT name FROM dept"
   },
   {
     "name": "29",
-    "q1": "SELECT CASE WHEN (2>1) THEN deptno ELSE name END FROM dept",
+    "q1": "SELECT CASE WHEN (2>1) THEN deptno ELSE deptno + 1 END FROM dept",
     "q2": "SELECT deptno FROM dept"
   },
   {
     "name": "30",
     "q1": "SELECT CASE WHEN deptno = 1 THEN TRUE ELSE FALSE END FROM dept",
-    "q2": "SELECT (deptno = 1) <=> TRUE FROM dept"
+    "q2": "SELECT (deptno = 1) = TRUE FROM dept"
   },
   {
     "name": "31",
-    "q1": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN FALSE THEN name ELSE deptno+1 END FROM dept",
+    "q1": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN FALSE THEN deptno +1 ELSE deptno+1 END FROM dept",
     "q2": "SELECT CASE WHEN deptno = 1 THEN deptno ELSE deptno+1 END FROM dept"
   },
   {
     "name": "32",
-    "q1": "SELECT CASE WHEN TRUE THEN deptno WHEN deptno = 1 THEN name ELSE deptno+1 END FROM dept",
+    "q1": "SELECT CASE WHEN TRUE THEN deptno WHEN deptno = 1 THEN deptno+1 ELSE deptno+2 END FROM dept",
     "q2": "SELECT deptno FROM dept"
   },
   {
     "name": "33",
-    "q1": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN TRUE THEN name WHEN deptno = 10 THEN 10 ELSE deptno + 1 END FROM dept",
-    "q2": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN TRUE THEN name END FROM dept"
+    "q1": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN TRUE THEN deptno + 100 WHEN deptno = 10 THEN 10 ELSE deptno + 1 END FROM dept",
+    "q2": "SELECT CASE WHEN deptno = 1 THEN deptno WHEN TRUE THEN deptno + 100 END FROM dept"
   },
   {
     "name": "34",
@@ -171,8 +171,8 @@
   },
   {
     "name": "35",
-    "q1": "SELECT (IF(F0_C1=100, F1_C2, 2)=2) FROM T",
-    "q2": "SELECT IF(F0_C1=100, F1_C2=2, 2=2) FROM T"
+    "q1": "SELECT (CASE WHEN F0_C1=100 THEN F1_C2 ELSE 2 END)=2 FROM T",
+    "q2": "SELECT CASE WHEN F0_C1=100 THEN F1_C2=2 ELSE 2=2 END FROM T"
   },
   {
     "name": "36",
@@ -181,8 +181,8 @@
   },
   {
     "name": "37",
-    "q1": "SELECT IF(F0_C1=100, F1_C2, 2) IS NULL FROM T",
-    "q2": "SELECT IF(F0_C1=100, F1_C2 IS NULL, 2 IS NULL) FROM T"
+    "q1": "SELECT CASE WHEN F0_C1=100 THEN F1_C2 ELSE 2 END IS NULL FROM T",
+    "q2": "SELECT CASE WHEN F0_C1=100 THEN F1_C2 IS NULL ELSE 2 IS NULL END FROM T"
   },
   {
     "name": "38",
@@ -226,8 +226,8 @@
   },
   {
     "name": "46",
-    "q1": "SELECT CONCAT(\"abc\", CONCAT(\"def\", \"ghi\")) AS c1 FROM dept",
-    "q2": "SELECT CONCAT(\"abc\", \"def\", \"ghi\") AS c1 FROM dept"
+    "q1": "SELECT CONCAT('abc', CONCAT('def', 'ghi')) AS c1 FROM dept",
+    "q2": "SELECT CONCAT('abc', 'def', 'ghi') AS c1 FROM dept"
   },
   {
     "name": "47",
@@ -581,13 +581,13 @@
   },
   {
     "name": "117",
-    "q1": "SELECT * FROM emp WHERE IF(TRUE AND NULL, FALSE OR NULL, NULL AND NULL)",
-    "q2": "SELECT * FROM emp WHERE IF(TRUE AND FALSE, FALSE OR FALSE, FALSE AND FALSE)"
+    "q1": "SELECT * FROM emp WHERE CASE WHEN TRUE AND NULL THEN  FALSE OR NULL ELSE NULL AND NULL END",
+    "q2": "SELECT * FROM emp WHERE CASE WHEN TRUE AND FALSE THEN FALSE OR FALSE ELSE FALSE AND FALSE END)"
   },
   {
     "name": "118",
-    "q1": "SELECT TRUE <=> ((empno = 1) OR NULL) FROM emp",
-    "q2": "SELECT TRUE <=> ((empno = 1) OR FALSE) FROM emp"
+    "q1": "SELECT TRUE = ((empno = 1) OR NULL) FROM emp",
+    "q2": "SELECT TRUE = ((empno = 1) OR FALSE) FROM emp"
   },
   {
     "name": "119",

@@ -15,7 +15,7 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/test.json");
+    File f = new File("testData/spark_tests.json");
     //File f = new File("testData/test.json");    
 
     boolean isSetSemantics = false;
@@ -121,7 +121,7 @@ public class Cvc5Analysis
 
   static public boolean isSupported(String sql)
   {
-    String[] keyWords = {"ORDER"};
+    String[] keyWords = {"ORDER", "COUNT", "SUM"};
     for (String keyWord : keyWords)
     {
       if (sql.contains(keyWord))

@@ -19,7 +19,6 @@ public class ANON implements Table
   @SuppressWarnings("deprecation")
   public RelDataType getRowType(RelDataTypeFactory typeFactory)
   {
-    @SuppressWarnings("deprecation")
     RelDataTypeFactory.FieldInfoBuilder b = typeFactory.builder();
     RelDataType integerType = typeFactory.createJavaType(Integer.class);
     b.add("C", integerType);

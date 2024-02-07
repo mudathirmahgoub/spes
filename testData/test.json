@@ -1,7 +1,7 @@
 [
   {
-    "name": "11",
-    "q1": "SELECT * FROM dept AS dept WHERE dept.deptno = 1 OR TRUE",
-    "q2": "SELECT * FROM dept AS dept WHERE TRUE"
+    "name": "17",
+    "q1": "SELECT dept.deptno = dept.deptno FROM dept AS dept",
+    "q2": "SELECT TRUE FROM dept AS dept"
   }
 ]

@@ -18,8 +18,7 @@ public class T implements Table
 {
   @SuppressWarnings("deprecation")
   public RelDataType getRowType(RelDataTypeFactory typeFactory)
-  {
-    @SuppressWarnings("deprecation")
+  {    
     RelDataTypeFactory.FieldInfoBuilder b = typeFactory.builder();
     RelDataType stringType = typeFactory.createJavaType(String.class);
     RelDataType integerType = typeFactory.createJavaType(Integer.class);

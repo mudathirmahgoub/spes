@@ -1027,8 +1027,79 @@ public abstract class Cvc5AbstractTranslator
         }
         case "*": k = Kind.MULT; break;
         case "/": k = Kind.DIVISION; break;
-        case "AND": k = Kind.AND; break;
-        case "OR": k = Kind.OR; break;
+        case "AND":
+        {
+          k = Kind.AND;
+          boolean needsLifting =
+              Arrays.asList(argTerms).stream().anyMatch(a -> a.getSort().isNullable());
+          if (needsLifting)
+          {
+            argTerms = Arrays.asList(argTerms)
+                           .stream()
+                           .map(a -> a.getSort().isNullable() ? a : solver.mkNullableSome(a))
+                           .collect(Collectors.toList())
+                           .toArray(new Term[0]);
+            Term a = argTerms[0];
+            Term b = argTerms[1];
+            // we do not do lifting here. Instead we return this            
+            // (ite
+            //   (or
+            //     (and (nullable.is_some a) (not (nullable.val a)))
+            //     (and (nullable.is_some b) (not (nullable.val b))))
+            //   (some false)
+            //   (ite 
+            //      (or (nullable.is_null a) (nullable.is_null b)
+            //      (as nullable.null) Bool)
+            //      (nullable.some true)            
+            Term disjunct1 = solver.mkNullableIsSome(a).andTerm(solver.mkNullableVal(a).notTerm());
+            Term disjunct2 = solver.mkNullableIsSome(b).andTerm(solver.mkNullableVal(b).notTerm());
+            Term condition = disjunct1.orTerm(disjunct2);
+            Term someFalse = solver.mkNullableSome(solver.mkFalse());
+            Term someTrue = solver.mkNullableSome(solver.mkTrue());
+            Sort nullableBool = solver.mkNullableSort(solver.getBooleanSort());
+            Term nullBool = solver.mkNullableNull(nullableBool);
+            Term isNullA = solver.mkNullableIsNull(a);
+            Term isNullB = solver.mkNullableIsNull(b);
+            Term isNull = isNullA.orTerm(isNullB);
+            Term ite1 = solver.mkTerm(Kind.ITE, isNull, nullBool, someTrue);
+            Term ite2 = solver.mkTerm(Kind.ITE, condition, someFalse, ite1);
+            return ite2;
+          }
+          return solver.mkTerm(k, argTerms);
+        }
+        case "OR":
+        {
+          k = Kind.OR;
+          boolean needsLifting =
+              Arrays.asList(argTerms).stream().anyMatch(a -> a.getSort().isNullable());
+          if (needsLifting)
+          {
+            argTerms = Arrays.asList(argTerms)
+                           .stream()
+                           .map(a -> a.getSort().isNullable() ? a : solver.mkNullableSome(a))
+                           .collect(Collectors.toList())
+                           .toArray(new Term[0]);
+            Term a = argTerms[0];
+            Term b = argTerms[1];
+            // we do not do lifting here. Instead we return this
+            // (ite
+            //   (or
+            //    (and (nullable.is_some a) (nullable.val a))
+            //    (and (nullable.is_some b) (nullable.val b)))
+            //    (some true)
+            //    ((as nullable.null) Bool)
+            //  )
+            Term disjunct1 = solver.mkNullableIsSome(a).andTerm(solver.mkNullableVal(a));
+            Term disjunct2 = solver.mkNullableIsSome(b).andTerm(solver.mkNullableVal(b));
+            Term condition = disjunct1.orTerm(disjunct2);
+            Term someTrue = solver.mkNullableSome(solver.mkTrue());
+            Sort nullableBool = solver.mkNullableSort(solver.getBooleanSort());
+            Term nullBool = solver.mkNullableNull(nullableBool);
+            Term ite = solver.mkTerm(Kind.ITE, condition, someTrue, nullBool);
+            return ite;
+          }
+          return solver.mkTerm(k, argTerms);
+        }
         case "NOT": k = Kind.NOT; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
         case "LOWER": k = Kind.STRING_TO_LOWER; break;
@@ -1145,8 +1216,6 @@ public abstract class Cvc5AbstractTranslator
                        .map(a -> a.getSort().isNullable() ? a : solver.mkNullableSome(a))
                        .collect(Collectors.toList())
                        .toArray(new Term[0]);
-        List<Sort> sorts =
-            Arrays.asList(argTerms).stream().map(a -> a.getSort()).collect(Collectors.toList());
         return solver.mkNullableLift(k, argTerms);
       }
       return solver.mkTerm(k, argTerms);

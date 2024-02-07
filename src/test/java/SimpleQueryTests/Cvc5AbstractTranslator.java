@@ -855,13 +855,20 @@ public abstract class Cvc5AbstractTranslator
     Term t = solver.mkVar(tupleSort, "t");
     Sort functionType = solver.getBooleanSort();
     Term body = translateRowExpr(condition, constructor, t, "");
-    if (body.getSort().isNullable())
-    {
-      body = solver.mkNullableIsSome(body);
-    }
+    body = checkNullablePredicate(body);
     Term p = defineFun(new Term[] {t}, functionType, body, "p", true);
     Term ret = solver.mkTerm(getFilterKind(), p, table);
     return ret;
+  }
+
+  private Term checkNullablePredicate(Term predicate)
+  {
+    if (predicate.getSort().isNullable())
+    {
+      Term booleanValue = solver.mkNullableVal(predicate);
+      predicate = solver.mkNullableIsSome(predicate).andTerm(booleanValue);
+    }
+    return predicate;
   }
 
   protected abstract Kind getFilterKind();

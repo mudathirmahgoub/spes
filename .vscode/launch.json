@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "SimpleAnalysis",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SimpleAnalysis",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
             "name": "BenchmarkFilter",
             "request": "launch",
             "mainClass": "SimpleQueryTests.BenchmarkFilter",

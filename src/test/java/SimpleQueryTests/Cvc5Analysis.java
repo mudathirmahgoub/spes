@@ -18,7 +18,7 @@ public class Cvc5Analysis
     File f = new File("testData/spark_tests.json");
     //File f = new File("testData/test.json");
 
-    boolean isSetSemantics = false;
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {

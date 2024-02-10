@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "JsonToText",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.JsonToText",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
             "name": "SimpleAnalysis",
             "request": "launch",
             "mainClass": "SimpleQueryTests.SimpleAnalysis",

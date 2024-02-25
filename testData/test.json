@@ -1,7 +1,7 @@
 [
   {
-    "name": "12",
-    "q1": "SELECT * FROM ANON as a WHERE a.c > 1 AND a.c <= 1",
-    "q2": "SELECT * FROM ANON WHERE CASE WHEN c IS NULL THEN NULL ELSE FALSE END"
+    "name": "17",
+    "q1": "SELECT dept.deptno = dept.deptno FROM dept AS dept",
+    "q2": "SELECT TRUE FROM dept AS dept"
   }
 ]

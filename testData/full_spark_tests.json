@@ -188,22 +188,52 @@
     "name": "38",
     "q1": "SELECT (CASE WHEN F0_C1=100 THEN F1_C2 ELSE 2 END) IS NULL FROM T",
     "q2": "SELECT CASE WHEN F0_C1=100 THEN F1_C2 IS NULL ELSE 2 IS NULL END FROM T"
-  },  
+  },
+  {
+    "name": "39",
+    "q1": "SELECT COUNT(DISTINCT (F1_C0 = NULL)) FROM T",
+    "q2": "SELECT SUM(0) FROM T"
+  },
+  {
+    "name": "40",
+    "q1": "SELECT COUNT(NULL) FROM T",
+    "q2": "SELECT SUM(0) FROM T"
+  },
   {
     "name": "41",
-    "q1": "SELECT * FROM EMP WHERE (NOT(CAST (null AS BOOLEAN))) IS NULL",
-    "q2": "SELECT * FROM EMP WHERE (CAST(null AS BOOLEAN)) IS NULL"
-  },  
+    "q1": "SELECT * FROM EMP WHERE (NOT(null)) IS NULL",
+    "q2": "SELECT * FROM EMP WHERE null IS NULL"
+  },
+  {
+    "name": "42",
+    "q1": "SELECT 1 AS X, 2 AS Y, empno FROM emp ORDER BY X, Y",
+    "q2": "SELECT 1 AS X, 2 AS Y, empno FROM emp ORDER BY 1, 2"
+  },
   {
     "name": "43",
-    "q1": "SELECT CAST(deptno AS int) FROM dept",
+    "q1": "SELECT CAST(deptno AS SIGNED) FROM dept",
     "q2": "SELECT deptno FROM dept"
-  },  
+  },
+  {
+    "name": "44",
+    "q1": "SELECT POSITIVE(deptno) FROM dept",
+    "q2": "SELECT deptno FROM dept"
+  },
   {
     "name": "45",
     "q1": "SELECT UPPER(LOWER(name)) FROM dept",
     "q2": "SELECT UPPER(name) FROM dept"
-  },    
+  },
+  {
+    "name": "46",
+    "q1": "SELECT CONCAT('abc', CONCAT('def', 'ghi')) AS c1 FROM dept",
+    "q2": "SELECT CONCAT('abc', 'def', 'ghi') AS c1 FROM dept"
+  },
+  {
+    "name": "47",
+    "q1": "SELECT * FROM dept WHERE EXISTS (SELECT F0_C1 FROM T WHERE F1_C2 > 10)",
+    "q2": "SELECT * FROM dept WHERE (SELECT 1 FROM (SELECT F0_C1 FROM T WHERE F1_C2 > 10) t0 LIMIT 1) IS NOT NULL"
+  },
   {
     "name": "48",
     "q1": "SELECT * FROM emp AS emp, dept AS dept, account AS account WHERE emp.empno = dept.deptno AND emp.empno = account.acctno",
@@ -218,12 +248,47 @@
     "name": "50",
     "q1": "SELECT DISTINCT T1.F1_C0 FROM T AS T1 LEFT JOIN T AS T2 ON T1.F0_C1 = T2.F0_C1",
     "q2": "SELECT DISTINCT T1.F1_C0 FROM T AS T1"
-  }, 
+  },
+  {
+    "name": "51",
+    "q1": "SELECT *, ROW_NUMBER() OVER(ORDER BY F0_C1) AS rn FROM T LIMIT 5",
+    "q2": "SELECT *, ROW_NUMBER() OVER(ORDER BY F0_C1) AS rn FROM (SELECT * FROM T ORDER BY F0_C1 LIMIT 5) t0"
+  },
   {
     "name": "52",
-    "q1": "SELECT * FROM T WHERE F0_C1 = -0",
-    "q2": "SELECT * FROM T WHERE F0_C1 = 0"
-  },  
+    "q1": "SELECT * FROM T WHERE F0_C1 = -0.0",
+    "q2": "SELECT * FROM T WHERE F0_C1 = 0.0"
+  },
+  {
+    "name": "53",
+    "q1": "((SELECT * FROM T LIMIT 0) UNION ALL (SELECT * FROM T ORDER BY F0_C1 LIMIT 1)) ORDER BY F0_C1",
+    "q2": "(SELECT * FROM T LIMIT 0) UNION ALL (SELECT * FROM T ORDER BY F0_C1 LIMIT 1)"
+  },
+  {
+    "name": "54",
+    "q1": "SELECT F0_C1 FROM (SELECT F0_C1 FROM T LIMIT 1) T0 GROUP BY F0_C1",
+    "q2": "SELECT F0_C1 FROM (SELECT F0_C1 FROM T LIMIT 1) T0"
+  },
+  {
+    "name": "55",
+    "q1": "SELECT SUM(DISTINCT F0_C1) FROM (SELECT F0_C1 FROM T LIMIT 1) T0 GROUP BY F0_C1",
+    "q2": "SELECT SUM(F0_C1) FROM (SELECT F0_C1 FROM T LIMIT 1) T0 GROUP BY F0_C1"
+  },
+  {
+    "name": "56",
+    "q1": "SELECT MAX(DISTINCT deptno) FROM dept",
+    "q2": "SELECT MAX(deptno) FROM dept"
+  },
+  {
+    "name": "57",
+    "q1": "SELECT COUNT(DISTINCT deptno) FILTER(WHERE 3>2) FROM dept",
+    "q2": "SELECT COUNT(DISTINCT deptno) FROM dept"
+  },
+  {
+    "name": "58",
+    "q1": "SELECT COUNT(DISTINCT deptno) FILTER(WHERE 3<2) FROM dept",
+    "q2": "SELECT 0"
+  },
   {
     "name": "59",
     "q1": "SELECT dept.deptno AS deptno, dept.name AS name FROM dept AS dept",
@@ -233,12 +298,27 @@
     "name": "60",
     "q1": "SELECT DISTINCT * FROM ((SELECT * FROM dept as dept0) UNION ALL (SELECT * FROM dept as dept1)) t0",
     "q2": "SELECT DISTINCT * FROM dept as dept0"
-  },  
+  },
+  {
+    "name": "61",
+    "q1": "(SELECT deptno FROM dept) UNION ALL (SELECT deptno FROM dept) LIMIT 10",
+    "q2": "(SELECT deptno FROM dept LIMIT 10) UNION ALL (SELECT deptno FROM dept LIMIT 10) LIMIT 10"
+  },
+  {
+    "name": "62",
+    "q1": "SELECT * FROM (dept AS T1 LEFT OUTER JOIN dept AS T2 on T1.deptno = T2.deptno) LIMIT 10",
+    "q2": "SELECT * FROM ((SELECT * FROM dept LIMIT 10) AS T1 LEFT OUTER JOIN dept AS T2 on T1.deptno = T2.deptno) LIMIT 10"
+  },
   {
     "name": "63",
     "q1": "SELECT t0.name FROM ((SELECT * FROM dept as dept0) UNION ALL (SELECT * FROM dept as dept1)) t0",
     "q2": "SELECT t0.name FROM ((SELECT dept0.name FROM dept as dept0) UNION ALL (SELECT dept1.name FROM dept as dept1)) t0"
-  },  
+  },
+  {
+    "name": "64",
+    "q1": "SELECT emp1.ename, dept1.name FROM emp AS emp1 INNER JOIN dept AS dept1 ON emp1.sal > 50",
+    "q2": "SELECT emp1.ename, dept1.name FROM (SELECT emp.ename, emp.sal FROM emp AS emp) AS emp1 INNER JOIN (SELECT dept.name FROM dept AS dept) AS dept1 ON emp1.sal > 50"
+  },
   {
     "name": "65",
     "q1": "SELECT dept0.name FROM (SELECT dept.deptno, dept.name FROM dept AS dept) dept0 WHERE dept0.deptno > 1",
@@ -273,7 +353,32 @@
     "name": "71",
     "q1": "SELECT tmp.empno, tmp.sal FROM (SELECT emp.empno, emp.sal FROM emp AS emp WHERE emp.sal = 3) AS tmp WHERE tmp.empno > 1",
     "q2": "SELECT tmp.empno, tmp.sal FROM (SELECT emp.empno, emp.sal FROM emp AS emp WHERE emp.sal = 3 AND emp.empno > 1) AS tmp"
-  }, 
+  },
+  {
+    "name": "72",
+    "q1": "SELECT emp.empno FROM emp ORDER BY 'a'",
+    "q2": "SELECT emp.empno FROM emp"
+  },
+  {
+    "name": "73",
+    "q1": "SELECT emp.empno FROM emp ORDER BY 'a', emp.ename",
+    "q2": "SELECT emp.empno FROM emp ORDER BY emp.ename"
+  },
+  {
+    "name": "74",
+    "q1": "SELECT t0.empno FROM (SELECT emp.empno FROM emp ORDER BY emp.empno) t0 ORDER BY t0.empno",
+    "q2": "SELECT t0.empno FROM (SELECT emp.empno FROM emp) t0 ORDER BY t0.empno"
+  },
+  {
+    "name": "75",
+    "q1": "SELECT * FROM (SELECT * FROM dept ORDER BY deptno) d1 INNER JOIN (SELECT * FROM dept ORDER BY deptno) d2",
+    "q2": "SELECT * FROM (SELECT * FROM dept) d1 INNER JOIN (SELECT * FROM dept) d2"
+  },
+  {
+    "name": "76",
+    "q1": "SELECT MIN(t0.empno) FROM (SELECT * FROM emp ORDER BY emp.empno) t0",
+    "q2": "SELECT MIN(t0.empno) FROM (SELECT * FROM emp) t0"
+  },
   {
     "name": "77",
     "q1": "SELECT * FROM emp AS emp WHERE TRUE",
@@ -298,7 +403,12 @@
     "name": "81",
     "q1": "SELECT * FROM (SELECT * FROM dept AS dept UNION ALL SELECT * FROM dept AS dept0) t0 WHERE t0.deptno = 0",
     "q2": "SELECT * FROM dept AS dept WHERE dept.deptno = 0 UNION ALL SELECT * FROM dept AS dept0 WHERE dept0.deptno = 0"
-  },  
+  },
+  {
+    "name": "82",
+    "q1": "SELECT * FROM (SELECT emp.deptno, MIN(emp.sal) FROM emp AS emp GROUP BY emp.deptno) t0 WHERE t0.deptno > 10",
+    "q2": "SELECT emp.deptno, MIN(emp.sal) FROM emp AS emp WHERE emp.deptno > 10 GROUP BY emp.deptno"
+  },
   {
     "name": "83",
     "q1": "SELECT * FROM (SELECT dept.deptno FROM dept AS dept) t0 WHERE t0.deptno > 10",
@@ -308,7 +418,12 @@
     "name": "84",
     "q1": "SELECT * FROM (SELECT DISTINCT dept.deptno FROM dept AS dept) t0 WHERE t0.deptno > 10",
     "q2": "SELECT DISTINCT dept.deptno FROM dept AS dept WHERE dept.deptno > 10"
-  },  
+  },
+  {
+    "name": "85",
+    "q1": "SELECT * FROM emp AS emp INNER JOIN dept AS dept WHERE emp.empno > 0 AND dept.deptno > 0",
+    "q2": "SELECT * FROM (SELECT * FROM emp AS emp WHERE emp.empno > 0) t0 INNER JOIN (SELECT * FROM dept AS dept WHERE dept.deptno > 0) t1"
+  },
   {
     "name": "86",
     "q1": "SELECT * FROM emp RIGHT JOIN dept ON emp.deptno = dept.deptno WHERE emp.sal > 0 AND dept.deptno = 1",
@@ -333,7 +448,12 @@
     "name": "90",
     "q1": "SELECT * FROM emp LEFT JOIN dept ON emp.deptno = dept.deptno AND emp.sal > 0 AND dept.deptno = 1",
     "q2": "SELECT * FROM emp LEFT JOIN (SELECT * FROM dept WHERE dept.deptno = 1) t0 ON emp.deptno = t0.deptno AND emp.sal > 0"
-  },  
+  },
+  {
+    "name": "91",
+    "q1": "SELECT * FROM (SELECT * FROM emp ORDER BY empno LIMIT 1) t0 ORDER BY empno LIMIT 10",
+    "q2": "SELECT * FROM (SELECT * FROM emp ORDER BY empno LIMIT 1) t0 ORDER BY empno"
+  },
   {
     "name": "92",
     "q1": "SELECT c1 FROM (VALUES (1, 2)) AS t0(c1, c2)",
@@ -343,7 +463,27 @@
     "name": "93",
     "q1": "SELECT * FROM (VALUES (1, 2), (3, 3)) AS t0(c1, c2) WHERE t0.c1 = t0.c2",
     "q2": "SELECT * FROM (VALUES (3, 3)) AS t0(c1, c2)"
-  },    
+  },
+  {
+    "name": "94",
+    "q1": "SELECT DISTINCT dept.deptno, dept.name FROM dept AS dept",
+    "q2": "SELECT dept.deptno, dept.name FROM dept AS dept GROUP BY dept.deptno, dept.name"
+  },
+  {
+    "name": "95",
+    "q1": "SELECT empno FROM emp GROUP BY empno, 'a'",
+    "q2": "SELECT empno FROM emp GROUP BY empno"
+  },
+  {
+    "name": "96",
+    "q1": "SELECT dept.deptno FROM dept AS dept GROUP BY dept.deptno, dept.deptno",
+    "q2": "SELECT dept.deptno FROM dept AS dept GROUP BY dept.deptno"
+  },
+  {
+    "name": "97",
+    "q1": "SELECT * FROM dept LIMIT 0",
+    "q2": "SELECT * FROM dept WHERE FALSE"
+  },
   {
     "name": "98",
     "q1": "SELECT * FROM dept AS dept WHERE FALSE UNION ALL SELECT * FROM dept AS dept0 WHERE FALSE",
@@ -356,7 +496,7 @@
   },
   {
     "name": "100",
-    "q1": "SELECT * FROM dept UNION ALL SELECT * FROM dept WHERE CAST(NULL AS BOOLEAN) AND TRUE",
+    "q1": "SELECT * FROM dept UNION ALL SELECT * FROM dept WHERE NULL AND TRUE",
     "q2": "SELECT * FROM dept"
   },
   {
@@ -368,7 +508,12 @@
     "name": "102",
     "q1": "SELECT dept.deptno FROM dept AS dept WHERE FALSE UNION ALL SELECT emp.empno FROM emp AS emp",
     "q2": "SELECT emp.empno AS deptno FROM emp AS emp"
-  },  
+  },
+  {
+    "name": "103",
+    "q1": "SELECT empno FROM emp GROUP BY empno, ename IS NULL",
+    "q2": "SELECT empno FROM (SELECT emp.*, ename IS NULL AS c0 FROM emp) t0 GROUP BY empno, c0"
+  },
   {
     "name": "104",
     "q1": "SELECT * FROM emp AS emp INNER JOIN dept AS dept ON (emp.empno < 10 AND dept.deptno < 10) OR (emp.empno > 20 AND dept.deptno > 20)",
@@ -388,7 +533,12 @@
     "name": "107",
     "q1": "SELECT * FROM emp RIGHT JOIN dept ON (emp.empno < 10 AND dept.deptno < 10) OR (emp.empno > 20 AND dept.deptno > 20)",
     "q2": "SELECT * FROM (SELECT * FROM emp WHERE emp.empno < 10 OR emp.empno > 20) emp0 RIGHT JOIN dept dept0 ON (emp0.empno < 10 AND dept0.deptno < 10) OR (emp0.empno > 20 AND dept0.deptno > 20)"
-  },  
+  },
+  {
+    "name": "108",
+    "q1": "SELECT COUNT(DISTINCT empno) FROM (SELECT empno FROM emp GROUP BY empno) t0",
+    "q2": "SELECT COUNT(DISTINCT empno) FROM (SELECT empno FROM emp) t0"
+  },
   {
     "name": "109",
     "q1": "SELECT * FROM emp WHERE empno > 0 EXCEPT SELECT * FROM emp WHERE empno < 10",
@@ -396,47 +546,92 @@
   },
   {
     "name": "110",
-    "q1": "SELECT * FROM emp WHERE CAST(NULL AS BOOLEAN) AND TRUE",
+    "q1": "SELECT * FROM emp WHERE NULL AND TRUE",
     "q2": "SELECT * FROM emp WHERE FALSE"
   },
   {
     "name": "111",
-    "q1": "SELECT * FROM emp WHERE (empno = 0) OR CAST(NULL AS BOOLEAN)",
+    "q1": "SELECT * FROM emp WHERE (empno = 0) OR NULL",
     "q2": "SELECT * FROM emp WHERE (empno = 0) OR FALSE"
   },
   {
     "name": "112",
-    "q1": "SELECT * FROM emp WHERE emp.empno > 0 AND CAST(NULL AS BOOLEAN)",
+    "q1": "SELECT * FROM emp WHERE emp.empno > 0 AND NULL",
     "q2": "SELECT * FROM emp WHERE emp.empno > 0 AND FALSE"
   },
   {
     "name": "113",
-    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN FALSE ELSE CAST(NULL AS BOOLEAN) END",
+    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN FALSE ELSE NULL END",
     "q2": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN FALSE ELSE FALSE END"
   },
   {
     "name": "114",
-    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN CAST(NULL AS BOOLEAN) ELSE TRUE END",
+    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN NULL ELSE TRUE END",
     "q2": "SELECT * FROM emp WHERE CASE WHEN empno = 1 THEN FALSE ELSE TRUE END"
   },
   {
     "name": "115",
-    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 OR CAST(NULL AS BOOLEAN) THEN sal < 10 ELSE sal > 10 END",
+    "q1": "SELECT * FROM emp WHERE CASE WHEN empno = 1 OR NULL THEN sal < 10 ELSE sal > 10 END",
     "q2": "SELECT * FROM emp WHERE CASE WHEN empno = 1 OR FALSE THEN sal < 10 ELSE sal > 10 END"
   },
   {
     "name": "116",
-    "q1": "SELECT * FROM emp INNER JOIN dept ON NOT emp.empno IN (dept.deptno, CAST (NULL as int))",
+    "q1": "SELECT * FROM emp INNER JOIN dept ON NOT emp.empno IN (dept.deptno, NULL)",
     "q2": "SELECT * FROM emp INNER JOIN dept ON FALSE"
   },
   {
     "name": "117",
-    "q1": "SELECT * FROM emp WHERE CASE WHEN TRUE AND CAST(NULL AS BOOLEAN) THEN  FALSE OR CAST(NULL AS BOOLEAN) ELSE CAST(NULL AS BOOLEAN) AND CAST(NULL AS BOOLEAN) END",
-    "q2": "SELECT * FROM emp WHERE CASE WHEN TRUE AND FALSE THEN FALSE OR FALSE ELSE FALSE AND FALSE END"
+    "q1": "SELECT * FROM emp WHERE CASE WHEN TRUE AND NULL THEN  FALSE OR NULL ELSE NULL AND NULL END",
+    "q2": "SELECT * FROM emp WHERE CASE WHEN TRUE AND FALSE THEN FALSE OR FALSE ELSE FALSE AND FALSE END)"
   },
   {
     "name": "118",
-    "q1": "SELECT TRUE = ((empno = 1) OR CAST(NULL AS BOOLEAN)) FROM emp",
+    "q1": "SELECT TRUE = ((empno = 1) OR NULL) FROM emp",
     "q2": "SELECT TRUE = ((empno = 1) OR FALSE) FROM emp"
-  }  
+  },
+  {
+    "name": "119",
+    "q1": "SELECT t1.empno, t1.mgr FROM emp AS t1 WHERE t1.empno = (SELECT MAX(t2.deptno) FROM emp AS t2 WHERE t1.mgr = t2.sal)",
+    "q2": "SELECT sub.a, sub.b FROM (SELECT t1.empno as a, t1.mgr as b, sub0.max_dno AS max_dno FROM emp AS t1 LEFT JOIN LATERAL (SELECT max(t2.deptno) as max_dno FROM emp AS t2 WHERE t1.mgr = t2.sal) sub0) sub WHERE sub.a = sub.max_dno"
+  },
+  {
+    "name": "120",
+    "q1": "SELECT t1.empno, (SELECT max(t2.deptno) FROM emp AS t2 WHERE t1.mgr = t2.sal) FROM emp AS t1",
+    "q2": "SELECT t1.empno, sub.max_dno FROM emp AS t1 LEFT JOIN LATERAL (SELECT max(t2.deptno) as max_dno FROM emp AS t2 WHERE t1.mgr = t2.sal) sub"
+  },
+  {
+    "name": "121",
+    "q1": "SELECT (SELECT max(t2.deptno) FROM emp AS t2 WHERE t1.mgr = t2.sal) as sub, max(t1.empno) FROM emp AS t1 GROUP BY sub",
+    "q2": "SELECT sub.max_dno, max(t1.empno) FROM emp AS t1 LEFT JOIN LATERAL (SELECT max(t2.deptno) as max_dno FROM emp AS t2 WHERE t1.mgr = t2.sal) sub GROUP BY sub.max_dno"
+  },
+  {
+    "name": "122",
+    "q1": "SELECT * FROM emp INNER JOIN LATERAL (SELECT * FROM dept WHERE emp.deptno = dept.deptno) t0",
+    "q2": "SELECT * FROM emp INNER JOIN dept ON emp.deptno = dept.deptno"
+  },
+  {
+    "name": "123",
+    "q1": "SELECT * FROM emp INNER JOIN LATERAL (SELECT 1) t0",
+    "q2": "SELECT emp.*, 1 FROM emp"
+  },
+  {
+    "name": "124",
+    "q1": "SELECT * FROM emp WHERE (SELECT 1) = 1",
+    "q2": "SELECT * FROM emp WHERE 1 = 1"
+  },
+  {
+    "name": "125",
+    "q1": "SELECT * FROM emp WHERE CAST((empno IS NULL) AS SIGNED) > 1000",
+    "q2": "SELECT * FROM emp WHERE ((empno IS NULL) IS NULL) AND NULL"
+  },
+  {
+    "name": "126",
+    "q1": "SELECT * FROM emp WHERE CAST((empno IS NULL) AS SIGNED) < 1000",
+    "q2": "SELECT * FROM emp WHERE ((empno IS NULL) IS NOT NULL) OR NULL"
+  },
+  {
+    "name": "127",
+    "q1": "SELECT FIRST_VALUE(emp.deptno) OVER(PARTITION BY emp.empno ORDER BY emp.ename ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM emp",
+    "q2": "SELECT NTH_VALUE(emp.deptno, 1) OVER(PARTITION BY emp.empno ORDER BY emp.ename ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM emp"
+  }
 ]

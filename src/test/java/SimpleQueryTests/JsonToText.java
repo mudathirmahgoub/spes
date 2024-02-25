@@ -12,9 +12,9 @@ public class JsonToText
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/no_aggregation_sat.json");
+    File f = new File("testData/no_aggregation.json");
 
-    PrintWriter writer = new PrintWriter(new File("sql_solver/no_aggregation_sat.sql"));
+    PrintWriter writer = new PrintWriter(new File("sql_solver/no_aggregation.sql"));
 
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();

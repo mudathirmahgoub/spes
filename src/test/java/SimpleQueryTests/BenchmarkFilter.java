@@ -12,13 +12,13 @@ public class BenchmarkFilter
 {
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/calcite_tests.json");
+    File f = new File("testData/full_spark_tests.json");
     JsonParser parser = new JsonParser();
     JsonArray array = parser.parse(new FileReader(f)).getAsJsonArray();
     JsonArray filteredArray = new JsonArray();
 
     JsonWriter writer = new JsonWriter(
-        new FileWriter("testData/no_aggregation_no_null_no_cast_no_outer_join.json"));
+        new FileWriter("testData/sparks_tests.json"));
     Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     writer.beginArray();
 
@@ -42,7 +42,6 @@ public class BenchmarkFilter
   {
     return query.contains("SUM") || query.contains("COUNT") || query.contains("MIN")
         || query.contains("MAX") || query.contains("AVG") || query.contains("GROUP BY")
-        || query.contains("NULL") || query.contains("CAST") || query.contains("LEFT")
-        || query.contains("RIGHT") || query.contains("FULL");
+        || query.contains("ORDER") || query.contains("PARTITION");
   }
 }

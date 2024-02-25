@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "JsonToText",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.JsonToText",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "SimpleAnalysis",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.SimpleAnalysis",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
+            "name": "BenchmarkFilter",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.BenchmarkFilter",
+            "projectName": "equitas"
+        },
+        {
+            "type": "java",
             "name": "Cvc5Analysis",
             "request": "launch",
             "mainClass": "SimpleQueryTests.Cvc5Analysis",

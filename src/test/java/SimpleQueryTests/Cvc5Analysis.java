@@ -4,8 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.rel.RelNode;
@@ -15,8 +13,8 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/test.json");
-    //File f = new File("testData/test.json");    
+    //File f = new File("testData/test.json");
+    File f = new File("testData/no_aggregation.json");
 
     boolean isSetSemantics = false;
     PrintWriter writer;
@@ -73,8 +71,7 @@ public class Cvc5Analysis
     {
       return;
     }
-    boolean isNullable = isNullable(sql1) || isNullable(sql2);
-    isNullable = true;
+
     RelNode logicPlan = null;
     RelNode logicPlan2 = null;
     boolean compile = false;
@@ -97,24 +94,16 @@ public class Cvc5Analysis
     }
     if (compile)
     {
-      try
+      Cvc5AbstractTranslator translator;
+      if (isSetSemantics)
       {
-        Cvc5AbstractTranslator translator;
-        if (isSetSemantics)
-        {
-          translator = new Cvc5SetsTranslator(isNullable, writer);
-        }
-        else
-        {
-          translator = new Cvc5BagsTranslator(isNullable, writer);
-        }
-        translator.translate(name, logicPlan, sql1, logicPlan2, sql2);
+        translator = new Cvc5SetsTranslator(writer);
       }
-      catch (Exception e)
+      else
       {
-        System.out.println("buggy in code");
-        throw e;
+        translator = new Cvc5BagsTranslator(writer);
       }
+      translator.translate(name, logicPlan, sql1, logicPlan2, sql2);
     }
     return;
   }

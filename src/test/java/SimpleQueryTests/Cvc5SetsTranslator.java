@@ -9,9 +9,9 @@ import org.apache.calcite.rel.logical.LogicalUnion;
 
 public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
 {
-  public Cvc5SetsTranslator(boolean isNullable, PrintWriter writer)
+  public Cvc5SetsTranslator(PrintWriter writer)
   {
-    super(isNullable, writer);
+    super(writer);
   }
 
   @Override

@@ -49,11 +49,20 @@ public abstract class Cvc5AbstractTranslator
   protected Term one;
   protected Term trueTerm;
   protected Term falseTerm;
+  protected Term nullableTrue;
+  protected Term nullableFalse;
+  protected Term nullBool;
+  protected Sort boolSort;
+  protected Sort intSort;
+  protected Sort nullableBool;
+  protected Sort nullableInt;
   protected final long startTime;
   public static long totalTime = 0;
   public static int unsatAnswers = 0;
   public static int satAnswers = 0;
   public static int unknownAnswers = 0;
+  public Term nullableAnd;
+  public Term nullableOr;
 
   public Cvc5AbstractTranslator(PrintWriter writer)
   {
@@ -84,6 +93,73 @@ public abstract class Cvc5AbstractTranslator
     one = solver.mkInteger(1);
     trueTerm = solver.mkBoolean(true);
     falseTerm = solver.mkBoolean(false);
+    nullableTrue = solver.mkNullableSome(trueTerm);
+    nullableFalse = solver.mkNullableSome(falseTerm);
+    boolSort = solver.getBooleanSort();
+    intSort = solver.getIntegerSort();
+    nullableBool = solver.mkNullableSort(boolSort);
+    nullBool = solver.mkNullableNull(nullableBool);
+    nullableInt = solver.mkNullableSort(intSort);
+    nullableAnd = defineNullableAnd();
+    nullableOr = defineNullableOr();
+  }
+
+  private Term defineNullableOr()
+  {
+    Term x = solver.mkVar(nullableBool, "x");
+    Term y = solver.mkVar(nullableBool, "y");
+    Term xIsNull = solver.mkNullableIsNull(x);
+    Term yIsNull = solver.mkNullableIsNull(y);
+    Term xIsFalse = x.eqTerm(nullableFalse);
+    Term yIsFalse = y.eqTerm(nullableFalse);
+    Term xIsTrue = x.eqTerm(nullableTrue);
+    Term yIsTrue = y.eqTerm(nullableTrue);
+    Term condition1 = xIsNull.andTerm(yIsTrue);
+    Term value1 = nullableTrue;
+    Term condition2 = xIsTrue.andTerm(yIsNull);
+    Term value2 = nullableTrue;
+    Term condition3 = xIsNull.andTerm(yIsFalse);
+    Term value3 = nullBool;
+    Term condition4 = xIsFalse.andTerm(yIsNull);
+    Term value4 = nullBool;
+    Term xVal = solver.mkNullableVal(x);
+    Term yVal = solver.mkNullableVal(y);
+    Term orTerm = solver.mkNullableSome(xVal.orTerm(yVal));
+    Term ite4 = solver.mkTerm(Kind.ITE, condition4, value4, orTerm);
+    Term ite3 = solver.mkTerm(Kind.ITE, condition3, value3, ite4);
+    Term ite2 = solver.mkTerm(Kind.ITE, condition2, value2, ite3);
+    Term ite1 = solver.mkTerm(Kind.ITE, condition1, value1, ite2);
+    Term f = defineFun(new Term[]{x, y},ite1.getSort(),  ite1, "nullableOr", false);
+    return f;
+  }
+
+  private Term defineNullableAnd()
+  {
+    Term x = solver.mkVar(nullableBool, "x");
+    Term y = solver.mkVar(nullableBool, "y");
+    Term xIsNull = solver.mkNullableIsNull(x);
+    Term yIsNull = solver.mkNullableIsNull(y);
+    Term xIsFalse = x.eqTerm(nullableFalse);
+    Term yIsFalse = y.eqTerm(nullableFalse);
+    Term xIsTrue = x.eqTerm(nullableTrue);
+    Term yIsTrue = y.eqTerm(nullableTrue);
+    Term condition1 = xIsNull.andTerm(yIsFalse);
+    Term value1 = nullableFalse;
+    Term condition2 = xIsFalse.andTerm(yIsNull);
+    Term value2 = nullableFalse;
+    Term condition3 = xIsNull.andTerm(yIsTrue);
+    Term value3 = nullBool;
+    Term condition4 = xIsTrue.andTerm(yIsNull);
+    Term value4 = nullBool;
+    Term xVal = solver.mkNullableVal(x);
+    Term yVal = solver.mkNullableVal(y);
+    Term andTerm = solver.mkNullableSome(xVal.andTerm(yVal));
+    Term ite4 = solver.mkTerm(Kind.ITE, condition4, value4, andTerm);
+    Term ite3 = solver.mkTerm(Kind.ITE, condition3, value3, ite4);
+    Term ite2 = solver.mkTerm(Kind.ITE, condition2, value2, ite3);
+    Term ite1 = solver.mkTerm(Kind.ITE, condition1, value1, ite2);
+    Term f = defineFun(new Term[]{x, y},ite1.getSort(),  ite1, "nullableAnd", false);
+    return f;
   }
 
   private void setOption(String option, String value)
@@ -104,15 +180,18 @@ public abstract class Cvc5AbstractTranslator
     Term q1 = defineFun(new Term[0], q1Term.getSort(), q1Term, "q1", false);
     Term q2 = defineFun(new Term[0], q2Term.getSort(), q2Term, "q2", false);
     solver.assertFormula(q1.eqTerm(q2).notTerm());
+    //
+    Term nullIsFalse = solver.mkNullableVal(nullBool).eqTerm(falseTerm);
+    solver.assertFormula(nullIsFalse);
     printSmtProblem();
-    //solver.assertFormula(falseTerm);
+    // solver.assertFormula(falseTerm);
     Result result = solver.checkSat();
     long stopTime = System.currentTimeMillis();
     long duration = stopTime - startTime;
     totalTime += duration;
     println(";answer: " + result);
     println("; duration: " + duration + " ms.");
-    if (result.isSat())
+    if (result.isSat() || result.isUnknown())
     {
       satAnswers++;
       println("(get-model)");
@@ -925,33 +1004,39 @@ public abstract class Cvc5AbstractTranslator
         case "/": k = Kind.DIVISION; break;
         case "AND":
         {
-          Term l = argTerms[0];
-          Term r = argTerms[1];
-          Term lVal = solver.mkNullableVal(l);
-          Term rVal = solver.mkNullableVal(r);
-          Term lIsSome = solver.mkNullableIsSome(l);
-          Term rIsSome = solver.mkNullableIsSome(r);
-          Term isSome = lIsSome.andTerm(rIsSome);
-          Term notLeft = lIsSome.andTerm(lVal.notTerm());
-          Term notRight = rIsSome.andTerm(rVal.notTerm());
-          Term andTerm = isSome.andTerm(lVal.andTerm(rVal));
-          Term ret = notLeft.orTerm(notRight).orTerm(andTerm);
-          return solver.mkNullableSome(ret);
+          if(argTerms.length == 1)
+          {
+            return argTerms[0];
+          }
+          Term ret;
+          ret = solver.mkTerm(Kind.APPLY_UF, new Term[]{nullableAnd, argTerms[0], argTerms[1]});
+          if(argTerms.length == 2)
+          {
+              return ret;
+          }
+          for (int i = 2; i < argTerms.length; i++)
+          {
+            ret = solver.mkTerm(Kind.APPLY_UF, new Term[]{nullableAnd,ret, argTerms[i]});
+          }
+          return ret;
         }
         case "OR":
         {
-          Term l = argTerms[0];
-          Term r = argTerms[1];
-          Term lVal = solver.mkNullableVal(l);
-          Term rVal = solver.mkNullableVal(r);
-          Term lIsSome = solver.mkNullableIsSome(l);
-          Term rIsSome = solver.mkNullableIsSome(r);
-          Term isSome = lIsSome.andTerm(rIsSome);
-          Term left = lIsSome.andTerm(lVal);
-          Term right = rIsSome.andTerm(rVal);
-          Term orTerm = isSome.andTerm(lVal.orTerm(rVal));
-          Term ret = left.orTerm(right).orTerm(orTerm);
-          return solver.mkNullableSome(ret);
+          if(argTerms.length == 1)
+          {
+            return argTerms[0];
+          }
+          Term ret;
+          ret = solver.mkTerm(Kind.APPLY_UF, new Term[]{nullableOr, argTerms[0], argTerms[1]});
+          if(argTerms.length == 2)
+          {
+            return ret;
+          }
+          for (int i = 2; i < argTerms.length; i++)
+          {
+            ret = solver.mkTerm(Kind.APPLY_UF, new Term[]{nullableOr,ret, argTerms[i]});
+          }
+          return ret;
         }
         case "NOT": k = Kind.NOT; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
@@ -960,7 +1045,8 @@ public abstract class Cvc5AbstractTranslator
           k = Kind.STRING_SUBSTR;
           assert (argTerms.length >= 2);
           // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
-          Term sub = solver.mkNullableLift(Kind.SUB, new Term[]{argTerms[1], solver.mkNullableSome(one)});
+          Term sub =
+              solver.mkNullableLift(Kind.SUB, new Term[] {argTerms[1], solver.mkNullableSome(one)});
           argTerms[1] = solver.simplify(sub);
           if (argTerms.length == 3)
           {
@@ -973,7 +1059,8 @@ public abstract class Cvc5AbstractTranslator
           arguments[0] = argTerms[0];
           arguments[1] = argTerms[1];
           Term stringTerm = argTerms[0];
-          arguments[2] = solver.simplify(solver.mkNullableLift(Kind.STRING_LENGTH, new Term[]{stringTerm}));
+          arguments[2] =
+              solver.simplify(solver.mkNullableLift(Kind.STRING_LENGTH, new Term[] {stringTerm}));
           argTerms = arguments;
           break;
         }
@@ -1058,7 +1145,7 @@ public abstract class Cvc5AbstractTranslator
       }
       int integer = RexLiteral.intValue(literal);
       Term ret = solver.mkInteger(integer);
-      return solver.mkNullableSome(ret);      
+      return solver.mkNullableSome(ret);
     }
     if (typeString.contains("VARCHAR") || typeString.contains("CHAR"))
     {

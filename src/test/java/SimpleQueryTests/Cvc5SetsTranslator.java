@@ -83,18 +83,18 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   @Override
   protected Sort mkTableSort(Sort tupleSort)
   {
-    return solver.mkSetSort(tupleSort);
+    return tm.mkSetSort(tupleSort);
   }
 
   @Override
   protected Term mkEmptyTable(Sort sort)
   {
-    return solver.mkEmptySet(sort);
+    return tm.mkEmptySet(sort);
   }
 
   protected Term mkSingleton(Term smtTuple)
   {
-    return solver.mkTerm(Kind.SET_SINGLETON, smtTuple);
+    return tm.mkTerm(Kind.SET_SINGLETON, smtTuple);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   {
     Term a = translate(minus.getInput(0));
     Term b = translate(minus.getInput(1));
-    Term difference = solver.mkTerm(Kind.SET_MINUS, a, b);
+    Term difference = tm.mkTerm(Kind.SET_MINUS, a, b);
     return difference;
   }
 
@@ -112,10 +112,10 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
     List<RelNode> inputs = n.getInputs();
     Kind k = Kind.SET_UNION;
     Term result = translate(inputs.get(0));
-    result = solver.mkTerm(k, result, translate(inputs.get(1)));
+    result = tm.mkTerm(k, result, translate(inputs.get(1)));
     for (int i = 2; i < inputs.size(); i++)
     {
-      result = solver.mkTerm(k, result, translate(inputs.get(i)));
+      result = tm.mkTerm(k, result, translate(inputs.get(i)));
     }
     return result;
   }

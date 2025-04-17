@@ -44,6 +44,7 @@ public abstract class Cvc5AbstractTranslator
   protected final boolean isNullable;
   public HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
   public HashMap<String, Term> declaredFunctions = new HashMap<>();
+  protected TermManager tm;
   protected Solver solver;
   protected int functionIndex = 0;
   protected Term zero;
@@ -71,7 +72,8 @@ public abstract class Cvc5AbstractTranslator
     declaredFunctions.clear();
     functionIndex = 0;
     Context.deletePointers();
-    solver = new Solver();
+    tm = new TermManager();
+    solver = new Solver(tm);
     solver.setLogic("HO_ALL");
     prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
@@ -82,10 +84,10 @@ public abstract class Cvc5AbstractTranslator
     setOption("tlimit-per", "10000");
     setOption("strings-exp", "true");
     // setOption("simplification", "none");
-    zero = solver.mkInteger(0);
-    one = solver.mkInteger(1);
-    trueTerm = solver.mkBoolean(true);
-    falseTerm = solver.mkBoolean(false);
+    zero = tm.mkInteger(0);
+    one = tm.mkInteger(1);
+    trueTerm = tm.mkBoolean(true);
+    falseTerm = tm.mkBoolean(false);
   }
 
   private void setOption(String option, String value)
@@ -229,10 +231,10 @@ public abstract class Cvc5AbstractTranslator
     {
       if (fields[i].getSort().isNullable())
       {
-        Term isSome = solver.simplify(solver.mkNullableIsSome(fields[i]));
+        Term isSome = solver.simplify(tm.mkNullableIsSome(fields[i]));
         if (isSome.getBooleanValue())
         {
-          Term cvc5Value = solver.simplify(solver.mkNullableVal(fields[i]));
+          Term cvc5Value = solver.simplify(tm.mkNullableVal(fields[i]));
           Object javaValue = getFieldValue(cvc5Value);
           tupleValues.add(javaValue);
         }
@@ -401,7 +403,7 @@ public abstract class Cvc5AbstractTranslator
   {
     Term a = translate(intersect.getInput(0));
     Term b = translate(intersect.getInput(1));
-    Term difference = solver.mkTerm(getIntersectionKind(), a, b);
+    Term difference = tm.mkTerm(getIntersectionKind(), a, b);
     return difference;
   }
 
@@ -420,8 +422,8 @@ public abstract class Cvc5AbstractTranslator
       // it is similar to duplicate removal of a projection
 
       // ((_ table.project indices) child)
-      Op op = solver.mkOp(getProjectKind(), indices);
-      Term ret = solver.mkTerm(op, child);
+      Op op = tm.mkOp(getProjectKind(), indices);
+      Term ret = tm.mkTerm(op, child);
       return ret;
     }
 
@@ -432,7 +434,7 @@ public abstract class Cvc5AbstractTranslator
     String name = String.join("_", calls.stream().map(s -> s.getAggregation().getName()).toList())
                       .toLowerCase();
     Sort yTupleSort = getSort(aggregate.getRowType());
-    Term y = solver.mkVar(yTupleSort, "y");
+    Term y = tm.mkVar(yTupleSort, "y");
     int yTupleLength = yTupleSort.getTupleLength();
     Sort[] yTupleSorts = yTupleSort.getTupleSorts();
     Term[] tupleElements = new Term[yTupleLength];
@@ -444,7 +446,7 @@ public abstract class Cvc5AbstractTranslator
       Term tupleSelect = mkTupleSelect(xTupleSort, x, index);
       tupleElements[yIndex] = tupleSelect;
       // initial value is needed for grouping fields
-      initialValues[yIndex] = solver.mkNullableNull(yTupleSorts[yIndex]);
+      initialValues[yIndex] = tm.mkNullableNull(yTupleSorts[yIndex]);
       yIndex++;
     }
 
@@ -456,7 +458,7 @@ public abstract class Cvc5AbstractTranslator
       Term yTupleSelect = mkTupleSelect(yTupleSort, y, yIndex);
       if (yTupleSelect.getSort().isNullable())
       {
-        yTupleSelect = solver.mkNullableVal(yTupleSelect);
+        yTupleSelect = tm.mkNullableVal(yTupleSelect);
       }
       if (argList.isEmpty())
       {
@@ -470,11 +472,11 @@ public abstract class Cvc5AbstractTranslator
       yIndex++;
     }
 
-    Term body = solver.mkTuple(tupleElements);
-    Term initialValue = solver.mkTuple(initialValues);
+    Term body = tm.mkTuple(tupleElements);
+    Term initialValue = tm.mkTuple(initialValues);
     Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name, true);
-    Op op = solver.mkOp(getAggregateKind(), indices);
-    Term ret = solver.mkTerm(op, new Term[] {f, initialValue, child});
+    Op op = tm.mkOp(getAggregateKind(), indices);
+    Term ret = tm.mkTerm(op, new Term[] {f, initialValue, child});
     return ret;
   }
 
@@ -501,38 +503,38 @@ public abstract class Cvc5AbstractTranslator
       {
         if (xTupleSelect.getSort().isNullable())
         {
-          Term isNull = solver.mkNullableIsNull(xTupleSelect);
-          Term val = solver.mkNullableVal(xTupleSelect);
-          Term ite = solver.mkTerm(Kind.ITE, isNull, zero, val);
-          Term result = solver.mkTerm(Kind.ADD, ite, yTupleSelect);
-          tupleElements[yIndex] = solver.mkNullableSome(result);
-          initialValues[yIndex] = solver.mkNullableSome(zero);
+          Term isNull = tm.mkNullableIsNull(xTupleSelect);
+          Term val = tm.mkNullableVal(xTupleSelect);
+          Term ite = tm.mkTerm(Kind.ITE, isNull, zero, val);
+          Term result = tm.mkTerm(Kind.ADD, ite, yTupleSelect);
+          tupleElements[yIndex] = tm.mkNullableSome(result);
+          initialValues[yIndex] = tm.mkNullableSome(zero);
         }
       }
       case MIN:
       {
         if (xTupleSelect.getSort().isNullable())
         {
-          Term isNull = solver.mkNullableIsNull(xTupleSelect);
-          Term val = solver.mkNullableVal(xTupleSelect);
-          Term ite = solver.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
-          Term lt = solver.mkTerm(Kind.LT, ite, yTupleSelect);
-          Term result = solver.mkTerm(Kind.ITE, lt, ite, yTupleSelect);
-          tupleElements[yIndex] = solver.mkNullableSome(result);
-          initialValues[yIndex] = solver.mkNullableSome(zero);
+          Term isNull = tm.mkNullableIsNull(xTupleSelect);
+          Term val = tm.mkNullableVal(xTupleSelect);
+          Term ite = tm.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
+          Term lt = tm.mkTerm(Kind.LT, ite, yTupleSelect);
+          Term result = tm.mkTerm(Kind.ITE, lt, ite, yTupleSelect);
+          tupleElements[yIndex] = tm.mkNullableSome(result);
+          initialValues[yIndex] = tm.mkNullableSome(zero);
         }
       }
       case MAX:
       {
         if (xTupleSelect.getSort().isNullable())
         {
-          Term isNull = solver.mkNullableIsNull(xTupleSelect);
-          Term val = solver.mkNullableVal(xTupleSelect);
-          Term ite = solver.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
-          Term gt = solver.mkTerm(Kind.GT, ite, yTupleSelect);
-          Term result = solver.mkTerm(Kind.ITE, gt, ite, yTupleSelect);
-          tupleElements[yIndex] = solver.mkNullableSome(result);
-          initialValues[yIndex] = solver.mkNullableSome(zero);
+          Term isNull = tm.mkNullableIsNull(xTupleSelect);
+          Term val = tm.mkNullableVal(xTupleSelect);
+          Term ite = tm.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
+          Term gt = tm.mkTerm(Kind.GT, ite, yTupleSelect);
+          Term result = tm.mkTerm(Kind.ITE, gt, ite, yTupleSelect);
+          tupleElements[yIndex] = tm.mkNullableSome(result);
+          initialValues[yIndex] = tm.mkNullableSome(zero);
         }
       }
       break;
@@ -542,9 +544,9 @@ public abstract class Cvc5AbstractTranslator
 
   private void mkCountFun(Term[] tupleElements, Term[] initialValues, int yIndex, Term yTupleSelect)
   {
-    Term result = solver.mkTerm(Kind.ADD, yTupleSelect, one);
-    tupleElements[yIndex] = solver.mkNullableSome(result);
-    initialValues[yIndex] = solver.mkNullableSome(zero);
+    Term result = tm.mkTerm(Kind.ADD, yTupleSelect, one);
+    tupleElements[yIndex] = tm.mkNullableSome(result);
+    initialValues[yIndex] = tm.mkNullableSome(zero);
   }
 
   private Term mkTupleSelect(Sort tupleSort, Term t, int index)
@@ -552,7 +554,7 @@ public abstract class Cvc5AbstractTranslator
     Datatype datatype = tupleSort.getDatatype();
     DatatypeConstructor constructor = datatype.getConstructor(0);
     Term selectorTerm = constructor.getSelector(index).getTerm();
-    Term selectedTerm = solver.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
+    Term selectedTerm = tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
     return selectedTerm;
   }
 
@@ -589,7 +591,7 @@ public abstract class Cvc5AbstractTranslator
       {
         terms[j] = translate(tuple.get(j), false);
       }
-      Term smtTuple = solver.mkTuple(terms);
+      Term smtTuple = tm.mkTuple(terms);
       Term singleton = mkSingleton(smtTuple);
       smtTuples[i] = singleton;
     }
@@ -606,7 +608,7 @@ public abstract class Cvc5AbstractTranslator
     Term union = smtTuples[0];
     for (int i = 1; i < smtTuples.length; i++)
     {
-      union = solver.mkTerm(getUnionAllKind(), union, smtTuples[i]);
+      union = tm.mkTerm(getUnionAllKind(), union, smtTuples[i]);
     }
     return union;
   }
@@ -621,7 +623,7 @@ public abstract class Cvc5AbstractTranslator
   {
     Term a = translate(n.getLeft());
     Term b = translate(n.getRight());
-    Term product = solver.mkTerm(getProductKind(), a, b);
+    Term product = tm.mkTerm(getProductKind(), a, b);
     if (!n.getCondition().isAlwaysTrue())
     {
       product = applyFilter(n.getCondition(), product);
@@ -632,21 +634,21 @@ public abstract class Cvc5AbstractTranslator
       case LEFT:
       {
         Term left = mkLeft(a, product);
-        Term join = solver.mkTerm(getUnionAllKind(), left, product);
+        Term join = tm.mkTerm(getUnionAllKind(), left, product);
         return join;
       }
       case RIGHT:
       {
         Term right = mkRight(b, product);
-        Term join = solver.mkTerm(getUnionAllKind(), right, product);
+        Term join = tm.mkTerm(getUnionAllKind(), right, product);
         return join;
       }
       case FULL:
       {
         Term left = mkLeft(a, product);
         Term right = mkRight(b, product);
-        Term join = solver.mkTerm(getUnionAllKind(), left, right);
-        join = solver.mkTerm(getUnionAllKind(), join, product);
+        Term join = tm.mkTerm(getUnionAllKind(), left, right);
+        join = tm.mkTerm(getUnionAllKind(), join, product);
         return join;
       }
       default: throw new RuntimeException(n.toString());
@@ -662,21 +664,21 @@ public abstract class Cvc5AbstractTranslator
     Sort aTupleSort = getElementSort(a.getSort());
     int aTupleLength = aTupleSort.getTupleLength();
     int[] aIndices = IntStream.range(0, aTupleLength).boxed().mapToInt(Integer::intValue).toArray();
-    Op op = solver.mkOp(getProjectKind(), aIndices);
-    Term projection = solver.mkTerm(op, product);
-    Term difference = solver.mkTerm(getDifferenceRemoveKind(), a, projection);
+    Op op = tm.mkOp(getProjectKind(), aIndices);
+    Term projection = tm.mkTerm(op, product);
+    Term difference = tm.mkTerm(getDifferenceRemoveKind(), a, projection);
 
     Sort productTupleSort = getElementSort(product.getSort());
     Datatype aDatatype = aTupleSort.getDatatype();
     DatatypeConstructor aConstructor = aDatatype.getConstructor(0);
     int productTupleLength = productTupleSort.getTupleLength();
     Term[] terms = new Term[productTupleLength];
-    Term t = solver.mkVar(aTupleSort, "t");
+    Term t = tm.mkVar(aTupleSort, "t");
     // fill a elements
     for (int i = 0; i < aTupleLength; i++)
     {
       Term selectorTerm = aConstructor.getSelector(i).getTerm();
-      Term selectedTerm = solver.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
+      Term selectedTerm = tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
       terms[i] = selectedTerm;
     }
     // fill the remaining elements with nulls
@@ -684,12 +686,12 @@ public abstract class Cvc5AbstractTranslator
     for (int i = aTupleLength; i < productTupleLength; i++)
     {
       Sort elementSort = productTupleSorts[i];
-      terms[i] = solver.mkNullableNull(elementSort);
+      terms[i] = tm.mkNullableNull(elementSort);
     }
-    Term productTuple = solver.mkTuple(terms);
+    Term productTuple = tm.mkTuple(terms);
 
     Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "leftJoin", true);
-    Term mapF = solver.mkTerm(getMapKind(), f, difference);
+    Term mapF = tm.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
 
@@ -708,33 +710,33 @@ public abstract class Cvc5AbstractTranslator
                          .boxed()
                          .mapToInt(Integer::intValue)
                          .toArray();
-    Op op = solver.mkOp(getProjectKind(), bIndices);
-    Term projection = solver.mkTerm(op, product);
-    Term difference = solver.mkTerm(getDifferenceRemoveKind(), b, projection);
+    Op op = tm.mkOp(getProjectKind(), bIndices);
+    Term projection = tm.mkTerm(op, product);
+    Term difference = tm.mkTerm(getDifferenceRemoveKind(), b, projection);
 
     Datatype bDatatype = bTupleSort.getDatatype();
     DatatypeConstructor bConstructor = bDatatype.getConstructor(0);
 
     Term[] terms = new Term[productTupleLength];
-    Term t = solver.mkVar(bTupleSort, "t");
+    Term t = tm.mkVar(bTupleSort, "t");
     // fill initial elements with nulls
     Sort[] tupleSorts = productTupleSort.getTupleSorts();
     for (int i = 0; i < aTupleLength; i++)
     {
       Sort elementSort = tupleSorts[i];
-      terms[i] = solver.mkNullableNull(elementSort);
+      terms[i] = tm.mkNullableNull(elementSort);
     }
     // fill b elements
     for (int i = aTupleLength; i < productTupleLength; i++)
     {
       Term selectorTerm = bConstructor.getSelector(i - aTupleLength).getTerm();
-      Term selectedTerm = solver.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
+      Term selectedTerm = tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
       terms[i] = selectedTerm;
     }
-    Term productTuple = solver.mkTuple(terms);
+    Term productTuple = tm.mkTuple(terms);
 
     Term f = defineFun(new Term[] {t}, productTupleSort, productTuple, "rightJoin", true);
-    Term mapF = solver.mkTerm(getMapKind(), f, difference);
+    Term mapF = tm.mkTerm(getMapKind(), f, difference);
     return mapF;
   }
 
@@ -756,22 +758,22 @@ public abstract class Cvc5AbstractTranslator
     Sort tupleSort = getElementSort(table.getSort());
     Datatype datatype = tupleSort.getDatatype();
     DatatypeConstructor constructor = datatype.getConstructor(0);
-    Term t = solver.mkVar(tupleSort, "t");
-    Sort functionType = solver.getBooleanSort();
+    Term t = tm.mkVar(tupleSort, "t");
+    Sort functionType = tm.getBooleanSort();
     List<Term> nullConstraints = new ArrayList<>();
     Term body = translateRowExpr(condition, constructor, t, true, nullConstraints, "");
     if (body.getSort().isNullable())
     {
-      nullConstraints.add(solver.mkNullableIsSome(body));
-      body = solver.mkNullableVal(body);
+      nullConstraints.add(tm.mkNullableIsSome(body));
+      body = tm.mkNullableVal(body);
     }
     if (!nullConstraints.isEmpty())
     {
       nullConstraints.add(body);
-      body = solver.mkTerm(Kind.AND, nullConstraints.toArray(new Term[0]));
+      body = tm.mkTerm(Kind.AND, nullConstraints.toArray(new Term[0]));
     }
     Term p = defineFun(new Term[] {t}, functionType, body, "p", true);
-    Term ret = solver.mkTerm(getFilterKind(), p, table);
+    Term ret = tm.mkTerm(getFilterKind(), p, table);
     return ret;
   }
 
@@ -827,15 +829,15 @@ public abstract class Cvc5AbstractTranslator
     if (isTableProject)
     {
       // ((_ table.project indices) input)
-      Op op = solver.mkOp(getProjectKind(), indices);
-      Term ret = solver.mkTerm(op, child);
+      Op op = tm.mkOp(getProjectKind(), indices);
+      Term ret = tm.mkTerm(op, child);
       return ret;
     }
     else
     {
       // (set.map (lambda (t (Tuple ...) ) ... ) input)
       Sort argType = getElementSort(child.getSort());
-      Term t = solver.mkVar(argType, "t");
+      Term t = tm.mkVar(argType, "t");
       Sort functionType = getSort(project.getRowType());
 
       Datatype datatype = t.getSort().getDatatype();
@@ -845,9 +847,9 @@ public abstract class Cvc5AbstractTranslator
       {
         terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null, "");
       }
-      Term body = solver.mkTuple(terms);
+      Term body = tm.mkTuple(terms);
       Term f = defineFun(new Term[] {t}, functionType, body, "f", true);
-      Term ret = solver.mkTerm(getMapKind(), f, child);
+      Term ret = tm.mkTerm(getMapKind(), f, child);
       return ret;
     }
   }
@@ -868,20 +870,20 @@ public abstract class Cvc5AbstractTranslator
       int index = rex.getIndex();
 
       Term selectorTerm = constructor.getSelector(index).getTerm();
-      Term selectedTerm = solver.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
+      Term selectedTerm = tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
       // if the type is nullable, extract the value
       if (isNullable)
       {
         if (isFilter && !operator.equals("IS NULL") && !operator.equals("IS NOT NULL"))
         {
-          nullConstraints.add(solver.mkNullableIsSome(selectedTerm));
-          selectedTerm = solver.mkNullableVal(selectedTerm);
+          nullConstraints.add(tm.mkNullableIsSome(selectedTerm));
+          selectedTerm = tm.mkNullableVal(selectedTerm);
         }
         else if (!selectedTerm.getSort().isNullable())
         {
           // for select clauses, we always return nullables
           // when isNullable holds
-          selectedTerm = solver.mkNullableSome(selectedTerm);
+          selectedTerm = tm.mkNullableSome(selectedTerm);
         }
       }
       Term simplifiedTerm = solver.simplify(selectedTerm);
@@ -964,11 +966,11 @@ public abstract class Cvc5AbstractTranslator
           {
             if (argTerms[i].getSort().isNullable())
             {
-              argTerms[i] = solver.mkNullableVal(argTerms[i]);
+              argTerms[i] = tm.mkNullableVal(argTerms[i]);
             }
           }
           // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
-          argTerms[1] = solver.simplify(solver.mkTerm(Kind.SUB, argTerms[1], one));
+          argTerms[1] = solver.simplify(tm.mkTerm(Kind.SUB, argTerms[1], one));
           if (argTerms.length == 3)
           {
             // SELECT SUBSTRING('abcdef' from 2 for 3) = bcd
@@ -982,9 +984,9 @@ public abstract class Cvc5AbstractTranslator
           Term stringTerm = argTerms[0];
           if (stringTerm.getSort().isNullable())
           {
-            stringTerm = solver.mkNullableVal(stringTerm);
+            stringTerm = tm.mkNullableVal(stringTerm);
           }
-          arguments[2] = solver.simplify(solver.mkTerm(Kind.STRING_LENGTH, stringTerm));
+          arguments[2] = solver.simplify(tm.mkTerm(Kind.STRING_LENGTH, stringTerm));
           argTerms = arguments;
           break;
         }
@@ -995,21 +997,21 @@ public abstract class Cvc5AbstractTranslator
             // condition part should not be nullable
             if (argTerms[0].getSort().isNullable())
             {
-              argTerms[0] = solver.mkNullableVal(argTerms[0]);
+              argTerms[0] = tm.mkNullableVal(argTerms[0]);
             }
             // either then part or else part is nullable
             if (argTerms[1].getSort().isNullable() || argTerms[2].getSort().isNullable())
             {
               if (!argTerms[1].getSort().isNullable())
               {
-                argTerms[1] = solver.mkNullableSome(argTerms[1]);
+                argTerms[1] = tm.mkNullableSome(argTerms[1]);
               }
               if (!argTerms[2].getSort().isNullable())
               {
-                argTerms[2] = solver.mkNullableSome(argTerms[2]);
+                argTerms[2] = tm.mkNullableSome(argTerms[2]);
               }
             }
-            return solver.mkTerm(k, argTerms);
+            return tm.mkTerm(k, argTerms);
           }
         case "IS TRUE": return argTerms[0];
         case "IS NOT TRUE":
@@ -1017,14 +1019,14 @@ public abstract class Cvc5AbstractTranslator
           Sort sort = argTerms[0].getSort();
           if (sort.isNullable())
           {
-            Term isSome = solver.mkNullableIsSome(argTerms[0]);
+            Term isSome = tm.mkNullableIsSome(argTerms[0]);
             if (isFilter)
             {
               nullConstraints.add(isSome);
             }
             else
             {
-              Term val = solver.mkNullableVal(argTerms[0]);
+              Term val = tm.mkNullableVal(argTerms[0]);
               argTerms[0] = isSome.andTerm(val);
             }
           }
@@ -1035,7 +1037,7 @@ public abstract class Cvc5AbstractTranslator
           argTerms = getArgTerms(constructor, t, call, false, null);
           if (argTerms[0].getSort().isNullable())
           {
-            return solver.mkNullableIsNull(argTerms[0]);
+            return tm.mkNullableIsNull(argTerms[0]);
           }
           return falseTerm;
         }
@@ -1044,7 +1046,7 @@ public abstract class Cvc5AbstractTranslator
           argTerms = getArgTerms(constructor, t, call, false, null);
           if (argTerms[0].getSort().isNullable())
           {
-            return solver.mkNullableIsSome(argTerms[0]);
+            return tm.mkNullableIsSome(argTerms[0]);
           }
           return trueTerm;
         }
@@ -1061,12 +1063,12 @@ public abstract class Cvc5AbstractTranslator
       {
         argTerms = Arrays.asList(argTerms)
                        .stream()
-                       .map(a -> a.getSort().isNullable() ? a : solver.mkNullableSome(a))
+                       .map(a -> a.getSort().isNullable() ? a : tm.mkNullableSome(a))
                        .collect(Collectors.toList())
                        .toArray(new Term[0]);
-        return solver.mkNullableLift(k, argTerms);
+        return tm.mkNullableLift(k, argTerms);
       }
-      return solver.mkTerm(k, argTerms);
+      return tm.mkTerm(k, argTerms);
     }
     else
     {
@@ -1105,13 +1107,13 @@ public abstract class Cvc5AbstractTranslator
     {
       if (literal.getValue() == null)
       {
-        return solver.mkNullableNull(solver.mkNullableSort(solver.getIntegerSort()));
+        return tm.mkNullableNull(tm.mkNullableSort(tm.getIntegerSort()));
       }
       int integer = RexLiteral.intValue(literal);
-      Term ret = solver.mkInteger(integer);
+      Term ret = tm.mkInteger(integer);
       if (isNullable && !isFilter)
       {
-        ret = solver.mkNullableSome(ret);
+        ret = tm.mkNullableSome(ret);
       }
       return ret;
     }
@@ -1119,13 +1121,13 @@ public abstract class Cvc5AbstractTranslator
     {
       if (literal.getValue() == null)
       {
-        return solver.mkNullableNull(solver.mkNullableSort(solver.getStringSort()));
+        return tm.mkNullableNull(tm.mkNullableSort(tm.getStringSort()));
       }
       String string = RexLiteral.stringValue(literal);
-      Term ret = solver.mkString(string);
+      Term ret = tm.mkString(string);
       if (isNullable && !isFilter)
       {
-        ret = solver.mkNullableSome(ret);
+        ret = tm.mkNullableSome(ret);
       }
       return ret;
     }
@@ -1133,13 +1135,13 @@ public abstract class Cvc5AbstractTranslator
     {
       if (literal.getValue() == null)
       {
-        return solver.mkNullableNull(solver.mkNullableSort(solver.getBooleanSort()));
+        return tm.mkNullableNull(tm.mkNullableSort(tm.getBooleanSort()));
       }
       boolean value = RexLiteral.booleanValue(literal);
-      Term ret = solver.mkBoolean(value);
+      Term ret = tm.mkBoolean(value);
       if (isNullable && !isFilter)
       {
-        ret = solver.mkNullableSome(ret);
+        ret = tm.mkNullableSome(ret);
       }
       return ret;
     }
@@ -1158,7 +1160,7 @@ public abstract class Cvc5AbstractTranslator
     String tableName = getTableName(table);
     Sort tupleSort = getSort(table.getRowType());
     Sort tableSort = mkTableSort(tupleSort);
-    Term cvc5Table = solver.mkConst(tableSort, tableName);
+    Term cvc5Table = tm.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
     return cvc5Table;
   }
@@ -1180,7 +1182,7 @@ public abstract class Cvc5AbstractTranslator
       {
         columnSorts.add(getFieldSort(type.getType()));
       }
-      Sort tupleSort = solver.mkTupleSort(columnSorts.toArray(new Sort[0]));
+      Sort tupleSort = tm.mkTupleSort(columnSorts.toArray(new Sort[0]));
       return tupleSort;
     }
     return getFieldSort(relDataType);
@@ -1241,28 +1243,28 @@ public abstract class Cvc5AbstractTranslator
 
   private Sort getIntFieldSort(boolean isNullableType)
   {
-    Sort sort = solver.getIntegerSort();
+    Sort sort = tm.getIntegerSort();
     if (isNullable)
     {
-      sort = solver.mkNullableSort(sort);
+      sort = tm.mkNullableSort(sort);
     }
     return sort;
   }
   private Sort getStringFieldSort(boolean isNullableType)
   {
-    Sort sort = solver.getStringSort();
+    Sort sort = tm.getStringSort();
     if (isNullable)
     {
-      sort = solver.mkNullableSort(sort);
+      sort = tm.mkNullableSort(sort);
     }
     return sort;
   }
   private Sort getBooleanFieldSort(boolean isNullableType)
   {
-    Sort sort = solver.getBooleanSort();
+    Sort sort = tm.getBooleanSort();
     if (isNullable)
     {
-      sort = solver.mkNullableSort(sort);
+      sort = tm.mkNullableSort(sort);
     }
     return sort;
   }

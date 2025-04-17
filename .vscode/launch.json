@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "SimpleQueryTests.Cvc5Analysis",
             "projectName": "equitas",
-            "vmArgs": "-Djava.library.path=/home/mudathir/Desktop/cvc5/nullables/build/install/lib:/home/mudathir/z3/build"
+            "vmArgs": "-Djava.library.path=/home/mudathir/all/cvc5/mudathir/build/install/lib:/home/mudathir/z3/build"
         }
     ]
 }

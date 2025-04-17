@@ -82,18 +82,18 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   @Override
   protected Sort mkTableSort(Sort tupleSort)
   {
-    return solver.mkBagSort(tupleSort);
+    return tm.mkBagSort(tupleSort);
   }
 
   @Override
   protected Term mkEmptyTable(Sort sort)
   {
-    return solver.mkEmptyBag(sort);
+    return tm.mkEmptyBag(sort);
   }
 
   protected Term mkSingleton(Term smtTuple)
   {
-    return solver.mkTerm(Kind.BAG_MAKE, smtTuple, one);
+    return tm.mkTerm(Kind.BAG_MAKE, smtTuple, one);
   }
 
   @Override
@@ -101,8 +101,8 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   {
     Term a = translate(minus.getInput(0));
     Term b = translate(minus.getInput(1));
-    Term difference = minus.all ? solver.mkTerm(Kind.BAG_DIFFERENCE_SUBTRACT, a, b)
-                                : solver.mkTerm(Kind.BAG_DIFFERENCE_REMOVE, a, b);
+    Term difference = minus.all ? tm.mkTerm(Kind.BAG_DIFFERENCE_SUBTRACT, a, b)
+                                : tm.mkTerm(Kind.BAG_DIFFERENCE_REMOVE, a, b);
     return difference;
   }
 
@@ -112,10 +112,10 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     List<RelNode> inputs = n.getInputs();
     Kind k = n.all ? Kind.BAG_UNION_DISJOINT : Kind.BAG_UNION_MAX;
     Term result = translate(inputs.get(0));
-    result = solver.mkTerm(k, result, translate(inputs.get(1)));
+    result = tm.mkTerm(k, result, translate(inputs.get(1)));
     for (int i = 2; i < inputs.size(); i++)
     {
-      result = solver.mkTerm(k, result, translate(inputs.get(i)));
+      result = tm.mkTerm(k, result, translate(inputs.get(i)));
     }
     return result;
   }

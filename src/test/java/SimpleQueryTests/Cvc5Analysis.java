@@ -4,8 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.rel.RelNode;
@@ -15,18 +13,18 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/test.json");
+    File f = new File("testData/no_aggregation.json");
     //File f = new File("testData/test.json");    
 
-    boolean isSetSemantics = false;
+    boolean isSetSemantics = true;
     PrintWriter writer;
     if (isSetSemantics)
     {
-      writer = new PrintWriter(new File("spark_tests_sets.smt2"));
+      writer = new PrintWriter(new File("min_sets.smt2"));
     }
     else
     {
-      writer = new PrintWriter(new File("spark_tests_bags.smt2"));
+      writer = new PrintWriter(new File("min_bags.smt2"));
     }
 
     JsonParser parser = new JsonParser();

@@ -75,13 +75,13 @@ public abstract class Cvc5AbstractTranslator
     tm = new TermManager();
     solver = new Solver(tm);
     solver.setLogic("HO_ALL");
-    prologue.append("(set-logic HO_ALL)\n");
+    prologue.append("(set-logic HO_ALL)\n");    
     setOption("produce-models", "true");
     setOption("check-models", "true");
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");
-    setOption("tlimit-per", "10000");
+    setOption("tlimit-per", "20000");
     setOption("strings-exp", "true");
     // setOption("simplification", "none");
     zero = tm.mkInteger(0);
@@ -589,7 +589,7 @@ public abstract class Cvc5AbstractTranslator
       Term[] terms = new Term[tuple.size()];
       for (int j = 0; j < tuple.size(); j++)
       {
-        terms[j] = translate(tuple.get(j), false);
+        terms[j] = translate(tuple.get(j));
       }
       Term smtTuple = tm.mkTuple(terms);
       Term singleton = mkSingleton(smtTuple);
@@ -760,18 +760,8 @@ public abstract class Cvc5AbstractTranslator
     DatatypeConstructor constructor = datatype.getConstructor(0);
     Term t = tm.mkVar(tupleSort, "t");
     Sort functionType = tm.getBooleanSort();
-    List<Term> nullConstraints = new ArrayList<>();
-    Term body = translateRowExpr(condition, constructor, t, true, nullConstraints, "");
-    if (body.getSort().isNullable())
-    {
-      nullConstraints.add(tm.mkNullableIsSome(body));
-      body = tm.mkNullableVal(body);
-    }
-    if (!nullConstraints.isEmpty())
-    {
-      nullConstraints.add(body);
-      body = tm.mkTerm(Kind.AND, nullConstraints.toArray(new Term[0]));
-    }
+    Term body = translateRowExpr(condition, constructor, t, "");
+    body = mkIsSomeValIfNullable(body);
     Term p = defineFun(new Term[] {t}, functionType, body, "p", true);
     Term ret = tm.mkTerm(getFilterKind(), p, table);
     return ret;
@@ -845,7 +835,7 @@ public abstract class Cvc5AbstractTranslator
       Term[] terms = new Term[exprs.size()];
       for (int i = 0; i < terms.length; i++)
       {
-        terms[i] = translateRowExpr(exprs.get(i), constructor, t, false, null, "");
+        terms[i] = translateRowExpr(exprs.get(i), constructor, t, "");
       }
       Term body = tm.mkTuple(terms);
       Term f = defineFun(new Term[] {t}, functionType, body, "f", true);
@@ -856,12 +846,8 @@ public abstract class Cvc5AbstractTranslator
 
   protected abstract Kind getMapKind();
 
-  protected Term translateRowExpr(RexNode expr,
-      DatatypeConstructor constructor,
-      Term t,
-      boolean isFilter,
-      List<Term> nullConstraints,
-      String operator)
+  protected Term translateRowExpr(
+      RexNode expr, DatatypeConstructor constructor, Term t, String operator)
   {
     if (expr instanceof RexInputRef)
     {
@@ -871,27 +857,12 @@ public abstract class Cvc5AbstractTranslator
 
       Term selectorTerm = constructor.getSelector(index).getTerm();
       Term selectedTerm = tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {selectorTerm, t});
-      // if the type is nullable, extract the value
-      if (isNullable)
-      {
-        if (isFilter && !operator.equals("IS NULL") && !operator.equals("IS NOT NULL"))
-        {
-          nullConstraints.add(tm.mkNullableIsSome(selectedTerm));
-          selectedTerm = tm.mkNullableVal(selectedTerm);
-        }
-        else if (!selectedTerm.getSort().isNullable())
-        {
-          // for select clauses, we always return nullables
-          // when isNullable holds
-          selectedTerm = tm.mkNullableSome(selectedTerm);
-        }
-      }
       Term simplifiedTerm = solver.simplify(selectedTerm);
       return simplifiedTerm;
     }
     else if (expr instanceof RexLiteral)
     {
-      return translate(expr, isFilter);
+      return translate(expr);
     }
     else if (expr instanceof RexCall)
     {
@@ -899,11 +870,16 @@ public abstract class Cvc5AbstractTranslator
       Kind k;
       if (call.op.toString().equals("CAST"))
       {
-        Term ret = translateRowExpr(
-            call.getOperands().get(0), constructor, t, isFilter, nullConstraints, "");
+        Term ret = translateRowExpr(call.getOperands().get(0), constructor, t, "");
         return ret;
       }
-      Term[] argTerms = getArgTerms(constructor, t, call, isFilter, nullConstraints);
+      Term[] argTerms = getArgTerms(constructor, t, call);
+      boolean needsLifting =
+          Arrays.asList(argTerms).stream().anyMatch(a -> a.getSort().isNullable());
+      if (needsLifting)
+      {
+        argTerms = getNullableTerms(needsLifting, argTerms);
+      }
       switch (call.op.toString())
       {
         case "=": k = Kind.EQUAL; break;
@@ -954,8 +930,8 @@ public abstract class Cvc5AbstractTranslator
         }
         case "*": k = Kind.MULT; break;
         case "/": k = Kind.DIVISION; break;
-        case "AND": k = Kind.AND; break;
-        case "OR": k = Kind.OR; break;
+        case "AND": return translateAnd(needsLifting, argTerms);
+        case "OR": return translateOr(needsLifting, argTerms);
         case "NOT": k = Kind.NOT; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
         case "SUBSTRING":
@@ -990,51 +966,24 @@ public abstract class Cvc5AbstractTranslator
           argTerms = arguments;
           break;
         }
+        
         case "||": k = Kind.STRING_CONCAT; break;
         case "CASE":
+        {
           k = Kind.ITE;
-          {
-            // condition part should not be nullable
-            if (argTerms[0].getSort().isNullable())
-            {
-              argTerms[0] = tm.mkNullableVal(argTerms[0]);
-            }
-            // either then part or else part is nullable
-            if (argTerms[1].getSort().isNullable() || argTerms[2].getSort().isNullable())
-            {
-              if (!argTerms[1].getSort().isNullable())
-              {
-                argTerms[1] = tm.mkNullableSome(argTerms[1]);
-              }
-              if (!argTerms[2].getSort().isNullable())
-              {
-                argTerms[2] = tm.mkNullableSome(argTerms[2]);
-              }
-            }
-            return tm.mkTerm(k, argTerms);
-          }
-        case "IS TRUE": return argTerms[0];
+          // condition part should not be nullable
+          argTerms[0] = mkIsSomeValIfNullable(argTerms[0]);
+          return tm.mkTerm(k, argTerms);
+        }
+        case "IS TRUE": return mkIsSomeValIfNullable(argTerms[0]);
         case "IS NOT TRUE":
         {
-          Sort sort = argTerms[0].getSort();
-          if (sort.isNullable())
-          {
-            Term isSome = tm.mkNullableIsSome(argTerms[0]);
-            if (isFilter)
-            {
-              nullConstraints.add(isSome);
-            }
-            else
-            {
-              Term val = tm.mkNullableVal(argTerms[0]);
-              argTerms[0] = isSome.andTerm(val);
-            }
-          }
-          return argTerms[0].notTerm();
+          Term term = mkIsSomeValIfNullable(argTerms[0]);
+          return term.notTerm();
         }
         case "IS NULL":
         {
-          argTerms = getArgTerms(constructor, t, call, false, null);
+          argTerms = getArgTerms(constructor, t, call);
           if (argTerms[0].getSort().isNullable())
           {
             return tm.mkNullableIsNull(argTerms[0]);
@@ -1043,7 +992,7 @@ public abstract class Cvc5AbstractTranslator
         }
         case "IS NOT NULL":
         {
-          argTerms = getArgTerms(constructor, t, call, false, null);
+          argTerms = getArgTerms(constructor, t, call);
           if (argTerms[0].getSort().isNullable())
           {
             return tm.mkNullableIsSome(argTerms[0]);
@@ -1057,15 +1006,9 @@ public abstract class Cvc5AbstractTranslator
           System.exit(1);
         }
       }
-      boolean needsLifting =
-          Arrays.asList(argTerms).stream().anyMatch(a -> a.getSort().isNullable());
-      if (needsLifting || (isNullable && !isFilter))
+
+      if (needsLifting)
       {
-        argTerms = Arrays.asList(argTerms)
-                       .stream()
-                       .map(a -> a.getSort().isNullable() ? a : tm.mkNullableSome(a))
-                       .collect(Collectors.toList())
-                       .toArray(new Term[0]);
         return tm.mkNullableLift(k, argTerms);
       }
       return tm.mkTerm(k, argTerms);
@@ -1076,6 +1019,86 @@ public abstract class Cvc5AbstractTranslator
     }
   }
 
+  private Term translateAnd(boolean needsLifting, Term[] argTerms)
+  {
+    if (needsLifting)
+    {
+      Term someFalse = tm.mkNullableSome(falseTerm);
+      Term fstIsSome = tm.mkNullableIsSome(argTerms[0]);
+      Term sndIsSome = tm.mkNullableIsSome(argTerms[1]);
+      Term fstVal = tm.mkNullableVal(argTerms[0]);
+      Term sndVal = tm.mkNullableVal(argTerms[1]);
+      Term fstValFalse = fstVal.notTerm();
+      Term sndValFalse = sndVal.notTerm();
+      Term isFirstFalse = fstIsSome.andTerm(fstValFalse);
+      Term isSecondFalse = sndIsSome.andTerm(sndValFalse);
+      Term ite = tm.mkTerm(Kind.ITE,
+          isFirstFalse,
+          someFalse,
+          tm.mkTerm(Kind.ITE, isSecondFalse, someFalse, tm.mkNullableLift(Kind.AND, argTerms)));
+      return ite;
+    }
+    else
+    {
+      return tm.mkTerm(Kind.AND, argTerms);
+    }
+  }
+
+  private Term translateOr(boolean needsLifting, Term[] argTerms)
+  {
+    if (needsLifting)
+    {
+      Term someTrue = tm.mkNullableSome(trueTerm);
+      Term fstIsSome = tm.mkNullableIsSome(argTerms[0]);
+      Term sndIsSome = tm.mkNullableIsSome(argTerms[1]);
+      Term fstVal = tm.mkNullableVal(argTerms[0]);
+      Term sndVal = tm.mkNullableVal(argTerms[1]);
+      Term isFirstTrue = fstIsSome.andTerm(fstVal);
+      Term isSecondTrue = sndIsSome.andTerm(sndVal);
+      Term ite = tm.mkTerm(Kind.ITE,
+          isFirstTrue,
+          someTrue,
+          tm.mkTerm(Kind.ITE, isSecondTrue, someTrue, tm.mkNullableLift(Kind.OR, argTerms)));
+      return ite;
+    }
+    else
+    {
+      return tm.mkTerm(Kind.OR, argTerms);
+    }
+  }
+
+  private Term[] getNullableTerms(boolean needsLifting, Term[] argTerms)
+  {
+    if (needsLifting)
+    {
+      for (int i = 0; i < argTerms.length; i++)
+      {
+        if (!argTerms[i].getSort().isNullable())
+        {
+          System.out.println("argTerms[" + i + "].getSort() = " + argTerms[i].getSort());
+          System.out.println("argTerms[" + i + "] = " + argTerms[i]);
+          argTerms[i] = tm.mkNullableSome(argTerms[i]);
+        }
+      }
+    }
+    return argTerms;
+  }
+
+  private Term mkIsSomeValIfNullable(Term term)
+  {
+    Sort sort = term.getSort();
+    assert (
+        !(sort.isBoolean() || (sort.isNullable() && sort.getNullableElementSort().isBoolean())));
+
+    if (sort.isNullable())
+    {
+      Term isSome = tm.mkNullableIsSome(term);
+      Term val = tm.mkNullableVal(term);
+      term = isSome.andTerm(val);
+    }
+    return term;
+  }
+
   private void swap(Term[] argTerms, int i, int j)
   {
     Term temp = argTerms[i];
@@ -1083,23 +1106,18 @@ public abstract class Cvc5AbstractTranslator
     argTerms[j] = temp;
   }
 
-  protected Term[] getArgTerms(DatatypeConstructor constructor,
-      Term t,
-      RexCall call,
-      boolean isFilter,
-      List<Term> nullConstraints)
+  protected Term[] getArgTerms(DatatypeConstructor constructor, Term t, RexCall call)
   {
     List<RexNode> operands = call.getOperands();
     Term[] argTerms = new Term[operands.size()];
     for (int i = 0; i < operands.size(); i++)
     {
-      argTerms[i] = translateRowExpr(
-          operands.get(i), constructor, t, isFilter, nullConstraints, call.op.toString());
+      argTerms[i] = translateRowExpr(operands.get(i), constructor, t, call.op.toString());
     }
     return argTerms;
   }
 
-  protected Term translate(RexNode expr, boolean isFilter)
+  protected Term translate(RexNode expr)
   {
     RexLiteral literal = (RexLiteral) expr;
     String typeString = literal.getType().toString();
@@ -1111,7 +1129,7 @@ public abstract class Cvc5AbstractTranslator
       }
       int integer = RexLiteral.intValue(literal);
       Term ret = tm.mkInteger(integer);
-      if (isNullable && !isFilter)
+      if (isNullable)
       {
         ret = tm.mkNullableSome(ret);
       }
@@ -1125,7 +1143,7 @@ public abstract class Cvc5AbstractTranslator
       }
       String string = RexLiteral.stringValue(literal);
       Term ret = tm.mkString(string);
-      if (isNullable && !isFilter)
+      if (isNullable)
       {
         ret = tm.mkNullableSome(ret);
       }
@@ -1139,7 +1157,7 @@ public abstract class Cvc5AbstractTranslator
       }
       boolean value = RexLiteral.booleanValue(literal);
       Term ret = tm.mkBoolean(value);
-      if (isNullable && !isFilter)
+      if (isNullable)
       {
         ret = tm.mkNullableSome(ret);
       }

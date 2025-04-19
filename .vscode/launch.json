@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Cvc5Test",
+            "request": "launch",
+            "mainClass": "SimpleQueryTests.Cvc5Test",
+            "projectName": "equitas",
+            "vmArgs": "-Djava.library.path=/home/mudathir/all/cvc5/mudathir/build/install/lib:/home/mudathir/z3/build"
+        },
+        {
+            "type": "java",
             "name": "Cvc5Analysis",
             "request": "launch",
             "mainClass": "SimpleQueryTests.Cvc5Analysis",

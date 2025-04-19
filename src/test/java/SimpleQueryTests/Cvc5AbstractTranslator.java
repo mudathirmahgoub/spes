@@ -430,7 +430,7 @@ public abstract class Cvc5AbstractTranslator
     List<AggregateCall> calls = aggregate.getAggCallList();
     // construct a lambda function that handles all aggregate functions
     Sort xTupleSort = getElementSort(child.getSort());
-    Term x = solver.mkVar(xTupleSort, "x");
+    Term x = tm.mkVar(xTupleSort, "x");
     String name = String.join("_", calls.stream().map(s -> s.getAggregation().getName()).toList())
                       .toLowerCase();
     Sort yTupleSort = getSort(aggregate.getRowType());

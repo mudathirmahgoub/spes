@@ -13,10 +13,12 @@ public class Cvc5Test
     Term xList = tm.mkTerm(Kind.VARIABLE_LIST, new Term[] {x});
     Term gt = tm.mkTerm(Kind.GT, x, tm.mkInteger(1));
     Term witness = tm.mkTerm(Kind.WITNESS, xList, gt);         
-    Term y = tm.mkVar(tm.getIntegerSort(), "y");
+    Term y = tm.mkConst(tm.getIntegerSort(), "y");
     Term equal = y.eqTerm(witness);
     solver.assertFormula(equal);
     Result result = solver.checkSat();
     System.out.println(result);
+    System.out.println(solver.getModel(new Sort[]{}, new Term[]{y}));
+    System.out.println(solver.getValue(y));
   }
 }

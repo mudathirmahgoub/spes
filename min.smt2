@@ -8,33 +8,64 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+;; (set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
-(declare-const q1 (Set (Tuple (Nullable String) (Nullable Int))))
-(declare-const q2 (Set (Tuple (Nullable String) (Nullable Int))))
-(define-fun leq ((x (Tuple (Nullable String) (Nullable Int))) (y (Tuple (Nullable String) (Nullable Int)))) Bool
-  (let ((x1 ((_ tuple.select 1) x)) (y1 ((_ tuple.select 1) y)))
-      (ite 
-        (and (nullable.is_null x1) (nullable.is_null y1))
-        true 
-        (ite 
-          (nullable.is_null x1)
-          false          
-          (<= (nullable.val x1) (nullable.val y1))))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String))))
+(declare-const q1 (Set (Tuple (Nullable String) (Nullable Int)  (Nullable Int))))
+(declare-const q2 (Set (Tuple (Nullable String) (Nullable Int)  (Nullable Int))))
+(define-fun leq ((x (Nullable Int)) (y (Nullable Int))) Bool
+  (ite
+    (and (nullable.is_null x) (nullable.is_null y))
+    true
+    (ite
+      (nullable.is_null x)
+      false
+      (<= (nullable.val x) (nullable.val y)))))
+
+(define-fun null () (Tuple (Nullable String) (Nullable Int))
+  (tuple (as nullable.null (Nullable String)) (as nullable.null (Nullable Int))))
+
+(assert 
+(= 
+  q1 
+  (set.map 
+    (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+      (let (
+            (t (ite (set.is_empty s) null (set.choose s))) 
+            (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+            (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+          )
+       (tuple ((_ tuple.select 0) t ) min max))) 
+    ((_ rel.group 0) ((_ rel.project 1 0)(set.union EMP EMP)))    
+  )))
+
+(assert 
+(= 
+  q2   
+  (set.union 
+    (set.map 
+      (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+        (let (
+              (t (ite (set.is_empty s) null (set.choose s))) 
+              (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+              (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+            )
+         (tuple ((_ tuple.select 0) t ) min max))) 
+      ((_ rel.group 0) ((_ rel.project 1 0) EMP))) 
+    (set.map 
+      (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+        (let (
+              (t (ite (set.is_empty s) null (set.choose s))) 
+              (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+              (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+            )
+         (tuple ((_ tuple.select 0) t ) min max))) 
+      ((_ rel.group 0) ((_ rel.project 1 0) EMP)))    
+  )
+))
 
 
-(define-fun witness ((x Int)) Int
-  (ite (> x 0) x 1))
+(assert (distinct q1 q2))
 
-(define-fun min ((s (Relation (Nullable String) (Nullable Int)))) (Tuple (Nullable String) (Nullable Int))
-  (ite 
-    (= s (as set.empty (Relation (Nullable String) (Nullable Int))))
-    (tuple (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)))
-    (witness5 ((x (Tuple (Nullable String) (Nullable Int))))       
-        (and 
-          (set.member x s)
-          (set.all (lambda ((y (Tuple (Nullable String) (Nullable Int))))
-                   (leq x y)) s)))))
 (check-sat)

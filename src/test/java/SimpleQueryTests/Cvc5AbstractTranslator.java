@@ -81,7 +81,7 @@ public abstract class Cvc5AbstractTranslator
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");
-    setOption("tlimit-per", "20000");
+    setOption("tlimit-per", "10000");
     setOption("strings-exp", "true");
     // setOption("simplification", "none");
     zero = tm.mkInteger(0);

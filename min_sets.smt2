@@ -8,7 +8,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -22,7 +22,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 148 ms.
+; duration: 39 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyFilterProjectUnion
@@ -34,7 +34,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -46,7 +46,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 30) (nullable.some 3))))))
 (check-sat)
 ;answer: unsat
-; duration: 15 ms.
+; duration: 14 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullNull
@@ -58,7 +58,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -68,14 +68,24 @@
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_465 Bool) (BOUND_VARIABLE_466 Bool) (BOUND_VARIABLE_467 Bool) (BOUND_VARIABLE_468 Bool)) (and BOUND_VARIABLE_465 BOUND_VARIABLE_466 BOUND_VARIABLE_467 BOUND_VARIABLE_468)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (= BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_465 Bool) (BOUND_VARIABLE_466 Bool) (BOUND_VARIABLE_467 Bool) (BOUND_VARIABLE_468 Bool)) (and BOUND_VARIABLE_465 BOUND_VARIABLE_466 BOUND_VARIABLE_467 BOUND_VARIABLE_468)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_441 Int) (BOUND_VARIABLE_442 Int)) (= BOUND_VARIABLE_441 BOUND_VARIABLE_442)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (= BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.some (nullable.is_null ((_ tuple.select 3) t)))) (not (nullable.val (nullable.some (nullable.is_null ((_ tuple.select 3) t)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_514 Bool) (BOUND_VARIABLE_515 Bool) (BOUND_VARIABLE_516 Bool)) (and BOUND_VARIABLE_514 BOUND_VARIABLE_515 BOUND_VARIABLE_516)) (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_499 Int) (BOUND_VARIABLE_500 Int)) (= BOUND_VARIABLE_499 BOUND_VARIABLE_500)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.some (nullable.is_null ((_ tuple.select 3) t)))) (not (nullable.val (nullable.some (nullable.is_null ((_ tuple.select 3) t)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_514 Bool) (BOUND_VARIABLE_515 Bool) (BOUND_VARIABLE_516 Bool)) (and BOUND_VARIABLE_514 BOUND_VARIABLE_515 BOUND_VARIABLE_516)) (nullable.lift (lambda ((BOUND_VARIABLE_490 Int) (BOUND_VARIABLE_491 Int)) (= BOUND_VARIABLE_490 BOUND_VARIABLE_491)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_499 Int) (BOUND_VARIABLE_500 Int)) (= BOUND_VARIABLE_499 BOUND_VARIABLE_500)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_464 Bool) (BOUND_VARIABLE_465 Bool) (BOUND_VARIABLE_466 Bool) (BOUND_VARIABLE_467 Bool)) (and BOUND_VARIABLE_464 BOUND_VARIABLE_465 BOUND_VARIABLE_466 BOUND_VARIABLE_467)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (= BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_464 Bool) (BOUND_VARIABLE_465 Bool) (BOUND_VARIABLE_466 Bool) (BOUND_VARIABLE_467 Bool)) (and BOUND_VARIABLE_464 BOUND_VARIABLE_465 BOUND_VARIABLE_466 BOUND_VARIABLE_467)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (= BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.some (nullable.is_null ((_ tuple.select 3) t)))) (not (nullable.val (nullable.some (nullable.is_null ((_ tuple.select 3) t)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_513 Bool) (BOUND_VARIABLE_514 Bool) (BOUND_VARIABLE_515 Bool)) (and BOUND_VARIABLE_513 BOUND_VARIABLE_514 BOUND_VARIABLE_515)) (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_498 Int) (BOUND_VARIABLE_499 Int)) (= BOUND_VARIABLE_498 BOUND_VARIABLE_499)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.some (nullable.is_null ((_ tuple.select 3) t)))) (not (nullable.val (nullable.some (nullable.is_null ((_ tuple.select 3) t)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_513 Bool) (BOUND_VARIABLE_514 Bool) (BOUND_VARIABLE_515 Bool)) (and BOUND_VARIABLE_513 BOUND_VARIABLE_514 BOUND_VARIABLE_515)) (nullable.lift (lambda ((BOUND_VARIABLE_489 Int) (BOUND_VARIABLE_490 Int)) (= BOUND_VARIABLE_489 BOUND_VARIABLE_490)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_498 Int) (BOUND_VARIABLE_499 Int)) (= BOUND_VARIABLE_498 BOUND_VARIABLE_499)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) ((_ tuple.select 1) t) ((_ tuple.select 2) t) (as nullable.null (Nullable Int)) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) (nullable.some 7) ((_ tuple.select 8) t)))))
 (assert (= q1 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP))))
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+;answer: sat
+; duration: 73 ms.
+(get-model)
+; (
+; (define-fun EMP () (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (set.singleton (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (as nullable.null (Nullable Int)) (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 7) (nullable.some 2))))
+; )
+; q1
+(get-value (q1))
+; (set.singleton (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (as nullable.null (Nullable Int)) (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 7) (nullable.some 2)))
+; q2
+(get-value (q2))
+; (set.singleton (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (as nullable.null (Nullable Int)) (nullable.some 0) (nullable.some (- 1)) (nullable.some 1) (nullable.some 7) (nullable.some 2)))
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProjectFilter
@@ -87,7 +97,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -95,13 +105,13 @@
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_406 Int) (BOUND_VARIABLE_407 Int)) (< BOUND_VARIABLE_406 BOUND_VARIABLE_407)) (nullable.lift (lambda ((BOUND_VARIABLE_396 Int) (BOUND_VARIABLE_397 Int)) (- BOUND_VARIABLE_396 BOUND_VARIABLE_397)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 21))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_406 Int) (BOUND_VARIABLE_407 Int)) (< BOUND_VARIABLE_406 BOUND_VARIABLE_407)) (nullable.lift (lambda ((BOUND_VARIABLE_396 Int) (BOUND_VARIABLE_397 Int)) (- BOUND_VARIABLE_396 BOUND_VARIABLE_397)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 21)))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_456 Int) (BOUND_VARIABLE_457 Int)) (+ BOUND_VARIABLE_456 BOUND_VARIABLE_457)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_405 Int) (BOUND_VARIABLE_406 Int)) (< BOUND_VARIABLE_405 BOUND_VARIABLE_406)) (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (- BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 21))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_405 Int) (BOUND_VARIABLE_406 Int)) (< BOUND_VARIABLE_405 BOUND_VARIABLE_406)) (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (- BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 21)))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_455 Int) (BOUND_VARIABLE_456 Int)) (+ BOUND_VARIABLE_455 BOUND_VARIABLE_456)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
 (assert (= q1 (set.map f1 (set.filter p0 (set.union (set.union (set.singleton (tuple (nullable.some 10) (nullable.some 1))) (set.singleton (tuple (nullable.some 30) (nullable.some 7)))) (set.singleton (tuple (nullable.some 20) (nullable.some 3))))))))
 (assert (= q2 ((_ rel.project 0 1 2) (set.union (set.singleton (tuple (nullable.some 11) (nullable.some 1) (nullable.some 10))) (set.singleton (tuple (nullable.some 23) (nullable.some 3) (nullable.some 20)))))))
 (check-sat)
 ;answer: unsat
-; duration: 105 ms.
+; duration: 13 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinus
@@ -113,7 +123,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -136,7 +146,7 @@
 (assert (= q2 (set.minus (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 331 ms.
+; duration: 206 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus
@@ -148,7 +158,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -172,7 +182,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -184,7 +194,7 @@
 (assert (= q2 ((_ rel.project 0) (set.union (set.singleton (tuple (nullable.some 11))) (set.singleton (tuple (nullable.some 23)))))))
 (check-sat)
 ;answer: unsat
-; duration: 7 ms.
+; duration: 6 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderFilter
@@ -196,7 +206,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String)) Bool))
@@ -208,7 +218,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 10) (nullable.some "x"))))))
 (check-sat)
 ;answer: unsat
-; duration: 9 ms.
+; duration: 8 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup
@@ -220,7 +230,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -228,12 +238,12 @@
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_434 Bool) (BOUND_VARIABLE_435 Bool)) (and BOUND_VARIABLE_434 BOUND_VARIABLE_435)) (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_434 Bool) (BOUND_VARIABLE_435 Bool)) (and BOUND_VARIABLE_434 BOUND_VARIABLE_435)) (nullable.lift (lambda ((BOUND_VARIABLE_395 Int) (BOUND_VARIABLE_396 Int)) (= BOUND_VARIABLE_395 BOUND_VARIABLE_396)) ((_ tuple.select 0) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_419 Int) (BOUND_VARIABLE_420 Int)) (= BOUND_VARIABLE_419 BOUND_VARIABLE_420)) ((_ tuple.select 0) t) (nullable.some 8))))))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_433 Bool) (BOUND_VARIABLE_434 Bool)) (and BOUND_VARIABLE_433 BOUND_VARIABLE_434)) (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_433 Bool) (BOUND_VARIABLE_434 Bool)) (and BOUND_VARIABLE_433 BOUND_VARIABLE_434)) (nullable.lift (lambda ((BOUND_VARIABLE_394 Int) (BOUND_VARIABLE_395 Int)) (= BOUND_VARIABLE_394 BOUND_VARIABLE_395)) ((_ tuple.select 0) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_418 Int) (BOUND_VARIABLE_419 Int)) (= BOUND_VARIABLE_418 BOUND_VARIABLE_419)) ((_ tuple.select 0) t) (nullable.some 8))))))))))
 (assert (= q1 ((_ rel.project 0) (set.filter p0 DEPT))))
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 24 ms.
+; duration: 18 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoin
@@ -245,11 +255,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -261,7 +271,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p1 (rel.product EMP DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 62 ms.
+; duration: 44 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion
@@ -273,7 +283,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -290,7 +300,7 @@
 (assert (= q2 (set.map f2 (set.union ((_ rel.project 7 2) EMP) ((_ rel.project 7 2) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 34 ms.
+; duration: 26 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNot
@@ -302,7 +312,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -321,7 +331,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p3 (set.map f2 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 166 ms.
+; duration: 118 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testWhereInCorrelated
@@ -333,11 +343,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String)) Bool))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -356,8 +366,8 @@
 (assert (= q1 ((_ rel.project 6) (set.filter p2 (rel.product EMP ((_ rel.project 0 1) ((_ rel.project 0 2) (set.filter p1 (set.map f0 DEPT)))))))))
 (assert (= q2 ((_ rel.project 6) (set.filter p5 (rel.product (set.map f3 EMP) (set.map f4 DEPT))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10022 ms.
+;answer: unsat
+; duration: 372 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsRequiresExecutor
@@ -369,7 +379,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -383,7 +393,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.filter p1 (set.singleton (tuple (nullable.some 1) (nullable.some 2)))))))
 (check-sat)
 ;answer: unsat
-; duration: 63 ms.
+; duration: 13 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsProjectNullable*
@@ -395,7 +405,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -412,7 +422,7 @@
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 53 ms.
+; duration: 38 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePreventProjectPullUp
@@ -424,7 +434,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -437,17 +447,17 @@
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const f5 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_507 Int) (BOUND_VARIABLE_508 Int)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_507 Int) (BOUND_VARIABLE_508 Int)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_506 Int) (BOUND_VARIABLE_507 Int)) (= BOUND_VARIABLE_506 BOUND_VARIABLE_507)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_506 Int) (BOUND_VARIABLE_507 Int)) (= BOUND_VARIABLE_506 BOUND_VARIABLE_507)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_533 Int) (BOUND_VARIABLE_534 Int)) (> BOUND_VARIABLE_533 BOUND_VARIABLE_534)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_533 Int) (BOUND_VARIABLE_534 Int)) (> BOUND_VARIABLE_533 BOUND_VARIABLE_534)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_532 Int) (BOUND_VARIABLE_533 Int)) (> BOUND_VARIABLE_532 BOUND_VARIABLE_533)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_532 Int) (BOUND_VARIABLE_533 Int)) (> BOUND_VARIABLE_532 BOUND_VARIABLE_533)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_551 Int) (BOUND_VARIABLE_552 Int)) (= BOUND_VARIABLE_551 BOUND_VARIABLE_552)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_551 Int) (BOUND_VARIABLE_552 Int)) (= BOUND_VARIABLE_551 BOUND_VARIABLE_552)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product ((_ rel.project 5) (set.filter p0 EMP)) EMP)))))
 (assert (= q2 (set.map f5 (set.filter p4 (rel.product ((_ rel.project 5) (set.filter p3 EMP)) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10013 ms.
+;answer: unsat
+; duration: 388 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin3way
@@ -459,7 +469,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -476,21 +486,21 @@
 (declare-const p8 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_630 Int) (BOUND_VARIABLE_631 Int)) (= BOUND_VARIABLE_630 BOUND_VARIABLE_631)) ((_ tuple.select 16) t) ((_ tuple.select 25) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_630 Int) (BOUND_VARIABLE_631 Int)) (= BOUND_VARIABLE_630 BOUND_VARIABLE_631)) ((_ tuple.select 16) t) ((_ tuple.select 25) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_629 Int) (BOUND_VARIABLE_630 Int)) (= BOUND_VARIABLE_629 BOUND_VARIABLE_630)) ((_ tuple.select 16) t) ((_ tuple.select 25) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_629 Int) (BOUND_VARIABLE_630 Int)) (= BOUND_VARIABLE_629 BOUND_VARIABLE_630)) ((_ tuple.select 16) t) ((_ tuple.select 25) t)))))))
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_704 Int) (BOUND_VARIABLE_705 Int)) (= BOUND_VARIABLE_704 BOUND_VARIABLE_705)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_704 Int) (BOUND_VARIABLE_705 Int)) (= BOUND_VARIABLE_704 BOUND_VARIABLE_705)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_720 Int) (BOUND_VARIABLE_721 Int)) (> BOUND_VARIABLE_720 BOUND_VARIABLE_721)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_720 Int) (BOUND_VARIABLE_721 Int)) (> BOUND_VARIABLE_720 BOUND_VARIABLE_721)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_739 Int) (BOUND_VARIABLE_740 Int)) (= BOUND_VARIABLE_739 BOUND_VARIABLE_740)) ((_ tuple.select 16) t) ((_ tuple.select 25) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_739 Int) (BOUND_VARIABLE_740 Int)) (= BOUND_VARIABLE_739 BOUND_VARIABLE_740)) ((_ tuple.select 16) t) ((_ tuple.select 25) t)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_667 Int) (BOUND_VARIABLE_668 Int)) (> BOUND_VARIABLE_667 BOUND_VARIABLE_668)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_667 Int) (BOUND_VARIABLE_668 Int)) (> BOUND_VARIABLE_667 BOUND_VARIABLE_668)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_684 Int) (BOUND_VARIABLE_685 Int)) (> BOUND_VARIABLE_684 BOUND_VARIABLE_685)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_684 Int) (BOUND_VARIABLE_685 Int)) (> BOUND_VARIABLE_684 BOUND_VARIABLE_685)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_703 Int) (BOUND_VARIABLE_704 Int)) (= BOUND_VARIABLE_703 BOUND_VARIABLE_704)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_703 Int) (BOUND_VARIABLE_704 Int)) (= BOUND_VARIABLE_703 BOUND_VARIABLE_704)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_719 Int) (BOUND_VARIABLE_720 Int)) (> BOUND_VARIABLE_719 BOUND_VARIABLE_720)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_719 Int) (BOUND_VARIABLE_720 Int)) (> BOUND_VARIABLE_719 BOUND_VARIABLE_720)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_738 Int) (BOUND_VARIABLE_739 Int)) (= BOUND_VARIABLE_738 BOUND_VARIABLE_739)) ((_ tuple.select 16) t) ((_ tuple.select 25) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_738 Int) (BOUND_VARIABLE_739 Int)) (= BOUND_VARIABLE_738 BOUND_VARIABLE_739)) ((_ tuple.select 16) t) ((_ tuple.select 25) t)))))))
 (assert (= f9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f3 (set.filter p2 (rel.product (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP)) EMP)))))
 (assert (= q2 (set.map f9 (set.filter p8 (rel.product (set.filter p6 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p7 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10059 ms.
+;answer: unsat
+; duration: 965 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRight
@@ -502,7 +512,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -520,7 +530,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p2 (rel.product (set.filter p1 (rel.product EMP DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 525 ms.
+; duration: 194 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceExpressionsNot
@@ -532,7 +542,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Bool)) Bool))
@@ -546,7 +556,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 (set.union (set.singleton (tuple (nullable.some false))) (set.singleton (tuple (nullable.some true))))))))
 (check-sat)
 ;answer: unsat
-; duration: 16 ms.
+; duration: 10 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceProject
@@ -558,7 +568,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -572,18 +582,18 @@
 (declare-const p5 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_557 Int) (BOUND_VARIABLE_558 Int)) (> BOUND_VARIABLE_557 BOUND_VARIABLE_558)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_557 Int) (BOUND_VARIABLE_558 Int)) (> BOUND_VARIABLE_557 BOUND_VARIABLE_558)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_574 Int) (BOUND_VARIABLE_575 Int)) (> BOUND_VARIABLE_574 BOUND_VARIABLE_575)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_574 Int) (BOUND_VARIABLE_575 Int)) (> BOUND_VARIABLE_574 BOUND_VARIABLE_575)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (= BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (= BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (> BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (> BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_592 Int) (BOUND_VARIABLE_593 Int)) (= BOUND_VARIABLE_592 BOUND_VARIABLE_593)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_592 Int) (BOUND_VARIABLE_593 Int)) (= BOUND_VARIABLE_592 BOUND_VARIABLE_593)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP)))))
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10022 ms.
+;answer: unsat
+; duration: 360 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup2
@@ -595,7 +605,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -605,14 +615,14 @@
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_473 Bool) (BOUND_VARIABLE_474 Bool) (BOUND_VARIABLE_475 Bool) (BOUND_VARIABLE_476 Bool) (BOUND_VARIABLE_477 Bool)) (and BOUND_VARIABLE_473 BOUND_VARIABLE_474 BOUND_VARIABLE_475 BOUND_VARIABLE_476 BOUND_VARIABLE_477)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8)) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (= BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_457 Int) (BOUND_VARIABLE_458 Int)) (= BOUND_VARIABLE_457 BOUND_VARIABLE_458)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_473 Bool) (BOUND_VARIABLE_474 Bool) (BOUND_VARIABLE_475 Bool) (BOUND_VARIABLE_476 Bool) (BOUND_VARIABLE_477 Bool)) (and BOUND_VARIABLE_473 BOUND_VARIABLE_474 BOUND_VARIABLE_475 BOUND_VARIABLE_476 BOUND_VARIABLE_477)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 8)) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (= BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_457 Int) (BOUND_VARIABLE_458 Int)) (= BOUND_VARIABLE_457 BOUND_VARIABLE_458)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_472 Bool) (BOUND_VARIABLE_473 Bool) (BOUND_VARIABLE_474 Bool) (BOUND_VARIABLE_475 Bool) (BOUND_VARIABLE_476 Bool)) (and BOUND_VARIABLE_472 BOUND_VARIABLE_473 BOUND_VARIABLE_474 BOUND_VARIABLE_475 BOUND_VARIABLE_476)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (= BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_456 Int) (BOUND_VARIABLE_457 Int)) (= BOUND_VARIABLE_456 BOUND_VARIABLE_457)) ((_ tuple.select 0) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_472 Bool) (BOUND_VARIABLE_473 Bool) (BOUND_VARIABLE_474 Bool) (BOUND_VARIABLE_475 Bool) (BOUND_VARIABLE_476 Bool)) (and BOUND_VARIABLE_472 BOUND_VARIABLE_473 BOUND_VARIABLE_474 BOUND_VARIABLE_475 BOUND_VARIABLE_476)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 8)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (= BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 0) t) (nullable.some 10)) (nullable.some (nullable.is_null ((_ tuple.select 3) t))) (nullable.lift (lambda ((BOUND_VARIABLE_456 Int) (BOUND_VARIABLE_457 Int)) (= BOUND_VARIABLE_456 BOUND_VARIABLE_457)) ((_ tuple.select 0) t) (nullable.some 10))))))))))
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.some false)) (nullable.val (nullable.some false))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) ((_ tuple.select 1) t) ((_ tuple.select 2) t) (as nullable.null (Nullable Int)) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
 (assert (= q1 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP))))
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 114 ms.
+; duration: 39 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNull
@@ -624,7 +634,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -643,7 +653,7 @@
 (assert (= q2 (set.map f3 EMP)))
 (check-sat)
 ;answer: unsat
-; duration: 25 ms.
+; duration: 19 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegatedInverted
@@ -655,7 +665,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -668,7 +678,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 24 ms.
+; duration: 19 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
@@ -680,11 +690,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -702,7 +712,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p4 (rel.product (set.filter p3 (rel.product (set.filter p2 (rel.product (set.filter p1 (rel.product EMP DEPT)) EMP)) DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 4600 ms.
+; duration: 474 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testExtractJoinFilterRule
@@ -714,11 +724,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -734,7 +744,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 (rel.product EMP DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 109 ms.
+; duration: 56 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceFullOuterJoin
@@ -746,7 +756,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -766,18 +776,18 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_481 Int) (BOUND_VARIABLE_482 Int)) (= BOUND_VARIABLE_481 BOUND_VARIABLE_482)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_481 Int) (BOUND_VARIABLE_482 Int)) (= BOUND_VARIABLE_481 BOUND_VARIABLE_482)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= leftJoin1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))))))
 (assert (= rightJoin2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_584 Bool) (BOUND_VARIABLE_585 Bool)) (and BOUND_VARIABLE_584 BOUND_VARIABLE_585)) (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_584 Bool) (BOUND_VARIABLE_585 Bool)) (and BOUND_VARIABLE_584 BOUND_VARIABLE_585)) (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 16) t) (nullable.some 9))))))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_583 Bool) (BOUND_VARIABLE_584 Bool)) (and BOUND_VARIABLE_583 BOUND_VARIABLE_584)) (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_583 Bool) (BOUND_VARIABLE_584 Bool)) (and BOUND_VARIABLE_583 BOUND_VARIABLE_584)) (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_568 Int) (BOUND_VARIABLE_569 Int)) (> BOUND_VARIABLE_568 BOUND_VARIABLE_569)) ((_ tuple.select 16) t) (nullable.some 9))))))))))
 (assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_625 Int) (BOUND_VARIABLE_626 Int)) (= BOUND_VARIABLE_625 BOUND_VARIABLE_626)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_625 Int) (BOUND_VARIABLE_626 Int)) (= BOUND_VARIABLE_625 BOUND_VARIABLE_626)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_624 Int) (BOUND_VARIABLE_625 Int)) (= BOUND_VARIABLE_624 BOUND_VARIABLE_625)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_624 Int) (BOUND_VARIABLE_625 Int)) (= BOUND_VARIABLE_624 BOUND_VARIABLE_625)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= leftJoin6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))))))
 (assert (= rightJoin7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
-(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_700 Bool) (BOUND_VARIABLE_701 Bool)) (and BOUND_VARIABLE_700 BOUND_VARIABLE_701)) (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_700 Bool) (BOUND_VARIABLE_701 Bool)) (and BOUND_VARIABLE_700 BOUND_VARIABLE_701)) (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (> BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_686 Int) (BOUND_VARIABLE_687 Int)) (> BOUND_VARIABLE_686 BOUND_VARIABLE_687)) ((_ tuple.select 16) t) (nullable.some 9))))))))))
+(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_699 Bool) (BOUND_VARIABLE_700 Bool)) (and BOUND_VARIABLE_699 BOUND_VARIABLE_700)) (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_699 Bool) (BOUND_VARIABLE_700 Bool)) (and BOUND_VARIABLE_699 BOUND_VARIABLE_700)) (nullable.lift (lambda ((BOUND_VARIABLE_678 Int) (BOUND_VARIABLE_679 Int)) (> BOUND_VARIABLE_678 BOUND_VARIABLE_679)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_685 Int) (BOUND_VARIABLE_686 Int)) (> BOUND_VARIABLE_685 BOUND_VARIABLE_686)) ((_ tuple.select 16) t) (nullable.some 9))))))))))
 (assert (= f9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.union (set.map leftJoin1 (set.minus EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 (rel.product EMP EMP))))) (set.map rightJoin2 (set.minus EMP ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p0 (rel.product EMP EMP)))))) (set.filter p0 (rel.product EMP EMP)))))))
 (assert (= q2 (set.map f9 (set.filter p8 (set.union (set.union (set.map leftJoin6 (set.minus EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 (rel.product EMP EMP))))) (set.map rightJoin7 (set.minus EMP ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p5 (rel.product EMP EMP)))))) (set.filter p5 (rel.product EMP EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 785 ms.
+; duration: 585 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testDecorrelateTwoIn
@@ -789,7 +799,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -824,8 +834,8 @@
 (assert (= q1 ((_ rel.project 6) (set.filter p5 (rel.product (set.filter p2 (rel.product EMP ((_ rel.project 0 1) ((_ rel.project 0 2) (set.filter p1 (set.map f0 DEPT)))))) ((_ rel.project 0 1) ((_ rel.project 0 9) (set.filter p4 (set.map f3 EMP)))))))))
 (assert (= q2 ((_ rel.project 6) (set.filter p11 (rel.product (set.map f9 (set.filter p8 (rel.product (set.map f6 EMP) (set.map f7 DEPT)))) (set.map f10 EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10066 ms.
+;answer: unsat
+; duration: 1644 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeFilter
@@ -837,7 +847,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -854,7 +864,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p2 DEPT))))
 (check-sat)
 ;answer: unsat
-; duration: 161 ms.
+; duration: 88 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastSetOp
@@ -866,7 +876,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -877,7 +887,7 @@
 (assert (= q2 (set.union ((_ rel.project 6) EMP) ((_ rel.project 6) EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 22 ms.
+; duration: 19 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinusRightDeep
@@ -889,7 +899,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -912,7 +922,7 @@
 (assert (= q2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 256 ms.
+; duration: 110 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoin
@@ -924,11 +934,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -940,7 +950,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")))) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some ""))))))))
 (check-sat)
 ;answer: unsat
-; duration: 60 ms.
+; duration: 40 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNull
@@ -952,7 +962,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -965,7 +975,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 20 ms.
+; duration: 16 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin
@@ -977,7 +987,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -991,18 +1001,18 @@
 (declare-const p5 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_557 Int) (BOUND_VARIABLE_558 Int)) (> BOUND_VARIABLE_557 BOUND_VARIABLE_558)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_557 Int) (BOUND_VARIABLE_558 Int)) (> BOUND_VARIABLE_557 BOUND_VARIABLE_558)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_574 Int) (BOUND_VARIABLE_575 Int)) (> BOUND_VARIABLE_574 BOUND_VARIABLE_575)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_574 Int) (BOUND_VARIABLE_575 Int)) (> BOUND_VARIABLE_574 BOUND_VARIABLE_575)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (= BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (= BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (> BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (> BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_592 Int) (BOUND_VARIABLE_593 Int)) (= BOUND_VARIABLE_592 BOUND_VARIABLE_593)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_592 Int) (BOUND_VARIABLE_593 Int)) (= BOUND_VARIABLE_592 BOUND_VARIABLE_593)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)))))))
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10022 ms.
+;answer: unsat
+; duration: 360 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToRightOuter
@@ -1014,7 +1024,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -1043,8 +1053,8 @@
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.union (set.map leftJoin1 (set.minus DEPT ((_ rel.project 0 1) (set.filter p0 (rel.product DEPT EMP))))) (set.map rightJoin2 (set.minus EMP ((_ rel.project 2 3 4 5 6 7 8 9 10) (set.filter p0 (rel.product DEPT EMP)))))) (set.filter p0 (rel.product DEPT EMP)))))))
 (assert (= q2 (set.map f8 (set.union (set.map rightJoin7 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 2 3 4 5 6 7 8 9 10) (set.filter p6 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP))))))) (set.filter p6 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10121 ms.
+;answer: unsat
+; duration: 819 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegated
@@ -1056,7 +1066,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1069,7 +1079,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 70 ms.
+; duration: 32 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNullableCase
@@ -1081,7 +1091,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -1099,7 +1109,7 @@
 (assert (= q2 (set.map f3 (set.union (set.map leftJoin2 (set.minus (set.singleton (tuple (nullable.some 1))) ((_ rel.project 0) (rel.product (set.singleton (tuple (nullable.some 1))) (set.singleton (tuple (nullable.some 1))))))) (rel.product (set.singleton (tuple (nullable.some 1))) (set.singleton (tuple (nullable.some 1))))))))
 (check-sat)
 ;answer: unsat
-; duration: 9 ms.
+; duration: 7 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConstantEquiPredicate
@@ -1111,7 +1121,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1130,7 +1140,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 (rel.product EMP EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 58 ms.
+; duration: 48 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesToEmpty
@@ -1142,7 +1152,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1150,13 +1160,13 @@
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f1 (-> (Tuple (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_398 Int) (BOUND_VARIABLE_399 Int)) (< BOUND_VARIABLE_398 BOUND_VARIABLE_399)) (nullable.lift (lambda ((BOUND_VARIABLE_389 Int) (BOUND_VARIABLE_390 Int)) (- BOUND_VARIABLE_389 BOUND_VARIABLE_390)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 0))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_398 Int) (BOUND_VARIABLE_399 Int)) (< BOUND_VARIABLE_398 BOUND_VARIABLE_399)) (nullable.lift (lambda ((BOUND_VARIABLE_389 Int) (BOUND_VARIABLE_390 Int)) (- BOUND_VARIABLE_389 BOUND_VARIABLE_390)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 0)))))))
-(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (+ BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_397 Int) (BOUND_VARIABLE_398 Int)) (< BOUND_VARIABLE_397 BOUND_VARIABLE_398)) (nullable.lift (lambda ((BOUND_VARIABLE_388 Int) (BOUND_VARIABLE_389 Int)) (- BOUND_VARIABLE_388 BOUND_VARIABLE_389)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 0))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_397 Int) (BOUND_VARIABLE_398 Int)) (< BOUND_VARIABLE_397 BOUND_VARIABLE_398)) (nullable.lift (lambda ((BOUND_VARIABLE_388 Int) (BOUND_VARIABLE_389 Int)) (- BOUND_VARIABLE_388 BOUND_VARIABLE_389)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) (nullable.some 0)))))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_447 Int) (BOUND_VARIABLE_448 Int)) (+ BOUND_VARIABLE_447 BOUND_VARIABLE_448)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
 (assert (= q1 (set.map f1 (set.filter p0 (set.union (set.singleton (tuple (nullable.some 10) (nullable.some 1))) (set.singleton (tuple (nullable.some 30) (nullable.some 7))))))))
 (assert (= q2 ((_ rel.project 0 1 2) (set.minus ((_ rel.project 0 1 2) (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2) (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 11 ms.
+; duration: 8 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter
@@ -1168,7 +1178,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1187,7 +1197,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 ((_ rel.project 0 1 6 5 7) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10015 ms.
+; duration: 20036 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushFilterThroughSemiJoin
@@ -1199,11 +1209,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
@@ -1219,7 +1229,7 @@
 (assert (= q2 ((_ rel.project 0 1 2) (set.filter p3 (rel.product ((_ rel.project 0 1) (set.filter p2 DEPT)) ((_ rel.project 7) EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 470 ms.
+; duration: 280 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion3way
@@ -1231,7 +1241,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1249,22 +1259,22 @@
 (declare-const p9 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f4 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 10)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_487 Int) (BOUND_VARIABLE_488 Int)) (> BOUND_VARIABLE_487 BOUND_VARIABLE_488)) ((_ tuple.select 7) t) (nullable.some 1))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_487 Int) (BOUND_VARIABLE_488 Int)) (> BOUND_VARIABLE_487 BOUND_VARIABLE_488)) ((_ tuple.select 7) t) (nullable.some 1)))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_548 Int) (BOUND_VARIABLE_549 Int)) (= BOUND_VARIABLE_548 BOUND_VARIABLE_549)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_548 Int) (BOUND_VARIABLE_549 Int)) (= BOUND_VARIABLE_548 BOUND_VARIABLE_549)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 10)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_486 Int) (BOUND_VARIABLE_487 Int)) (> BOUND_VARIABLE_486 BOUND_VARIABLE_487)) ((_ tuple.select 7) t) (nullable.some 1))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_486 Int) (BOUND_VARIABLE_487 Int)) (> BOUND_VARIABLE_486 BOUND_VARIABLE_487)) ((_ tuple.select 7) t) (nullable.some 1)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_547 Int) (BOUND_VARIABLE_548 Int)) (= BOUND_VARIABLE_547 BOUND_VARIABLE_548)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_547 Int) (BOUND_VARIABLE_548 Int)) (= BOUND_VARIABLE_547 BOUND_VARIABLE_548)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_573 Int) (BOUND_VARIABLE_574 Int)) (> BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (> BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (> BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 10)))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_609 Int) (BOUND_VARIABLE_610 Int)) (> BOUND_VARIABLE_609 BOUND_VARIABLE_610)) ((_ tuple.select 7) t) (nullable.some 1))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_609 Int) (BOUND_VARIABLE_610 Int)) (> BOUND_VARIABLE_609 BOUND_VARIABLE_610)) ((_ tuple.select 7) t) (nullable.some 1)))))))
-(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_652 Bool) (BOUND_VARIABLE_653 Bool) (BOUND_VARIABLE_654 Bool)) (or BOUND_VARIABLE_652 BOUND_VARIABLE_653 BOUND_VARIABLE_654)) (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10)) (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (> BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 1)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_652 Bool) (BOUND_VARIABLE_653 Bool) (BOUND_VARIABLE_654 Bool)) (or BOUND_VARIABLE_652 BOUND_VARIABLE_653 BOUND_VARIABLE_654)) (nullable.lift (lambda ((BOUND_VARIABLE_627 Int) (BOUND_VARIABLE_628 Int)) (> BOUND_VARIABLE_627 BOUND_VARIABLE_628)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (> BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 10)) (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (> BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 1))))))))))
-(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_572 Int) (BOUND_VARIABLE_573 Int)) (> BOUND_VARIABLE_572 BOUND_VARIABLE_573)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_572 Int) (BOUND_VARIABLE_573 Int)) (> BOUND_VARIABLE_572 BOUND_VARIABLE_573)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (> BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (> BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 10)))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_608 Int) (BOUND_VARIABLE_609 Int)) (> BOUND_VARIABLE_608 BOUND_VARIABLE_609)) ((_ tuple.select 7) t) (nullable.some 1))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_608 Int) (BOUND_VARIABLE_609 Int)) (> BOUND_VARIABLE_608 BOUND_VARIABLE_609)) ((_ tuple.select 7) t) (nullable.some 1)))))))
+(assert (= p8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_651 Bool) (BOUND_VARIABLE_652 Bool) (BOUND_VARIABLE_653 Bool)) (or BOUND_VARIABLE_651 BOUND_VARIABLE_652 BOUND_VARIABLE_653)) (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10)) (nullable.lift (lambda ((BOUND_VARIABLE_638 Int) (BOUND_VARIABLE_639 Int)) (> BOUND_VARIABLE_638 BOUND_VARIABLE_639)) ((_ tuple.select 7) t) (nullable.some 1)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_651 Bool) (BOUND_VARIABLE_652 Bool) (BOUND_VARIABLE_653 Bool)) (or BOUND_VARIABLE_651 BOUND_VARIABLE_652 BOUND_VARIABLE_653)) (nullable.lift (lambda ((BOUND_VARIABLE_626 Int) (BOUND_VARIABLE_627 Int)) (> BOUND_VARIABLE_626 BOUND_VARIABLE_627)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (> BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) (nullable.some 10)) (nullable.lift (lambda ((BOUND_VARIABLE_638 Int) (BOUND_VARIABLE_639 Int)) (> BOUND_VARIABLE_638 BOUND_VARIABLE_639)) ((_ tuple.select 7) t) (nullable.some 1))))))))))
+(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_675 Int) (BOUND_VARIABLE_676 Int)) (= BOUND_VARIABLE_675 BOUND_VARIABLE_676)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_675 Int) (BOUND_VARIABLE_676 Int)) (= BOUND_VARIABLE_675 BOUND_VARIABLE_676)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f4 (set.filter p3 (rel.product (set.union ((_ rel.project 0) (set.union ((_ rel.project 7) (set.filter p0 EMP)) ((_ rel.project 7) (set.filter p1 EMP)))) ((_ rel.project 7) (set.filter p2 EMP))) EMP)))))
 (assert (= q2 (set.map f10 (set.filter p9 (rel.product (set.union ((_ rel.project 0) (set.union ((_ rel.project 7) (set.filter p5 EMP)) ((_ rel.project 7) (set.filter p6 EMP)))) ((_ rel.project 7) (set.filter p7 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p8 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10041 ms.
+;answer: unsat
+; duration: 551 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinRight
@@ -1276,7 +1286,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1299,8 +1309,8 @@
 (assert (= q1 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map rightJoin2 (set.minus DEPT ((_ rel.project 9 10) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))))
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map rightJoin5 (set.minus (set.map f3 DEPT) ((_ rel.project 9 10 11) (set.filter p4 (rel.product (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0))))) (set.map f3 DEPT)))))) (set.filter p4 (rel.product (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0))))) (set.map f3 DEPT)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10260 ms.
+;answer: unsat
+; duration: 250 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceLeftOuterJoin
@@ -1312,7 +1322,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1330,22 +1340,22 @@
 (declare-const leftJoin8 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f4 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_518 Int) (BOUND_VARIABLE_519 Int)) (= BOUND_VARIABLE_518 BOUND_VARIABLE_519)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= leftJoin2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 16) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 16) t) (nullable.some 9)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 16) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (> BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 16) t) (nullable.some 9)))))))
 (assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (> BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (> BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_614 Int) (BOUND_VARIABLE_615 Int)) (> BOUND_VARIABLE_614 BOUND_VARIABLE_615)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_614 Int) (BOUND_VARIABLE_615 Int)) (> BOUND_VARIABLE_614 BOUND_VARIABLE_615)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (> BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (> BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_613 Int) (BOUND_VARIABLE_614 Int)) (> BOUND_VARIABLE_613 BOUND_VARIABLE_614)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_613 Int) (BOUND_VARIABLE_614 Int)) (> BOUND_VARIABLE_613 BOUND_VARIABLE_614)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (= BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_632 Int) (BOUND_VARIABLE_633 Int)) (= BOUND_VARIABLE_632 BOUND_VARIABLE_633)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= leftJoin8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))))))
-(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 16) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 16) t) (nullable.some 9)))))))
+(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_667 Int) (BOUND_VARIABLE_668 Int)) (> BOUND_VARIABLE_667 BOUND_VARIABLE_668)) ((_ tuple.select 16) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_667 Int) (BOUND_VARIABLE_668 Int)) (> BOUND_VARIABLE_667 BOUND_VARIABLE_668)) ((_ tuple.select 16) t) (nullable.some 9)))))))
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.map leftJoin2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP))))) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP)))))))
 (assert (= q2 (set.map f10 (set.filter p9 (set.union (set.map leftJoin8 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP))))))) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10075 ms.
+;answer: unsat
+; duration: 1365 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants2
@@ -1357,7 +1367,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Bool))))
@@ -1371,7 +1381,7 @@
 (assert (= q2 (set.map f1 (set.singleton (tuple (nullable.some 0))))))
 (check-sat)
 ;answer: unsat
-; duration: 86 ms.
+; duration: 30 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnRight
@@ -1383,7 +1393,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1394,7 +1404,7 @@
 (assert (= q2 ((_ rel.project 6) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 2439 ms.
+; duration: 141 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToInner
@@ -1406,11 +1416,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -1435,8 +1445,8 @@
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.union (set.map leftJoin1 (set.minus DEPT ((_ rel.project 0 1) (set.filter p0 (rel.product DEPT EMP))))) (set.map rightJoin2 (set.minus EMP ((_ rel.project 2 3 4 5 6 7 8 9 10) (set.filter p0 (rel.product DEPT EMP)))))) (set.filter p0 (rel.product DEPT EMP)))))))
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10084 ms.
+;answer: unsat
+; duration: 865 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceOrCaseWhen
@@ -1448,7 +1458,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1463,7 +1473,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 190 ms.
+; duration: 133 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionAll
@@ -1475,7 +1485,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1498,7 +1508,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 537 ms.
+; duration: 403 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testLeftOuterJoinSimplificationToInner
@@ -1510,11 +1520,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f6 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -1536,7 +1546,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 1326 ms.
+; duration: 288 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus2
@@ -1548,7 +1558,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1562,7 +1572,7 @@
 (assert (= q2 (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 30) (nullable.some 3)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 40) (nullable.some 4)))))))
 (check-sat)
 ;answer: unsat
-; duration: 32 ms.
+; duration: 13 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants
@@ -1574,7 +1584,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1592,15 +1602,15 @@
 (assert (= f0 (lambda ((t (Tuple (Nullable Int) (Nullable String)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 0) t)))))
 (assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 6) t) ((_ tuple.select 5) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t) (nullable.lift (lambda ((BOUND_VARIABLE_520 Int) (BOUND_VARIABLE_521 Int)) (+ BOUND_VARIABLE_520 BOUND_VARIABLE_521)) ((_ tuple.select 7) t) (nullable.lift (lambda ((BOUND_VARIABLE_513 Int) (BOUND_VARIABLE_514 Int)) (- BOUND_VARIABLE_513 BOUND_VARIABLE_514)) (nullable.some 5) (nullable.some 5)))))))
 (assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (= BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 2) t) ((_ tuple.select 12) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (= BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 2) t) ((_ tuple.select 12) t)))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8)))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_718 Bool) (BOUND_VARIABLE_719 Bool) (BOUND_VARIABLE_720 Bool)) (and BOUND_VARIABLE_718 BOUND_VARIABLE_719 BOUND_VARIABLE_720)) (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8))) (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7))) (nullable.lift (lambda ((BOUND_VARIABLE_703 Int) (BOUND_VARIABLE_704 Int)) (= BOUND_VARIABLE_703 BOUND_VARIABLE_704)) ((_ tuple.select 0) t) (ite (and (nullable.is_some (nullable.some (nullable.is_some (nullable.some 2)))) (nullable.val (nullable.some (nullable.is_some (nullable.some 2))))) (nullable.some 2) (as nullable.null (Nullable Int)))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8)))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_718 Bool) (BOUND_VARIABLE_719 Bool) (BOUND_VARIABLE_720 Bool)) (and BOUND_VARIABLE_718 BOUND_VARIABLE_719 BOUND_VARIABLE_720)) (nullable.lift (lambda ((BOUND_VARIABLE_677 Int) (BOUND_VARIABLE_678 Int)) (= BOUND_VARIABLE_677 BOUND_VARIABLE_678)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_671 Int) (BOUND_VARIABLE_672 Int)) (+ BOUND_VARIABLE_671 BOUND_VARIABLE_672)) (nullable.some 7) (nullable.some 8))) (nullable.lift (lambda ((BOUND_VARIABLE_689 Int) (BOUND_VARIABLE_690 Int)) (= BOUND_VARIABLE_689 BOUND_VARIABLE_690)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_683 Int) (BOUND_VARIABLE_684 Int)) (+ BOUND_VARIABLE_683 BOUND_VARIABLE_684)) (nullable.some 8) (nullable.some 7))) (nullable.lift (lambda ((BOUND_VARIABLE_703 Int) (BOUND_VARIABLE_704 Int)) (= BOUND_VARIABLE_703 BOUND_VARIABLE_704)) ((_ tuple.select 0) t) (ite (and (nullable.is_some (nullable.some (nullable.is_some (nullable.some 2)))) (nullable.val (nullable.some (nullable.is_some (nullable.some 2))))) (nullable.some 2) (as nullable.null (Nullable Int))))))))))))
-(assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_765 Int) (BOUND_VARIABLE_766 Int)) (+ BOUND_VARIABLE_765 BOUND_VARIABLE_766)) (nullable.some 1) (nullable.some 2)) (nullable.lift (lambda ((BOUND_VARIABLE_782 Int) (BOUND_VARIABLE_783 Int)) (+ BOUND_VARIABLE_782 BOUND_VARIABLE_783)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_776 Int) (BOUND_VARIABLE_777 Int)) (+ BOUND_VARIABLE_776 BOUND_VARIABLE_777)) (nullable.some 3) (nullable.some 4))) (nullable.lift (lambda ((BOUND_VARIABLE_795 Int) (BOUND_VARIABLE_796 Int)) (+ BOUND_VARIABLE_795 BOUND_VARIABLE_796)) (nullable.lift (lambda ((BOUND_VARIABLE_789 Int) (BOUND_VARIABLE_790 Int)) (+ BOUND_VARIABLE_789 BOUND_VARIABLE_790)) (nullable.some 5) (nullable.some 6)) ((_ tuple.select 0) t)) (as nullable.null (Nullable Int)) (nullable.some 2) (nullable.lift (lambda ((BOUND_VARIABLE_801 Int) (BOUND_VARIABLE_802 Int)) (+ BOUND_VARIABLE_801 BOUND_VARIABLE_802)) (nullable.some 7) (nullable.some 8))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8)))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_717 Bool) (BOUND_VARIABLE_718 Bool) (BOUND_VARIABLE_719 Bool)) (and BOUND_VARIABLE_717 BOUND_VARIABLE_718 BOUND_VARIABLE_719)) (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8))) (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7))) (nullable.lift (lambda ((BOUND_VARIABLE_702 Int) (BOUND_VARIABLE_703 Int)) (= BOUND_VARIABLE_702 BOUND_VARIABLE_703)) ((_ tuple.select 0) t) (ite (and (nullable.is_some (nullable.some (nullable.is_some (nullable.some 2)))) (nullable.val (nullable.some (nullable.is_some (nullable.some 2))))) (nullable.some 2) (as nullable.null (Nullable Int)))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8)))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7)))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7)))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_717 Bool) (BOUND_VARIABLE_718 Bool) (BOUND_VARIABLE_719 Bool)) (and BOUND_VARIABLE_717 BOUND_VARIABLE_718 BOUND_VARIABLE_719)) (nullable.lift (lambda ((BOUND_VARIABLE_676 Int) (BOUND_VARIABLE_677 Int)) (= BOUND_VARIABLE_676 BOUND_VARIABLE_677)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_670 Int) (BOUND_VARIABLE_671 Int)) (+ BOUND_VARIABLE_670 BOUND_VARIABLE_671)) (nullable.some 7) (nullable.some 8))) (nullable.lift (lambda ((BOUND_VARIABLE_688 Int) (BOUND_VARIABLE_689 Int)) (= BOUND_VARIABLE_688 BOUND_VARIABLE_689)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_682 Int) (BOUND_VARIABLE_683 Int)) (+ BOUND_VARIABLE_682 BOUND_VARIABLE_683)) (nullable.some 8) (nullable.some 7))) (nullable.lift (lambda ((BOUND_VARIABLE_702 Int) (BOUND_VARIABLE_703 Int)) (= BOUND_VARIABLE_702 BOUND_VARIABLE_703)) ((_ tuple.select 0) t) (ite (and (nullable.is_some (nullable.some (nullable.is_some (nullable.some 2)))) (nullable.val (nullable.some (nullable.is_some (nullable.some 2))))) (nullable.some 2) (as nullable.null (Nullable Int))))))))))))
+(assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_764 Int) (BOUND_VARIABLE_765 Int)) (+ BOUND_VARIABLE_764 BOUND_VARIABLE_765)) (nullable.some 1) (nullable.some 2)) (nullable.lift (lambda ((BOUND_VARIABLE_781 Int) (BOUND_VARIABLE_782 Int)) (+ BOUND_VARIABLE_781 BOUND_VARIABLE_782)) ((_ tuple.select 0) t) (nullable.lift (lambda ((BOUND_VARIABLE_775 Int) (BOUND_VARIABLE_776 Int)) (+ BOUND_VARIABLE_775 BOUND_VARIABLE_776)) (nullable.some 3) (nullable.some 4))) (nullable.lift (lambda ((BOUND_VARIABLE_795 Int) (BOUND_VARIABLE_796 Int)) (+ BOUND_VARIABLE_795 BOUND_VARIABLE_796)) (nullable.lift (lambda ((BOUND_VARIABLE_789 Int) (BOUND_VARIABLE_790 Int)) (+ BOUND_VARIABLE_789 BOUND_VARIABLE_790)) (nullable.some 5) (nullable.some 6)) ((_ tuple.select 0) t)) (as nullable.null (Nullable Int)) (nullable.some 2) (nullable.lift (lambda ((BOUND_VARIABLE_801 Int) (BOUND_VARIABLE_802 Int)) (+ BOUND_VARIABLE_801 BOUND_VARIABLE_802)) (nullable.some 7) (nullable.some 8))))))
 (assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.some false)) (nullable.val (nullable.some false))))))
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 3) (nullable.some 22) (nullable.some 26) (as nullable.null (Nullable Int)) (nullable.some 2) (nullable.some 15)))))
 (assert (= q1 (set.map f4 (set.filter p3 ((_ rel.project 0 1 3 4 5 6 7 8 9 10 11) (set.filter p2 (rel.product (set.map f0 DEPT) (set.map f1 EMP))))))))
 (assert (= q2 (set.map f6 (set.filter p5 (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))))))
 (check-sat)
 ;answer: unsat
-; duration: 41 ms.
+; duration: 35 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
@@ -1612,11 +1622,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int)) Bool))
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable String))))
@@ -1633,8 +1643,8 @@
 (assert (= q1 ((_ rel.project 0 1) (set.filter p2 ((_ rel.project 9 1) (set.filter p1 (rel.product EMP (set.map f0 DEPT))))))))
 (assert (= q2 ((_ rel.project 9 1) (set.filter p4 (rel.product EMP ((_ rel.project 0 1) (set.filter p3 DEPT)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10014 ms.
+;answer: unsat
+; duration: 283 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionDistinct
@@ -1646,7 +1656,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1669,7 +1679,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 532 ms.
+; duration: 407 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceNoPullUpExprs
@@ -1681,7 +1691,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1694,17 +1704,17 @@
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const f5 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool) (BOUND_VARIABLE_464 Bool)) (or BOUND_VARIABLE_462 BOUND_VARIABLE_463 BOUND_VARIABLE_464)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (> BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 5) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool) (BOUND_VARIABLE_464 Bool)) (or BOUND_VARIABLE_462 BOUND_VARIABLE_463 BOUND_VARIABLE_464)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_449 Int) (BOUND_VARIABLE_450 Int)) (> BOUND_VARIABLE_449 BOUND_VARIABLE_450)) ((_ tuple.select 5) t) (nullable.some 10))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_553 Int) (BOUND_VARIABLE_554 Int)) (= BOUND_VARIABLE_553 BOUND_VARIABLE_554)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_553 Int) (BOUND_VARIABLE_554 Int)) (= BOUND_VARIABLE_553 BOUND_VARIABLE_554)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool)) (or BOUND_VARIABLE_461 BOUND_VARIABLE_462 BOUND_VARIABLE_463)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (> BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 5) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool)) (or BOUND_VARIABLE_461 BOUND_VARIABLE_462 BOUND_VARIABLE_463)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (> BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 5) t) (nullable.some 10))))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_616 Bool) (BOUND_VARIABLE_617 Bool) (BOUND_VARIABLE_618 Bool)) (or BOUND_VARIABLE_616 BOUND_VARIABLE_617 BOUND_VARIABLE_618)) (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_604 Int) (BOUND_VARIABLE_605 Int)) (> BOUND_VARIABLE_604 BOUND_VARIABLE_605)) ((_ tuple.select 5) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_616 Bool) (BOUND_VARIABLE_617 Bool) (BOUND_VARIABLE_618 Bool)) (or BOUND_VARIABLE_616 BOUND_VARIABLE_617 BOUND_VARIABLE_618)) (nullable.lift (lambda ((BOUND_VARIABLE_591 Int) (BOUND_VARIABLE_592 Int)) (= BOUND_VARIABLE_591 BOUND_VARIABLE_592)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (= BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_604 Int) (BOUND_VARIABLE_605 Int)) (> BOUND_VARIABLE_604 BOUND_VARIABLE_605)) ((_ tuple.select 5) t) (nullable.some 10))))))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_638 Int) (BOUND_VARIABLE_639 Int)) (= BOUND_VARIABLE_638 BOUND_VARIABLE_639)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_638 Int) (BOUND_VARIABLE_639 Int)) (= BOUND_VARIABLE_638 BOUND_VARIABLE_639)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_615 Bool) (BOUND_VARIABLE_616 Bool) (BOUND_VARIABLE_617 Bool)) (or BOUND_VARIABLE_615 BOUND_VARIABLE_616 BOUND_VARIABLE_617)) (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_603 Int) (BOUND_VARIABLE_604 Int)) (> BOUND_VARIABLE_603 BOUND_VARIABLE_604)) ((_ tuple.select 5) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_615 Bool) (BOUND_VARIABLE_616 Bool) (BOUND_VARIABLE_617 Bool)) (or BOUND_VARIABLE_615 BOUND_VARIABLE_616 BOUND_VARIABLE_617)) (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_603 Int) (BOUND_VARIABLE_604 Int)) (> BOUND_VARIABLE_603 BOUND_VARIABLE_604)) ((_ tuple.select 5) t) (nullable.some 10))))))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (= BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (= BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP)))))
 (assert (= q2 (set.map f5 (set.filter p4 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10022 ms.
+;answer: unsat
+; duration: 457 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyProject
@@ -1716,7 +1726,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1732,7 +1742,7 @@
 (assert (= q2 (set.map f2 (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 90 ms.
+; duration: 18 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConjunctInPullUp
@@ -1744,7 +1754,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1758,18 +1768,18 @@
 (declare-const p5 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool)) (or BOUND_VARIABLE_461 BOUND_VARIABLE_462 BOUND_VARIABLE_463)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (> BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool) (BOUND_VARIABLE_463 Bool)) (or BOUND_VARIABLE_461 BOUND_VARIABLE_462 BOUND_VARIABLE_463)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (= BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_440 Int) (BOUND_VARIABLE_441 Int)) (= BOUND_VARIABLE_440 BOUND_VARIABLE_441)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_448 Int) (BOUND_VARIABLE_449 Int)) (> BOUND_VARIABLE_448 BOUND_VARIABLE_449)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (= BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_460 Bool) (BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool)) (or BOUND_VARIABLE_460 BOUND_VARIABLE_461 BOUND_VARIABLE_462)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_447 Int) (BOUND_VARIABLE_448 Int)) (> BOUND_VARIABLE_447 BOUND_VARIABLE_448)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_460 Bool) (BOUND_VARIABLE_461 Bool) (BOUND_VARIABLE_462 Bool)) (or BOUND_VARIABLE_460 BOUND_VARIABLE_461 BOUND_VARIABLE_462)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (= BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_447 Int) (BOUND_VARIABLE_448 Int)) (> BOUND_VARIABLE_447 BOUND_VARIABLE_448)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_551 Int) (BOUND_VARIABLE_552 Int)) (= BOUND_VARIABLE_551 BOUND_VARIABLE_552)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_551 Int) (BOUND_VARIABLE_552 Int)) (= BOUND_VARIABLE_551 BOUND_VARIABLE_552)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_614 Bool) (BOUND_VARIABLE_615 Bool) (BOUND_VARIABLE_616 Bool)) (or BOUND_VARIABLE_614 BOUND_VARIABLE_615 BOUND_VARIABLE_616)) (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_602 Int) (BOUND_VARIABLE_603 Int)) (> BOUND_VARIABLE_602 BOUND_VARIABLE_603)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_614 Bool) (BOUND_VARIABLE_615 Bool) (BOUND_VARIABLE_616 Bool)) (or BOUND_VARIABLE_614 BOUND_VARIABLE_615 BOUND_VARIABLE_616)) (nullable.lift (lambda ((BOUND_VARIABLE_590 Int) (BOUND_VARIABLE_591 Int)) (= BOUND_VARIABLE_590 BOUND_VARIABLE_591)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_596 Int) (BOUND_VARIABLE_597 Int)) (= BOUND_VARIABLE_596 BOUND_VARIABLE_597)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_602 Int) (BOUND_VARIABLE_603 Int)) (> BOUND_VARIABLE_602 BOUND_VARIABLE_603)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_658 Bool) (BOUND_VARIABLE_659 Bool) (BOUND_VARIABLE_660 Bool)) (or BOUND_VARIABLE_658 BOUND_VARIABLE_659 BOUND_VARIABLE_660)) (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_646 Int) (BOUND_VARIABLE_647 Int)) (> BOUND_VARIABLE_646 BOUND_VARIABLE_647)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_658 Bool) (BOUND_VARIABLE_659 Bool) (BOUND_VARIABLE_660 Bool)) (or BOUND_VARIABLE_658 BOUND_VARIABLE_659 BOUND_VARIABLE_660)) (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_640 Int) (BOUND_VARIABLE_641 Int)) (= BOUND_VARIABLE_640 BOUND_VARIABLE_641)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_646 Int) (BOUND_VARIABLE_647 Int)) (> BOUND_VARIABLE_646 BOUND_VARIABLE_647)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_680 Int) (BOUND_VARIABLE_681 Int)) (= BOUND_VARIABLE_680 BOUND_VARIABLE_681)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_680 Int) (BOUND_VARIABLE_681 Int)) (= BOUND_VARIABLE_680 BOUND_VARIABLE_681)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_613 Bool) (BOUND_VARIABLE_614 Bool) (BOUND_VARIABLE_615 Bool)) (or BOUND_VARIABLE_613 BOUND_VARIABLE_614 BOUND_VARIABLE_615)) (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_601 Int) (BOUND_VARIABLE_602 Int)) (> BOUND_VARIABLE_601 BOUND_VARIABLE_602)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_613 Bool) (BOUND_VARIABLE_614 Bool) (BOUND_VARIABLE_615 Bool)) (or BOUND_VARIABLE_613 BOUND_VARIABLE_614 BOUND_VARIABLE_615)) (nullable.lift (lambda ((BOUND_VARIABLE_589 Int) (BOUND_VARIABLE_590 Int)) (= BOUND_VARIABLE_589 BOUND_VARIABLE_590)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_595 Int) (BOUND_VARIABLE_596 Int)) (= BOUND_VARIABLE_595 BOUND_VARIABLE_596)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_601 Int) (BOUND_VARIABLE_602 Int)) (> BOUND_VARIABLE_601 BOUND_VARIABLE_602)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_657 Bool) (BOUND_VARIABLE_658 Bool) (BOUND_VARIABLE_659 Bool)) (or BOUND_VARIABLE_657 BOUND_VARIABLE_658 BOUND_VARIABLE_659)) (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_645 Int) (BOUND_VARIABLE_646 Int)) (> BOUND_VARIABLE_645 BOUND_VARIABLE_646)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_657 Bool) (BOUND_VARIABLE_658 Bool) (BOUND_VARIABLE_659 Bool)) (or BOUND_VARIABLE_657 BOUND_VARIABLE_658 BOUND_VARIABLE_659)) (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_639 Int) (BOUND_VARIABLE_640 Int)) (= BOUND_VARIABLE_639 BOUND_VARIABLE_640)) ((_ tuple.select 7) t) (nullable.some 9)) (nullable.lift (lambda ((BOUND_VARIABLE_645 Int) (BOUND_VARIABLE_646 Int)) (> BOUND_VARIABLE_645 BOUND_VARIABLE_646)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (= BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_679 Int) (BOUND_VARIABLE_680 Int)) (= BOUND_VARIABLE_679 BOUND_VARIABLE_680)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) EMP)))))
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10019 ms.
+;answer: unsat
+; duration: 665 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastFilter
@@ -1781,11 +1791,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1800,8 +1810,8 @@
 (assert (= q1 ((_ rel.project 1) (set.filter p0 (rel.product EMP DEPT)))))
 (assert (= q2 ((_ rel.project 1) (set.filter p3 (rel.product ((_ rel.project 7 1) (set.filter p2 (set.filter p1 (rel.product EMP DEPT)))) DEPT)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10129 ms.
+;answer: unsat
+; duration: 199 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoFilter
@@ -1813,7 +1823,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1832,7 +1842,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p2 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 218 ms.
+; duration: 133 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePullUpThruAlias
@@ -1844,7 +1854,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1858,18 +1868,18 @@
 (declare-const p5 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f2 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 5) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 5) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_507 Int) (BOUND_VARIABLE_508 Int)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_507 Int) (BOUND_VARIABLE_508 Int)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 5) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 5) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_506 Int) (BOUND_VARIABLE_507 Int)) (= BOUND_VARIABLE_506 BOUND_VARIABLE_507)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_506 Int) (BOUND_VARIABLE_507 Int)) (= BOUND_VARIABLE_506 BOUND_VARIABLE_507)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f2 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_533 Int) (BOUND_VARIABLE_534 Int)) (> BOUND_VARIABLE_533 BOUND_VARIABLE_534)) ((_ tuple.select 5) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_533 Int) (BOUND_VARIABLE_534 Int)) (> BOUND_VARIABLE_533 BOUND_VARIABLE_534)) ((_ tuple.select 5) t) (nullable.some 7)))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_550 Int) (BOUND_VARIABLE_551 Int)) (> BOUND_VARIABLE_550 BOUND_VARIABLE_551)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_550 Int) (BOUND_VARIABLE_551 Int)) (> BOUND_VARIABLE_550 BOUND_VARIABLE_551)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_570 Int) (BOUND_VARIABLE_571 Int)) (= BOUND_VARIABLE_570 BOUND_VARIABLE_571)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_570 Int) (BOUND_VARIABLE_571 Int)) (= BOUND_VARIABLE_570 BOUND_VARIABLE_571)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_532 Int) (BOUND_VARIABLE_533 Int)) (> BOUND_VARIABLE_532 BOUND_VARIABLE_533)) ((_ tuple.select 5) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_532 Int) (BOUND_VARIABLE_533 Int)) (> BOUND_VARIABLE_532 BOUND_VARIABLE_533)) ((_ tuple.select 5) t) (nullable.some 7)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_549 Int) (BOUND_VARIABLE_550 Int)) (> BOUND_VARIABLE_549 BOUND_VARIABLE_550)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_549 Int) (BOUND_VARIABLE_550 Int)) (> BOUND_VARIABLE_549 BOUND_VARIABLE_550)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (= BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (= BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f6 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f2 (set.filter p1 (rel.product ((_ rel.project 5) (set.filter p0 EMP)) EMP)))))
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 5) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+;answer: unsat
+; duration: 475 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeSetOpMixed
@@ -1881,7 +1891,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1904,7 +1914,7 @@
 (assert (= q2 (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.inter ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 283 ms.
+; duration: 173 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNotNull
@@ -1916,7 +1926,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1931,7 +1941,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 81 ms.
+; duration: 58 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyIntersect
@@ -1943,7 +1953,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1955,7 +1965,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 10 ms.
+; duration: 9 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoProject
@@ -1967,7 +1977,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1986,7 +1996,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10011 ms.
+; duration: 20016 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnionAlwaysTrue
@@ -1998,7 +2008,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2013,17 +2023,17 @@
 (declare-const p6 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
 (assert (not (= q1 q2)))
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (< BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 4))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (< BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 4)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_502 Int) (BOUND_VARIABLE_503 Int)) (= BOUND_VARIABLE_502 BOUND_VARIABLE_503)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_502 Int) (BOUND_VARIABLE_503 Int)) (= BOUND_VARIABLE_502 BOUND_VARIABLE_503)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_521 Int) (BOUND_VARIABLE_522 Int)) (< BOUND_VARIABLE_521 BOUND_VARIABLE_522)) ((_ tuple.select 7) t) (nullable.some 4))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_521 Int) (BOUND_VARIABLE_522 Int)) (< BOUND_VARIABLE_521 BOUND_VARIABLE_522)) ((_ tuple.select 7) t) (nullable.some 4)))))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_538 Int) (BOUND_VARIABLE_539 Int)) (> BOUND_VARIABLE_538 BOUND_VARIABLE_539)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_538 Int) (BOUND_VARIABLE_539 Int)) (> BOUND_VARIABLE_538 BOUND_VARIABLE_539)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (< BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 0) t) (nullable.some 4))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_556 Int) (BOUND_VARIABLE_557 Int)) (< BOUND_VARIABLE_556 BOUND_VARIABLE_557)) ((_ tuple.select 0) t) (nullable.some 4)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_577 Int) (BOUND_VARIABLE_578 Int)) (= BOUND_VARIABLE_577 BOUND_VARIABLE_578)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_577 Int) (BOUND_VARIABLE_578 Int)) (= BOUND_VARIABLE_577 BOUND_VARIABLE_578)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_501 Int) (BOUND_VARIABLE_502 Int)) (= BOUND_VARIABLE_501 BOUND_VARIABLE_502)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_501 Int) (BOUND_VARIABLE_502 Int)) (= BOUND_VARIABLE_501 BOUND_VARIABLE_502)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_520 Int) (BOUND_VARIABLE_521 Int)) (< BOUND_VARIABLE_520 BOUND_VARIABLE_521)) ((_ tuple.select 7) t) (nullable.some 4))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_520 Int) (BOUND_VARIABLE_521 Int)) (< BOUND_VARIABLE_520 BOUND_VARIABLE_521)) ((_ tuple.select 7) t) (nullable.some 4)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_537 Int) (BOUND_VARIABLE_538 Int)) (> BOUND_VARIABLE_537 BOUND_VARIABLE_538)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_537 Int) (BOUND_VARIABLE_538 Int)) (> BOUND_VARIABLE_537 BOUND_VARIABLE_538)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_555 Int) (BOUND_VARIABLE_556 Int)) (< BOUND_VARIABLE_555 BOUND_VARIABLE_556)) ((_ tuple.select 0) t) (nullable.some 4))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_555 Int) (BOUND_VARIABLE_556 Int)) (< BOUND_VARIABLE_555 BOUND_VARIABLE_556)) ((_ tuple.select 0) t) (nullable.some 4)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_576 Int) (BOUND_VARIABLE_577 Int)) (= BOUND_VARIABLE_576 BOUND_VARIABLE_577)) ((_ tuple.select 0) t) ((_ tuple.select 1) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_576 Int) (BOUND_VARIABLE_577 Int)) (= BOUND_VARIABLE_576 BOUND_VARIABLE_577)) ((_ tuple.select 0) t) ((_ tuple.select 1) t)))))))
 (assert (= q1 ((_ rel.project 0 1) (set.filter p2 (rel.product ((_ rel.project 7) (set.filter p0 EMP)) (set.union ((_ rel.project 7) (set.filter p1 EMP)) ((_ rel.project 7) EMP)))))))
 (assert (= q2 ((_ rel.project 0 1) (set.filter p6 (rel.product ((_ rel.project 7) (set.filter p3 EMP)) ((_ rel.project 0) (set.filter p5 (set.union ((_ rel.project 7) (set.filter p4 EMP)) ((_ rel.project 7) EMP)))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10078 ms.
+;answer: unsat
+; duration: 426 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeIntersect
@@ -2035,7 +2045,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2058,7 +2068,7 @@
 (assert (= q2 (set.inter (set.inter ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 254 ms.
+; duration: 98 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAddRedundantSemiJoinRule
@@ -2070,11 +2080,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -2092,7 +2102,7 @@
 (assert (= q2 (set.map f4 (set.filter p3 (rel.product (set.filter p2 (rel.product EMP DEPT)) DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 217 ms.
+; duration: 111 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinWithFilter
@@ -2104,7 +2114,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2122,7 +2132,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p2 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 EMP)) DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 501 ms.
+; duration: 183 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRightOuterJoinSimplificationToInner
@@ -2134,11 +2144,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f6 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -2160,7 +2170,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1) (set.filter p4 DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 1161 ms.
+; duration: 299 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinCondDownToProject
@@ -2172,11 +2182,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable Int))))
@@ -2192,7 +2202,7 @@
 (assert (= q2 ((_ rel.project 0 10) (set.filter p3 (rel.product (set.map f1 DEPT) (set.map f2 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 539 ms.
+; duration: 286 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRightWithFilter
@@ -2204,7 +2214,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -2224,7 +2234,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p3 (rel.product (set.filter p2 (rel.product EMP ((_ rel.project 0 1) (set.filter p1 DEPT)))) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 3564 ms.
+; duration: 417 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToLeftOuter
@@ -2236,7 +2246,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2265,8 +2275,8 @@
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.union (set.map leftJoin1 (set.minus DEPT ((_ rel.project 0 1) (set.filter p0 (rel.product DEPT EMP))))) (set.map rightJoin2 (set.minus EMP ((_ rel.project 2 3 4 5 6 7 8 9 10) (set.filter p0 (rel.product DEPT EMP)))))) (set.filter p0 (rel.product DEPT EMP)))))))
 (assert (= q2 (set.map f8 (set.union (set.map leftJoin7 (set.minus ((_ rel.project 0 1) (set.filter p5 DEPT)) ((_ rel.project 0 1) (set.filter p6 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) EMP))))) (set.filter p6 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10062 ms.
+;answer: unsat
+; duration: 858 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion
@@ -2278,7 +2288,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2294,20 +2304,20 @@
 (declare-const p7 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f3 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_466 Int) (BOUND_VARIABLE_467 Int)) (> BOUND_VARIABLE_466 BOUND_VARIABLE_467)) ((_ tuple.select 7) t) (nullable.some 10)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_527 Int) (BOUND_VARIABLE_528 Int)) (= BOUND_VARIABLE_527 BOUND_VARIABLE_528)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_527 Int) (BOUND_VARIABLE_528 Int)) (= BOUND_VARIABLE_527 BOUND_VARIABLE_528)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_465 Int) (BOUND_VARIABLE_466 Int)) (> BOUND_VARIABLE_465 BOUND_VARIABLE_466)) ((_ tuple.select 7) t) (nullable.some 10)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_526 Int) (BOUND_VARIABLE_527 Int)) (= BOUND_VARIABLE_526 BOUND_VARIABLE_527)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_526 Int) (BOUND_VARIABLE_527 Int)) (= BOUND_VARIABLE_526 BOUND_VARIABLE_527)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_553 Int) (BOUND_VARIABLE_554 Int)) (> BOUND_VARIABLE_553 BOUND_VARIABLE_554)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_553 Int) (BOUND_VARIABLE_554 Int)) (> BOUND_VARIABLE_553 BOUND_VARIABLE_554)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_570 Int) (BOUND_VARIABLE_571 Int)) (> BOUND_VARIABLE_570 BOUND_VARIABLE_571)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_570 Int) (BOUND_VARIABLE_571 Int)) (> BOUND_VARIABLE_570 BOUND_VARIABLE_571)) ((_ tuple.select 7) t) (nullable.some 10)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_607 Bool) (BOUND_VARIABLE_608 Bool)) (or BOUND_VARIABLE_607 BOUND_VARIABLE_608)) (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_607 Bool) (BOUND_VARIABLE_608 Bool)) (or BOUND_VARIABLE_607 BOUND_VARIABLE_608)) (nullable.lift (lambda ((BOUND_VARIABLE_588 Int) (BOUND_VARIABLE_589 Int)) (> BOUND_VARIABLE_588 BOUND_VARIABLE_589)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_594 Int) (BOUND_VARIABLE_595 Int)) (> BOUND_VARIABLE_594 BOUND_VARIABLE_595)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_630 Int) (BOUND_VARIABLE_631 Int)) (= BOUND_VARIABLE_630 BOUND_VARIABLE_631)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_630 Int) (BOUND_VARIABLE_631 Int)) (= BOUND_VARIABLE_630 BOUND_VARIABLE_631)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (> BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_552 Int) (BOUND_VARIABLE_553 Int)) (> BOUND_VARIABLE_552 BOUND_VARIABLE_553)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_569 Int) (BOUND_VARIABLE_570 Int)) (> BOUND_VARIABLE_569 BOUND_VARIABLE_570)) ((_ tuple.select 7) t) (nullable.some 10)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_606 Bool) (BOUND_VARIABLE_607 Bool)) (or BOUND_VARIABLE_606 BOUND_VARIABLE_607)) (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10)))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7)))) (nullable.some true) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10)))) (nullable.some true) (nullable.lift (lambda ((BOUND_VARIABLE_606 Bool) (BOUND_VARIABLE_607 Bool)) (or BOUND_VARIABLE_606 BOUND_VARIABLE_607)) (nullable.lift (lambda ((BOUND_VARIABLE_587 Int) (BOUND_VARIABLE_588 Int)) (> BOUND_VARIABLE_587 BOUND_VARIABLE_588)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_593 Int) (BOUND_VARIABLE_594 Int)) (> BOUND_VARIABLE_593 BOUND_VARIABLE_594)) ((_ tuple.select 7) t) (nullable.some 10))))))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_629 Int) (BOUND_VARIABLE_630 Int)) (= BOUND_VARIABLE_629 BOUND_VARIABLE_630)) ((_ tuple.select 0) t) ((_ tuple.select 8) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_629 Int) (BOUND_VARIABLE_630 Int)) (= BOUND_VARIABLE_629 BOUND_VARIABLE_630)) ((_ tuple.select 0) t) ((_ tuple.select 8) t)))))))
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f3 (set.filter p2 (rel.product (set.union ((_ rel.project 7) (set.filter p0 EMP)) ((_ rel.project 7) (set.filter p1 EMP))) EMP)))))
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product (set.union ((_ rel.project 7) (set.filter p4 EMP)) ((_ rel.project 7) (set.filter p5 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10077 ms.
+;answer: unsat
+; duration: 398 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoJoin
@@ -2319,7 +2329,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2342,8 +2352,8 @@
 (assert (= q1 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map leftJoin2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))))
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map leftJoin5 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1) (set.filter p4 DEPT)))))) (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1) (set.filter p4 DEPT)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10165 ms.
+;answer: unsat
+; duration: 1251 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSwapOuterJoin
@@ -2355,7 +2365,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -2379,7 +2389,7 @@
 (assert (= q2 (set.map f5 (set.union (set.map rightJoin4 (set.minus DEPT ((_ rel.project 9 10) (set.filter p3 (rel.product EMP DEPT))))) (set.filter p3 (rel.product EMP DEPT))))))
 (check-sat)
 ;answer: unsat
-; duration: 1189 ms.
+; duration: 302 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnLeft
@@ -2391,7 +2401,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2402,7 +2412,7 @@
 (assert (= q2 ((_ rel.project 6) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 2686 ms.
+; duration: 124 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed2
@@ -2414,7 +2424,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2437,7 +2447,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 588 ms.
+; duration: 387 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsEliminatesFilter
@@ -2449,7 +2459,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -2463,7 +2473,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.filter p1 (set.singleton (tuple (nullable.some 0) (nullable.some 0)))))))
 (check-sat)
 ;answer: unsat
-; duration: 15 ms.
+; duration: 12 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter2*
@@ -2475,7 +2485,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2490,7 +2500,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 ((_ rel.project 3) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 74 ms.
+; duration: 60 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSemiJoinReduceConstants
@@ -2502,7 +2512,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2524,8 +2534,8 @@
 (assert (= q1 ((_ rel.project 0) (set.filter p2 (rel.product ((_ rel.project 0 1) (set.filter p0 ((_ rel.project 6 7) EMP))) ((_ rel.project 1) (set.filter p1 ((_ rel.project 6 7) EMP))))))))
 (assert (= q2 ((_ rel.project 0) (set.filter p5 (rel.product ((_ rel.project 0 1) (set.filter p3 ((_ rel.project 6 7) EMP))) ((_ rel.project 1) (set.filter p4 ((_ rel.project 6 7) EMP))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10015 ms.
+;answer: unsat
+; duration: 1652 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinLeft
@@ -2537,11 +2547,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -2554,8 +2564,8 @@
 (assert (= q1 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map leftJoin2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))) (set.filter p1 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) DEPT))))))
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")))) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some ""))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10071 ms.
+;answer: unsat
+; duration: 91 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNestedCaseWhen
@@ -2567,7 +2577,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2582,7 +2592,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 177 ms.
+; duration: 114 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceRightOuterJoin
@@ -2594,7 +2604,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2615,19 +2625,19 @@
 (assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 9)))))))
 (assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_519 Int) (BOUND_VARIABLE_520 Int)) (= BOUND_VARIABLE_519 BOUND_VARIABLE_520)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= rightJoin2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_561 Int) (BOUND_VARIABLE_562 Int)) (> BOUND_VARIABLE_561 BOUND_VARIABLE_562)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_561 Int) (BOUND_VARIABLE_562 Int)) (> BOUND_VARIABLE_561 BOUND_VARIABLE_562)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_560 Int) (BOUND_VARIABLE_561 Int)) (> BOUND_VARIABLE_560 BOUND_VARIABLE_561)) ((_ tuple.select 7) t) (nullable.some 7)))))))
 (assert (= f4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_598 Int) (BOUND_VARIABLE_599 Int)) (> BOUND_VARIABLE_598 BOUND_VARIABLE_599)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_598 Int) (BOUND_VARIABLE_599 Int)) (> BOUND_VARIABLE_598 BOUND_VARIABLE_599)) ((_ tuple.select 7) t) (nullable.some 9)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_615 Int) (BOUND_VARIABLE_616 Int)) (> BOUND_VARIABLE_615 BOUND_VARIABLE_616)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_615 Int) (BOUND_VARIABLE_616 Int)) (> BOUND_VARIABLE_615 BOUND_VARIABLE_616)) ((_ tuple.select 7) t) (nullable.some 9)))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_634 Int) (BOUND_VARIABLE_635 Int)) (= BOUND_VARIABLE_634 BOUND_VARIABLE_635)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (> BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_597 Int) (BOUND_VARIABLE_598 Int)) (> BOUND_VARIABLE_597 BOUND_VARIABLE_598)) ((_ tuple.select 7) t) (nullable.some 9)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_614 Int) (BOUND_VARIABLE_615 Int)) (> BOUND_VARIABLE_614 BOUND_VARIABLE_615)) ((_ tuple.select 7) t) (nullable.some 9))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_614 Int) (BOUND_VARIABLE_615 Int)) (> BOUND_VARIABLE_614 BOUND_VARIABLE_615)) ((_ tuple.select 7) t) (nullable.some 9)))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_633 Int) (BOUND_VARIABLE_634 Int)) (= BOUND_VARIABLE_633 BOUND_VARIABLE_634)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= rightJoin8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) ((_ tuple.select 0) t) ((_ tuple.select 1) t) ((_ tuple.select 2) t) ((_ tuple.select 3) t) ((_ tuple.select 4) t) ((_ tuple.select 5) t) ((_ tuple.select 6) t) ((_ tuple.select 7) t) ((_ tuple.select 8) t)))))
-(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_669 Int) (BOUND_VARIABLE_670 Int)) (> BOUND_VARIABLE_669 BOUND_VARIABLE_670)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_669 Int) (BOUND_VARIABLE_670 Int)) (> BOUND_VARIABLE_669 BOUND_VARIABLE_670)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p9 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_668 Int) (BOUND_VARIABLE_669 Int)) (> BOUND_VARIABLE_668 BOUND_VARIABLE_669)) ((_ tuple.select 7) t) (nullable.some 7)))))))
 (assert (= f10 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f4 (set.filter p3 (set.union (set.map rightJoin2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p1 (rel.product EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP))))))) (set.filter p1 (rel.product EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)))))))))
 (assert (= q2 (set.map f10 (set.filter p9 (set.union (set.map rightJoin8 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)) ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP))))))) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+;answer: unsat
+; duration: 1370 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceComplexPredicate
@@ -2639,7 +2649,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2655,20 +2665,20 @@
 (declare-const p7 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int))))
 (assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_490 Bool) (BOUND_VARIABLE_491 Bool) (BOUND_VARIABLE_492 Bool)) (and BOUND_VARIABLE_490 BOUND_VARIABLE_491 BOUND_VARIABLE_492)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_474 Int) (BOUND_VARIABLE_475 Real)) (> BOUND_VARIABLE_474 BOUND_VARIABLE_475)) (nullable.lift (lambda ((BOUND_VARIABLE_445 Int) (BOUND_VARIABLE_446 Int)) (+ BOUND_VARIABLE_445 BOUND_VARIABLE_446)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_453 Int) (BOUND_VARIABLE_454 Int)) (/ BOUND_VARIABLE_453 BOUND_VARIABLE_454)) ((_ tuple.select 5) t) (nullable.some 2))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_490 Bool) (BOUND_VARIABLE_491 Bool) (BOUND_VARIABLE_492 Bool)) (and BOUND_VARIABLE_490 BOUND_VARIABLE_491 BOUND_VARIABLE_492)) (nullable.lift (lambda ((BOUND_VARIABLE_416 Int) (BOUND_VARIABLE_417 Int)) (> BOUND_VARIABLE_416 BOUND_VARIABLE_417)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_439 Int) (BOUND_VARIABLE_440 Int)) (= BOUND_VARIABLE_439 BOUND_VARIABLE_440)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_474 Int) (BOUND_VARIABLE_475 Real)) (> BOUND_VARIABLE_474 BOUND_VARIABLE_475)) (nullable.lift (lambda ((BOUND_VARIABLE_445 Int) (BOUND_VARIABLE_446 Int)) (+ BOUND_VARIABLE_445 BOUND_VARIABLE_446)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_453 Int) (BOUND_VARIABLE_454 Int)) (/ BOUND_VARIABLE_453 BOUND_VARIABLE_454)) ((_ tuple.select 5) t) (nullable.some 2)))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_515 Int) (BOUND_VARIABLE_516 Int)) (= BOUND_VARIABLE_515 BOUND_VARIABLE_516)) ((_ tuple.select 6) t) ((_ tuple.select 7) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_515 Int) (BOUND_VARIABLE_516 Int)) (= BOUND_VARIABLE_515 BOUND_VARIABLE_516)) ((_ tuple.select 6) t) ((_ tuple.select 7) t)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_599 Int) (BOUND_VARIABLE_600 Int)) (= BOUND_VARIABLE_599 BOUND_VARIABLE_600)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_599 Int) (BOUND_VARIABLE_600 Int)) (= BOUND_VARIABLE_599 BOUND_VARIABLE_600)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_489 Bool) (BOUND_VARIABLE_490 Bool) (BOUND_VARIABLE_491 Bool)) (and BOUND_VARIABLE_489 BOUND_VARIABLE_490 BOUND_VARIABLE_491)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_473 Int) (BOUND_VARIABLE_474 Real)) (> BOUND_VARIABLE_473 BOUND_VARIABLE_474)) (nullable.lift (lambda ((BOUND_VARIABLE_444 Int) (BOUND_VARIABLE_445 Int)) (+ BOUND_VARIABLE_444 BOUND_VARIABLE_445)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_452 Int) (BOUND_VARIABLE_453 Int)) (/ BOUND_VARIABLE_452 BOUND_VARIABLE_453)) ((_ tuple.select 5) t) (nullable.some 2))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_489 Bool) (BOUND_VARIABLE_490 Bool) (BOUND_VARIABLE_491 Bool)) (and BOUND_VARIABLE_489 BOUND_VARIABLE_490 BOUND_VARIABLE_491)) (nullable.lift (lambda ((BOUND_VARIABLE_415 Int) (BOUND_VARIABLE_416 Int)) (> BOUND_VARIABLE_415 BOUND_VARIABLE_416)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_438 Int) (BOUND_VARIABLE_439 Int)) (= BOUND_VARIABLE_438 BOUND_VARIABLE_439)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_473 Int) (BOUND_VARIABLE_474 Real)) (> BOUND_VARIABLE_473 BOUND_VARIABLE_474)) (nullable.lift (lambda ((BOUND_VARIABLE_444 Int) (BOUND_VARIABLE_445 Int)) (+ BOUND_VARIABLE_444 BOUND_VARIABLE_445)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_452 Int) (BOUND_VARIABLE_453 Int)) (/ BOUND_VARIABLE_452 BOUND_VARIABLE_453)) ((_ tuple.select 5) t) (nullable.some 2)))))))))))
+(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_514 Int) (BOUND_VARIABLE_515 Int)) (= BOUND_VARIABLE_514 BOUND_VARIABLE_515)) ((_ tuple.select 6) t) ((_ tuple.select 7) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_514 Int) (BOUND_VARIABLE_515 Int)) (= BOUND_VARIABLE_514 BOUND_VARIABLE_515)) ((_ tuple.select 6) t) ((_ tuple.select 7) t)))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_598 Int) (BOUND_VARIABLE_599 Int)) (= BOUND_VARIABLE_598 BOUND_VARIABLE_599)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_598 Int) (BOUND_VARIABLE_599 Int)) (= BOUND_VARIABLE_598 BOUND_VARIABLE_599)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
-(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_676 Bool) (BOUND_VARIABLE_677 Bool) (BOUND_VARIABLE_678 Bool)) (and BOUND_VARIABLE_676 BOUND_VARIABLE_677 BOUND_VARIABLE_678)) (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_662 Int) (BOUND_VARIABLE_663 Real)) (> BOUND_VARIABLE_662 BOUND_VARIABLE_663)) (nullable.lift (lambda ((BOUND_VARIABLE_650 Int) (BOUND_VARIABLE_651 Int)) (+ BOUND_VARIABLE_650 BOUND_VARIABLE_651)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_656 Int) (BOUND_VARIABLE_657 Int)) (/ BOUND_VARIABLE_656 BOUND_VARIABLE_657)) ((_ tuple.select 5) t) (nullable.some 2))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_676 Bool) (BOUND_VARIABLE_677 Bool) (BOUND_VARIABLE_678 Bool)) (and BOUND_VARIABLE_676 BOUND_VARIABLE_677 BOUND_VARIABLE_678)) (nullable.lift (lambda ((BOUND_VARIABLE_637 Int) (BOUND_VARIABLE_638 Int)) (> BOUND_VARIABLE_637 BOUND_VARIABLE_638)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_644 Int) (BOUND_VARIABLE_645 Int)) (= BOUND_VARIABLE_644 BOUND_VARIABLE_645)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_662 Int) (BOUND_VARIABLE_663 Real)) (> BOUND_VARIABLE_662 BOUND_VARIABLE_663)) (nullable.lift (lambda ((BOUND_VARIABLE_650 Int) (BOUND_VARIABLE_651 Int)) (+ BOUND_VARIABLE_650 BOUND_VARIABLE_651)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_656 Int) (BOUND_VARIABLE_657 Int)) (/ BOUND_VARIABLE_656 BOUND_VARIABLE_657)) ((_ tuple.select 5) t) (nullable.some 2)))))))))))
-(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_697 Int) (BOUND_VARIABLE_698 Int)) (= BOUND_VARIABLE_697 BOUND_VARIABLE_698)) ((_ tuple.select 6) t) ((_ tuple.select 7) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_697 Int) (BOUND_VARIABLE_698 Int)) (= BOUND_VARIABLE_697 BOUND_VARIABLE_698)) ((_ tuple.select 6) t) ((_ tuple.select 7) t)))))))
-(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_714 Int) (BOUND_VARIABLE_715 Int)) (> BOUND_VARIABLE_714 BOUND_VARIABLE_715)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_714 Int) (BOUND_VARIABLE_715 Int)) (> BOUND_VARIABLE_714 BOUND_VARIABLE_715)) ((_ tuple.select 7) t) (nullable.some 7)))))))
-(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_733 Int) (BOUND_VARIABLE_734 Int)) (= BOUND_VARIABLE_733 BOUND_VARIABLE_734)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_733 Int) (BOUND_VARIABLE_734 Int)) (= BOUND_VARIABLE_733 BOUND_VARIABLE_734)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_675 Bool) (BOUND_VARIABLE_676 Bool) (BOUND_VARIABLE_677 Bool)) (and BOUND_VARIABLE_675 BOUND_VARIABLE_676 BOUND_VARIABLE_677)) (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_661 Int) (BOUND_VARIABLE_662 Real)) (> BOUND_VARIABLE_661 BOUND_VARIABLE_662)) (nullable.lift (lambda ((BOUND_VARIABLE_649 Int) (BOUND_VARIABLE_650 Int)) (+ BOUND_VARIABLE_649 BOUND_VARIABLE_650)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_655 Int) (BOUND_VARIABLE_656 Int)) (/ BOUND_VARIABLE_655 BOUND_VARIABLE_656)) ((_ tuple.select 5) t) (nullable.some 2))))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_675 Bool) (BOUND_VARIABLE_676 Bool) (BOUND_VARIABLE_677 Bool)) (and BOUND_VARIABLE_675 BOUND_VARIABLE_676 BOUND_VARIABLE_677)) (nullable.lift (lambda ((BOUND_VARIABLE_636 Int) (BOUND_VARIABLE_637 Int)) (> BOUND_VARIABLE_636 BOUND_VARIABLE_637)) ((_ tuple.select 7) t) (nullable.some 7)) (nullable.lift (lambda ((BOUND_VARIABLE_643 Int) (BOUND_VARIABLE_644 Int)) (= BOUND_VARIABLE_643 BOUND_VARIABLE_644)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_661 Int) (BOUND_VARIABLE_662 Real)) (> BOUND_VARIABLE_661 BOUND_VARIABLE_662)) (nullable.lift (lambda ((BOUND_VARIABLE_649 Int) (BOUND_VARIABLE_650 Int)) (+ BOUND_VARIABLE_649 BOUND_VARIABLE_650)) ((_ tuple.select 5) t) ((_ tuple.select 7) t)) (nullable.lift (lambda ((BOUND_VARIABLE_655 Int) (BOUND_VARIABLE_656 Int)) (/ BOUND_VARIABLE_655 BOUND_VARIABLE_656)) ((_ tuple.select 5) t) (nullable.some 2)))))))))))
+(assert (= p5 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_696 Int) (BOUND_VARIABLE_697 Int)) (= BOUND_VARIABLE_696 BOUND_VARIABLE_697)) ((_ tuple.select 6) t) ((_ tuple.select 7) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_696 Int) (BOUND_VARIABLE_697 Int)) (= BOUND_VARIABLE_696 BOUND_VARIABLE_697)) ((_ tuple.select 6) t) ((_ tuple.select 7) t)))))))
+(assert (= p6 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_713 Int) (BOUND_VARIABLE_714 Int)) (> BOUND_VARIABLE_713 BOUND_VARIABLE_714)) ((_ tuple.select 7) t) (nullable.some 7))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_713 Int) (BOUND_VARIABLE_714 Int)) (> BOUND_VARIABLE_713 BOUND_VARIABLE_714)) ((_ tuple.select 7) t) (nullable.some 7)))))))
+(assert (= p7 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_732 Int) (BOUND_VARIABLE_733 Int)) (= BOUND_VARIABLE_732 BOUND_VARIABLE_733)) ((_ tuple.select 7) t) ((_ tuple.select 16) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_732 Int) (BOUND_VARIABLE_733 Int)) (= BOUND_VARIABLE_732 BOUND_VARIABLE_733)) ((_ tuple.select 7) t) ((_ tuple.select 16) t)))))))
 (assert (= f8 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 1)))))
 (assert (= q1 (set.map f3 (set.filter p2 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p0 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 EMP)))))))
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10109 ms.
+;answer: unsat
+; duration: 1021 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAlreadyFalseEliminatesFilter
@@ -2680,7 +2690,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -2692,7 +2702,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 85 ms.
+; duration: 24 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion2
@@ -2704,7 +2714,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2723,7 +2733,7 @@
 (assert (= q2 (set.union (set.map f2 EMP) (set.map f3 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 34 ms.
+; duration: 27 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion3
@@ -2735,7 +2745,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2756,7 +2766,7 @@
 (assert (= q2 (set.map f4 (set.union (set.map f2 EMP) (set.map f3 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 16 ms.
+; duration: 12 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed
@@ -2768,7 +2778,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
+(set-option :tlimit-per 20000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2791,9 +2801,9 @@
 (assert (= q2 (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 569 ms.
+; duration: 445 ms.
 (reset)
-; total time: 297535 ms.
-; sat answers    : 0
-; unsat answers  : 60
-; unknown answers: 27
+; total time: 64553 ms.
+; sat answers    : 1
+; unsat answers  : 84
+; unknown answers: 2

@@ -33,6 +33,24 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getGroupKind()
+  {
+    return Kind.RELATION_GROUP;
+  }
+
+  @Override
+  protected Kind getRelationMinKind()
+  {
+    return Kind.RELATION_MIN;
+  }
+
+  @Override
+  protected Kind getRelationMaxKind()
+  {
+    return Kind.RELATION_MAX;
+  }
+
+  @Override
   protected Kind getIntersectionKind()
   {
     return Kind.SET_INTER;

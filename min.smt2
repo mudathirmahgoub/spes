@@ -26,6 +26,9 @@
 (define-fun null () (Tuple (Nullable String) (Nullable Int))
   (tuple (as nullable.null (Nullable String)) (as nullable.null (Nullable Int))))
 
+(define-fun null2 () (Tuple (Nullable String) (Nullable Int) (Nullable Int))
+  (tuple (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))))
+
 (assert 
 (= 
   q1 
@@ -42,27 +45,36 @@
 
 (assert 
 (= 
-  q2   
-  (set.union 
-    (set.map 
-      (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+  q2
+  (set.map 
+      (lambda ((s (Relation (Nullable String) (Nullable Int) (Nullable Int)))) 
         (let (
-              (t (ite (set.is_empty s) null (set.choose s))) 
+              (t (ite (set.is_empty s) null2 (set.choose s))) 
               (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
-              (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+              (max ((_ rel.max 2) leq s (as nullable.null (Nullable Int))))            
             )
          (tuple ((_ tuple.select 0) t ) min max))) 
-      ((_ rel.group 0) ((_ rel.project 1 0) EMP))) 
-    (set.map 
-      (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
-        (let (
-              (t (ite (set.is_empty s) null (set.choose s))) 
-              (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
-              (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
-            )
-         (tuple ((_ tuple.select 0) t ) min max))) 
-      ((_ rel.group 0) ((_ rel.project 1 0) EMP)))    
-  )
+      ((_ rel.group 0)      
+        (set.union 
+          (set.map 
+            (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+              (let (
+                    (t (ite (set.is_empty s) null (set.choose s))) 
+                    (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+                    (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+                  )
+              (tuple ((_ tuple.select 0) t ) min max))) 
+            ((_ rel.group 0) ((_ rel.project 1 0) EMP))) 
+          (set.map 
+            (lambda ((s (Relation (Nullable String) (Nullable Int)))) 
+              (let (
+                    (t (ite (set.is_empty s) null (set.choose s))) 
+                    (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+                    (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))            
+                  )
+              (tuple ((_ tuple.select 0) t ) min max))) 
+            ((_ rel.group 0) ((_ rel.project 1 0) EMP)))    
+        )))
 ))
 
 

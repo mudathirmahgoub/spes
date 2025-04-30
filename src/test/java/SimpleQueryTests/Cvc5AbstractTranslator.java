@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 import java.util.stream.IntStream;
 import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.rel.RelNode;
@@ -56,6 +56,10 @@ public abstract class Cvc5AbstractTranslator
   public static int unsatAnswers = 0;
   public static int satAnswers = 0;
   public static int unknownAnswers = 0;
+  public static Term leqInt;
+  public static Term nullInt;
+  public static Term leqString;
+  public static Term nullString;
 
   public Cvc5AbstractTranslator(boolean isNullable, PrintWriter writer)
   {
@@ -75,7 +79,7 @@ public abstract class Cvc5AbstractTranslator
     tm = new TermManager();
     solver = new Solver(tm);
     solver.setLogic("HO_ALL");
-    prologue.append("(set-logic HO_ALL)\n");    
+    prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
     setOption("check-models", "true");
     setOption("dag-thresh", "0");
@@ -88,6 +92,41 @@ public abstract class Cvc5AbstractTranslator
     one = tm.mkInteger(1);
     trueTerm = tm.mkBoolean(true);
     falseTerm = tm.mkBoolean(false);
+    nullInt = tm.mkNullableNull(tm.mkNullableSort(tm.getIntegerSort()));
+    nullString = tm.mkNullableNull(tm.mkNullableSort(tm.getStringSort()));
+    defineFunctions();
+  }
+
+  private void defineFunctions()
+  {
+    // (define-fun leq ((x (Nullable Int)) (y (Nullable Int))) Bool
+    // (ite
+    //   (and (nullable.is_null x) (nullable.is_null y))
+    //   true
+    //   (ite
+    //     (nullable.is_null x)
+    //     false
+    //     (<= (nullable.val x) (nullable.val y)))))
+
+    leqInt = defineLeq(tm.getIntegerSort(), Kind.LEQ);
+    leqString = defineLeq(tm.getStringSort(), Kind.STRING_LEQ);
+  }
+
+  protected Term defineLeq(Sort sort, Kind kind)
+  {
+    Sort nullable = tm.mkNullableSort(sort);
+    Sort bool = tm.getBooleanSort();
+    Term x = tm.mkVar(nullable, "x");
+    Term y = tm.mkVar(nullable, "y");
+    Term isNullX = tm.mkNullableIsNull(x);
+    Term isNullY = tm.mkNullableIsNull(y);
+    Term isNullXAndY = tm.mkTerm(Kind.AND, isNullX, isNullY);
+    Term xVal = tm.mkNullableVal(x);
+    Term yVal = tm.mkNullableVal(y);
+    Term leq = tm.mkTerm(kind, xVal, yVal);
+    Term ite2 = tm.mkTerm(Kind.ITE, isNullX, falseTerm, leq);
+    Term ite1 = tm.mkTerm(Kind.ITE, isNullXAndY, trueTerm, ite2);
+    return defineFun(new Term[] {x, y}, bool, ite1, "leq", true);
   }
 
   private void setOption(String option, String value)
@@ -427,58 +466,64 @@ public abstract class Cvc5AbstractTranslator
       return ret;
     }
 
+    Op op = tm.mkOp(getGroupKind(), indices);
+    Term group = tm.mkTerm(op, child);
+
+    // (set.map
+    //   (lambda ((s (Relation (Nullable String) (Nullable Int))))
+    //   (let (
+    //         (t (ite (set.is_empty s) null (set.choose s)))
+    //         (min ((_ rel.min 1) leq s (as nullable.null (Nullable Int))))
+    //         (max ((_ rel.max 1) leq s (as nullable.null (Nullable Int))))
+    //       )
+    //    (tuple ((_ tuple.select 0) t ) min max)))
+    //   ((_ rel.group indices) child))
+    Sort setSort = getElementSort(group.getSort());
+    Sort tupleSort = getElementSort(setSort);
+    Sort[] tupleSorts = tupleSort.getTupleSorts();
+    Term s = tm.mkVar(setSort, "s");
+    Term choose = tm.mkTerm(Kind.SET_CHOOSE, s);
     List<AggregateCall> calls = aggregate.getAggCallList();
-    // construct a lambda function that handles all aggregate functions
-    Sort xTupleSort = getElementSort(child.getSort());
-    Term x = tm.mkVar(xTupleSort, "x");
-    String name = String.join("_", calls.stream().map(s -> s.getAggregation().getName()).toList())
-                      .toLowerCase();
-    Sort yTupleSort = getSort(aggregate.getRowType());
-    Term y = tm.mkVar(yTupleSort, "y");
-    int yTupleLength = yTupleSort.getTupleLength();
-    Sort[] yTupleSorts = yTupleSort.getTupleSorts();
-    Term[] tupleElements = new Term[yTupleLength];
-    Term[] initialValues = new Term[yTupleLength];
-    // add grouping elements
-    int yIndex = 0;
+    Term[] elements = new Term[indices.length + calls.size()];
+    int i = 0;
     for (int index : indices)
     {
-      Term tupleSelect = mkTupleSelect(xTupleSort, x, index);
-      tupleElements[yIndex] = tupleSelect;
-      // initial value is needed for grouping fields
-      initialValues[yIndex] = tm.mkNullableNull(yTupleSorts[yIndex]);
-      yIndex++;
-    }
-
+      Sort elementSort = tupleSorts[index];      
+      Term tupleSelect = mkTupleSelect(tupleSort, choose, index);
+      if (!elementSort.isNullable())
+      {
+        tupleSelect = tm.mkNullableSome(tupleSelect);
+      }
+      Term isEmpty = tm.mkTerm(Kind.SET_IS_EMPTY, s);
+      Term nullElement = tm.mkNullableNull(elementSort);
+      Term ite = tm.mkTerm(Kind.ITE, isEmpty, nullElement, tupleSelect);
+      elements[i] = ite;
+      i++;
+    }    
+    
     // add aggregate functions
     for (int j = 0; j < calls.size(); j++)
     {
       AggregateCall call = calls.get(j);
       List<Integer> argList = call.getArgList();
-      Term yTupleSelect = mkTupleSelect(yTupleSort, y, yIndex);
-      if (yTupleSelect.getSort().isNullable())
+      if (argList.size() != 1)
       {
-        yTupleSelect = tm.mkNullableVal(yTupleSelect);
+        throw new RuntimeException("Unsupported aggregate function: " + call);
       }
-      if (argList.isEmpty())
-      {
-        mkCountFun(tupleElements, initialValues, yIndex, yTupleSelect);
-      }
-      else
-      {
-        mkAggregateFun(
-            xTupleSort, x, yTupleSort, yTupleSelect, y, tupleElements, initialValues, yIndex, call);
-      }
-      yIndex++;
+      Op aggrOp = tm.mkOp(getRelationMinKind(), new int[] {argList.get(0)});
+      Term aggTerm = tm.mkTerm(aggrOp, leqInt , s, nullInt);
+      elements[i] = aggTerm;
+      i++;
     }
 
-    Term body = tm.mkTuple(tupleElements);
-    Term initialValue = tm.mkTuple(initialValues);
-    Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name, true);
-    Op op = tm.mkOp(getAggregateKind(), indices);
-    Term ret = tm.mkTerm(op, new Term[] {f, initialValue, child});
-    return ret;
+    Term body = tm.mkTuple(elements);
+    Term f = defineFun(new Term[]{s}, body.getSort(), body, "aggr", true);  
+    Term map = tm.mkTerm(getMapKind(), f, group);    
+    return map;
   }
+
+  protected abstract Kind getRelationMinKind();
+  protected abstract Kind getRelationMaxKind();
 
   private void mkAggregateFun(Sort xTupleSort,
       Term x,
@@ -578,6 +623,7 @@ public abstract class Cvc5AbstractTranslator
   protected abstract Term translate(LogicalUnion n) throws CVC5ApiException;
 
   protected abstract Kind getProjectKind();
+  protected abstract Kind getGroupKind();
 
   protected Term translate(LogicalValues values)
   {
@@ -966,7 +1012,7 @@ public abstract class Cvc5AbstractTranslator
           argTerms = arguments;
           break;
         }
-        
+
         case "||": k = Kind.STRING_CONCAT; break;
         case "CASE":
         {

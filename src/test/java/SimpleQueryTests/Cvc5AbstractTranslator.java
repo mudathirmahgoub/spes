@@ -75,7 +75,7 @@ public abstract class Cvc5AbstractTranslator
     tm = new TermManager();
     solver = new Solver(tm);
     solver.setLogic("HO_ALL");
-    prologue.append("(set-logic HO_ALL)\n");    
+    prologue.append("(set-logic HO_ALL)\n");
     setOption("produce-models", "true");
     setOption("check-models", "true");
     setOption("dag-thresh", "0");
@@ -934,39 +934,7 @@ public abstract class Cvc5AbstractTranslator
         case "OR": return translateOr(needsLifting, argTerms);
         case "NOT": k = Kind.NOT; break;
         case "UPPER": k = Kind.STRING_TO_UPPER; break;
-        case "SUBSTRING":
-        {
-          k = Kind.STRING_SUBSTR;
-          assert (argTerms.length >= 2);
-          for (int i = 1; i < argTerms.length; i++)
-          {
-            if (argTerms[i].getSort().isNullable())
-            {
-              argTerms[i] = tm.mkNullableVal(argTerms[i]);
-            }
-          }
-          // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
-          argTerms[1] = solver.simplify(tm.mkTerm(Kind.SUB, argTerms[1], one));
-          if (argTerms.length == 3)
-          {
-            // SELECT SUBSTRING('abcdef' from 2 for 3) = bcd
-            break;
-          }
-
-          // SELECT SUBSTRING('abcdef' from 2) = bcdef
-          Term[] arguments = new Term[3];
-          arguments[0] = argTerms[0];
-          arguments[1] = argTerms[1];
-          Term stringTerm = argTerms[0];
-          if (stringTerm.getSort().isNullable())
-          {
-            stringTerm = tm.mkNullableVal(stringTerm);
-          }
-          arguments[2] = solver.simplify(tm.mkTerm(Kind.STRING_LENGTH, stringTerm));
-          argTerms = arguments;
-          break;
-        }
-        
+        case "SUBSTRING": return translateNullableSubstring(needsLifting, argTerms);
         case "||": k = Kind.STRING_CONCAT; break;
         case "CASE":
         {
@@ -1017,6 +985,57 @@ public abstract class Cvc5AbstractTranslator
     {
       throw new RuntimeException(expr.toString());
     }
+  }
+
+  private Term translateNullableSubstring(boolean needsLifting, Term[] argTerms)
+  {
+    if (needsLifting)
+    {
+      Term orTerm = tm.mkNullableIsNull(argTerms[0]);
+      orTerm = orTerm.orTerm(tm.mkNullableIsNull(argTerms[1]));
+      if (argTerms.length == 3)
+      {
+        orTerm = orTerm.orTerm(tm.mkNullableIsNull(argTerms[2]));
+      }
+      Term nullString = tm.mkNullableNull(tm.mkNullableSort(tm.getStringSort()));
+      
+      for (int i = 0; i < argTerms.length; i++)
+      {
+        argTerms[i] = tm.mkNullableVal(argTerms[i]);
+      }
+      Term substring = translateSubstring(argTerms);
+      Term some = tm.mkNullableSome(substring);
+      Term ite = tm.mkTerm(Kind.ITE, orTerm, nullString, some);
+      return ite;
+    }
+    else
+    {
+      return translateSubstring(argTerms);
+    }
+  }
+
+  private Term translateSubstring(Term[] argTerms)
+  {
+    assert (argTerms.length >= 2);
+    // decrease stat index by 1 since smt is 0 based, whereas SQL is 1 based
+    argTerms[1] = tm.mkTerm(Kind.SUB, argTerms[1], one);
+    if (argTerms.length == 2)
+    {
+      // SELECT SUBSTRING('abcdef' from 2) = bcdef
+      Term[] arguments = new Term[3];
+      arguments[0] = argTerms[0];
+      arguments[1] = argTerms[1];
+      Term stringTerm = argTerms[0];
+      arguments[2] = tm.mkTerm(Kind.STRING_LENGTH, stringTerm);
+      argTerms = arguments;
+    }
+    System.out.println("substring args: " + Arrays.toString(argTerms));
+    System.out.println("substring sorts: " + argTerms[0].getSort());
+    System.out.println("substring sorts: " + argTerms[1].getSort());
+    System.out.println("substring sorts: " + argTerms[2].getSort());
+    Term substring = tm.mkTerm(Kind.STRING_SUBSTR, argTerms);
+    substring = solver.simplify(substring);
+    return substring;
   }
 
   private Term translateAnd(boolean needsLifting, Term[] argTerms)

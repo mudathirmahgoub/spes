@@ -8,7 +8,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -34,7 +34,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -46,7 +46,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 30) (nullable.some 3))))))
 (check-sat)
 ;answer: unsat
-; duration: 14 ms.
+; duration: 13 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullNull
@@ -58,7 +58,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -75,7 +75,7 @@
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 73 ms.
+; duration: 72 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (set.singleton (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (as nullable.null (Nullable Int)) (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 7) (nullable.some 2))))
@@ -97,7 +97,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -111,7 +111,7 @@
 (assert (= q2 ((_ rel.project 0 1 2) (set.union (set.singleton (tuple (nullable.some 11) (nullable.some 1) (nullable.some 10))) (set.singleton (tuple (nullable.some 23) (nullable.some 3) (nullable.some 20)))))))
 (check-sat)
 ;answer: unsat
-; duration: 13 ms.
+; duration: 12 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinus
@@ -123,7 +123,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -146,7 +146,7 @@
 (assert (= q2 (set.minus (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 206 ms.
+; duration: 211 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus
@@ -158,7 +158,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -170,7 +170,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 14 ms.
+; duration: 15 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProject
@@ -182,7 +182,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -194,7 +194,7 @@
 (assert (= q2 ((_ rel.project 0) (set.union (set.singleton (tuple (nullable.some 11))) (set.singleton (tuple (nullable.some 23)))))))
 (check-sat)
 ;answer: unsat
-; duration: 6 ms.
+; duration: 7 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderFilter
@@ -206,7 +206,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String)) Bool))
@@ -218,7 +218,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 10) (nullable.some "x"))))))
 (check-sat)
 ;answer: unsat
-; duration: 8 ms.
+; duration: 7 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup
@@ -230,7 +230,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -243,7 +243,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 18 ms.
+; duration: 20 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoin
@@ -255,7 +255,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -271,7 +271,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p1 (rel.product EMP DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 44 ms.
+; duration: 45 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion
@@ -283,7 +283,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -300,7 +300,7 @@
 (assert (= q2 (set.map f2 (set.union ((_ rel.project 7 2) EMP) ((_ rel.project 7 2) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 26 ms.
+; duration: 24 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNot
@@ -312,7 +312,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -331,7 +331,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p3 (set.map f2 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 118 ms.
+; duration: 122 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testWhereInCorrelated
@@ -343,7 +343,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -367,7 +367,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p5 (rel.product (set.map f3 EMP) (set.map f4 DEPT))))))
 (check-sat)
 ;answer: unsat
-; duration: 372 ms.
+; duration: 376 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsRequiresExecutor
@@ -379,7 +379,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -393,7 +393,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.filter p1 (set.singleton (tuple (nullable.some 1) (nullable.some 2)))))))
 (check-sat)
 ;answer: unsat
-; duration: 13 ms.
+; duration: 14 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsProjectNullable*
@@ -405,7 +405,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -422,7 +422,7 @@
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 38 ms.
+; duration: 40 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePreventProjectPullUp
@@ -434,7 +434,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -457,7 +457,7 @@
 (assert (= q2 (set.map f5 (set.filter p4 (rel.product ((_ rel.project 5) (set.filter p3 EMP)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 388 ms.
+; duration: 381 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin3way
@@ -469,7 +469,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -500,7 +500,7 @@
 (assert (= q2 (set.map f9 (set.filter p8 (rel.product (set.filter p6 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p7 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 965 ms.
+; duration: 1013 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRight
@@ -512,7 +512,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -530,7 +530,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p2 (rel.product (set.filter p1 (rel.product EMP DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 194 ms.
+; duration: 220 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceExpressionsNot
@@ -542,7 +542,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Bool)) Bool))
@@ -556,7 +556,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 (set.union (set.singleton (tuple (nullable.some false))) (set.singleton (tuple (nullable.some true))))))))
 (check-sat)
 ;answer: unsat
-; duration: 10 ms.
+; duration: 11 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceProject
@@ -568,7 +568,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -593,7 +593,41 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 360 ms.
+; duration: 385 ms.
+(reset)
+;-----------------------------------------------------------
+; test name: testReduceConstantsCalc
+;Translating sql query: SELECT * FROM (SELECT UPPER(SUBSTRING(t6.X FROM 1 FOR 2) || SUBSTRING(t6.X FROM 3)) AS U, SUBSTRING(t6.X FROM 1 FOR 1) AS S FROM (SELECT * FROM (SELECT 'table' AS X FROM (VALUES  (TRUE)) AS t UNION SELECT 'view' FROM (VALUES  (TRUE)) AS t1) AS t3 UNION SELECT 'foreign table' FROM (VALUES  (TRUE)) AS t4) AS t6) AS t7 WHERE t7.U = 'TABLE'
+;Translating sql query: SELECT 'TABLE' AS U, 't' AS S FROM (VALUES  (TRUE)) AS t9
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 10000)
+(set-option :strings-exp true)
+
+(declare-const q1 (Set (Tuple (Nullable String) (Nullable String))))
+(declare-const q2 (Set (Tuple (Nullable String) (Nullable String))))
+(declare-const p4 (-> (Tuple (Nullable String) (Nullable String)) Bool))
+(declare-const f0 (-> (Tuple (Nullable Bool)) (Tuple (Nullable String))))
+(declare-const f1 (-> (Tuple (Nullable Bool)) (Tuple (Nullable String))))
+(declare-const f2 (-> (Tuple (Nullable Bool)) (Tuple (Nullable String))))
+(declare-const f3 (-> (Tuple (Nullable String)) (Tuple (Nullable String) (Nullable String))))
+(declare-const f5 (-> (Tuple (Nullable Bool)) (Tuple (Nullable String) (Nullable String))))
+(assert (not (= q1 q2)))
+(assert (= f0 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "table")))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "view")))))
+(assert (= f2 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "foreign table")))))
+(assert (= f3 (lambda ((t (Tuple (Nullable String)))) (tuple (nullable.lift (lambda ((BOUND_VARIABLE_517 String)) (str.to_upper BOUND_VARIABLE_517)) (nullable.lift (lambda ((BOUND_VARIABLE_510 String) (BOUND_VARIABLE_511 String)) (str.++ BOUND_VARIABLE_510 BOUND_VARIABLE_511)) (ite (or (or (nullable.is_null ((_ tuple.select 0) t)) (nullable.is_null (nullable.some 1))) (nullable.is_null (nullable.some 2))) (as nullable.null (Nullable String)) (nullable.some (str.substr (nullable.val ((_ tuple.select 0) t)) 0 2))) (ite (or (nullable.is_null ((_ tuple.select 0) t)) (nullable.is_null (nullable.some 3))) (as nullable.null (Nullable String)) (nullable.some (str.substr (nullable.val ((_ tuple.select 0) t)) 2 (str.len (nullable.val ((_ tuple.select 0) t)))))))) (ite (or (or (nullable.is_null ((_ tuple.select 0) t)) (nullable.is_null (nullable.some 1))) (nullable.is_null (nullable.some 1))) (as nullable.null (Nullable String)) (nullable.some (str.substr (nullable.val ((_ tuple.select 0) t)) 0 1)))))))
+(assert (= p4 (lambda ((t (Tuple (Nullable String) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_547 String) (BOUND_VARIABLE_548 String)) (= BOUND_VARIABLE_547 BOUND_VARIABLE_548)) ((_ tuple.select 0) t) (nullable.some "TABLE"))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_547 String) (BOUND_VARIABLE_548 String)) (= BOUND_VARIABLE_547 BOUND_VARIABLE_548)) ((_ tuple.select 0) t) (nullable.some "TABLE")))))))
+(assert (= f5 (lambda ((t (Tuple (Nullable Bool)))) (tuple (nullable.some "TABLE") (nullable.some "t")))))
+(assert (= q1 ((_ rel.project 0 1) (set.filter p4 (set.map f3 (set.union ((_ rel.project 0) (set.union (set.map f0 (set.singleton (tuple (nullable.some true)))) (set.map f1 (set.singleton (tuple (nullable.some true)))))) (set.map f2 (set.singleton (tuple (nullable.some true))))))))))
+(assert (= q2 (set.map f5 (set.singleton (tuple (nullable.some true))))))
+(check-sat)
+;answer: unsat
+; duration: 23 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup2
@@ -605,7 +639,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -622,7 +656,7 @@
 (assert (= q2 (set.map f2 (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 39 ms.
+; duration: 37 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNull
@@ -634,7 +668,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -653,7 +687,7 @@
 (assert (= q2 (set.map f3 EMP)))
 (check-sat)
 ;answer: unsat
-; duration: 19 ms.
+; duration: 23 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegatedInverted
@@ -665,7 +699,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -678,7 +712,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 19 ms.
+; duration: 20 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
@@ -690,7 +724,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -712,7 +746,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p4 (rel.product (set.filter p3 (rel.product (set.filter p2 (rel.product (set.filter p1 (rel.product EMP DEPT)) EMP)) DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 474 ms.
+; duration: 509 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testExtractJoinFilterRule
@@ -724,11 +758,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -744,7 +778,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 (rel.product EMP DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 56 ms.
+; duration: 58 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceFullOuterJoin
@@ -756,7 +790,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -787,7 +821,7 @@
 (assert (= q2 (set.map f9 (set.filter p8 (set.union (set.union (set.map leftJoin6 (set.minus EMP ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 (rel.product EMP EMP))))) (set.map rightJoin7 (set.minus EMP ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p5 (rel.product EMP EMP)))))) (set.filter p5 (rel.product EMP EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 585 ms.
+; duration: 630 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testDecorrelateTwoIn
@@ -799,7 +833,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -835,7 +869,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p11 (rel.product (set.map f9 (set.filter p8 (rel.product (set.map f6 EMP) (set.map f7 DEPT)))) (set.map f10 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 1644 ms.
+; duration: 1660 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeFilter
@@ -847,7 +881,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -876,7 +910,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -899,7 +933,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -922,7 +956,7 @@
 (assert (= q2 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 110 ms.
+; duration: 127 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoin
@@ -934,7 +968,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -950,7 +984,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")))) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some ""))))))))
 (check-sat)
 ;answer: unsat
-; duration: 40 ms.
+; duration: 45 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNull
@@ -962,7 +996,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -975,7 +1009,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 16 ms.
+; duration: 18 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin
@@ -987,7 +1021,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1012,7 +1046,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 360 ms.
+; duration: 1584 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToRightOuter
@@ -1024,7 +1058,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -1054,7 +1088,7 @@
 (assert (= q2 (set.map f8 (set.union (set.map rightJoin7 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 2 3 4 5 6 7 8 9 10) (set.filter p6 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP))))))) (set.filter p6 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP))))))))
 (check-sat)
 ;answer: unsat
-; duration: 819 ms.
+; duration: 851 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegated
@@ -1066,7 +1100,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1079,7 +1113,7 @@
 (assert (= q2 ((_ rel.project 0) (set.minus ((_ rel.project 0) (set.singleton (tuple (nullable.some 0)))) ((_ rel.project 0) (set.singleton (tuple (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 32 ms.
+; duration: 36 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNullableCase
@@ -1091,7 +1125,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Int))))
@@ -1121,7 +1155,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1140,7 +1174,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 (rel.product EMP EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 48 ms.
+; duration: 49 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesToEmpty
@@ -1152,7 +1186,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1166,7 +1200,7 @@
 (assert (= q2 ((_ rel.project 0 1 2) (set.minus ((_ rel.project 0 1 2) (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2) (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 8 ms.
+; duration: 9 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter
@@ -1178,7 +1212,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1197,7 +1231,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 ((_ rel.project 0 1 6 5 7) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 20036 ms.
+; duration: 10010 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushFilterThroughSemiJoin
@@ -1209,11 +1243,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
@@ -1229,7 +1263,7 @@
 (assert (= q2 ((_ rel.project 0 1 2) (set.filter p3 (rel.product ((_ rel.project 0 1) (set.filter p2 DEPT)) ((_ rel.project 7) EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 280 ms.
+; duration: 260 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion3way
@@ -1241,7 +1275,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1274,7 +1308,7 @@
 (assert (= q2 (set.map f10 (set.filter p9 (rel.product (set.union ((_ rel.project 0) (set.union ((_ rel.project 7) (set.filter p5 EMP)) ((_ rel.project 7) (set.filter p6 EMP)))) ((_ rel.project 7) (set.filter p7 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p8 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 551 ms.
+; duration: 633 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinRight
@@ -1286,7 +1320,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1310,7 +1344,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map rightJoin5 (set.minus (set.map f3 DEPT) ((_ rel.project 9 10 11) (set.filter p4 (rel.product (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0))))) (set.map f3 DEPT)))))) (set.filter p4 (rel.product (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0))))) (set.map f3 DEPT)))))))
 (check-sat)
 ;answer: unsat
-; duration: 250 ms.
+; duration: 265 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceLeftOuterJoin
@@ -1322,7 +1356,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1355,7 +1389,7 @@
 (assert (= q2 (set.map f10 (set.filter p9 (set.union (set.map leftJoin8 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP))))))) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unsat
-; duration: 1365 ms.
+; duration: 1417 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants2
@@ -1367,7 +1401,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const q1 (Set (Tuple (Nullable Bool))))
@@ -1381,7 +1415,7 @@
 (assert (= q2 (set.map f1 (set.singleton (tuple (nullable.some 0))))))
 (check-sat)
 ;answer: unsat
-; duration: 30 ms.
+; duration: 32 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnRight
@@ -1393,7 +1427,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1404,7 +1438,7 @@
 (assert (= q2 ((_ rel.project 6) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 141 ms.
+; duration: 146 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToInner
@@ -1416,7 +1450,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1446,7 +1480,7 @@
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 865 ms.
+; duration: 896 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceOrCaseWhen
@@ -1458,7 +1492,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1473,7 +1507,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 133 ms.
+; duration: 136 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionAll
@@ -1485,7 +1519,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1508,7 +1542,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 403 ms.
+; duration: 464 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testLeftOuterJoinSimplificationToInner
@@ -1520,7 +1554,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -1546,7 +1580,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product DEPT ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 288 ms.
+; duration: 312 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus2
@@ -1558,7 +1592,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1572,7 +1606,7 @@
 (assert (= q2 (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 30) (nullable.some 3)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 40) (nullable.some 4)))))))
 (check-sat)
 ;answer: unsat
-; duration: 13 ms.
+; duration: 14 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants
@@ -1584,11 +1618,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const f6 (-> (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1610,7 +1644,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (set.singleton (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)))))))
 (check-sat)
 ;answer: unsat
-; duration: 35 ms.
+; duration: 34 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
@@ -1622,7 +1656,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -1644,7 +1678,7 @@
 (assert (= q2 ((_ rel.project 9 1) (set.filter p4 (rel.product EMP ((_ rel.project 0 1) (set.filter p3 DEPT)))))))
 (check-sat)
 ;answer: unsat
-; duration: 283 ms.
+; duration: 320 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionDistinct
@@ -1656,7 +1690,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1679,7 +1713,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 407 ms.
+; duration: 423 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceNoPullUpExprs
@@ -1691,7 +1725,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1714,7 +1748,7 @@
 (assert (= q2 (set.map f5 (set.filter p4 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 457 ms.
+; duration: 507 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyProject
@@ -1726,7 +1760,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1742,7 +1776,7 @@
 (assert (= q2 (set.map f2 (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 18 ms.
+; duration: 19 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConjunctInPullUp
@@ -1754,7 +1788,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1779,7 +1813,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 665 ms.
+; duration: 682 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastFilter
@@ -1791,7 +1825,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1811,7 +1845,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p3 (rel.product ((_ rel.project 7 1) (set.filter p2 (set.filter p1 (rel.product EMP DEPT)))) DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 199 ms.
+; duration: 227 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoFilter
@@ -1823,7 +1857,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1842,7 +1876,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p2 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 133 ms.
+; duration: 149 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePullUpThruAlias
@@ -1854,7 +1888,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1879,7 +1913,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 5) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 475 ms.
+; duration: 521 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeSetOpMixed
@@ -1891,7 +1925,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1914,7 +1948,7 @@
 (assert (= q2 (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.inter ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 173 ms.
+; duration: 167 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNotNull
@@ -1926,7 +1960,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1941,7 +1975,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 58 ms.
+; duration: 61 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyIntersect
@@ -1953,7 +1987,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -1965,7 +1999,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 9 ms.
+; duration: 8 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoProject
@@ -1977,7 +2011,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -1996,7 +2030,7 @@
 (assert (= q2 (set.map f3 (set.filter p2 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 20016 ms.
+; duration: 10013 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnionAlwaysTrue
@@ -2008,7 +2042,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2033,7 +2067,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.filter p6 (rel.product ((_ rel.project 7) (set.filter p3 EMP)) ((_ rel.project 0) (set.filter p5 (set.union ((_ rel.project 7) (set.filter p4 EMP)) ((_ rel.project 7) EMP)))))))))
 (check-sat)
 ;answer: unsat
-; duration: 426 ms.
+; duration: 413 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeIntersect
@@ -2045,7 +2079,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2068,7 +2102,7 @@
 (assert (= q2 (set.inter (set.inter ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 98 ms.
+; duration: 114 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAddRedundantSemiJoinRule
@@ -2080,7 +2114,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2102,7 +2136,7 @@
 (assert (= q2 (set.map f4 (set.filter p3 (rel.product (set.filter p2 (rel.product EMP DEPT)) DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 111 ms.
+; duration: 130 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinWithFilter
@@ -2114,11 +2148,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Set (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
@@ -2132,7 +2166,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p2 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p1 EMP)) DEPT)))))
 (check-sat)
 ;answer: unsat
-; duration: 183 ms.
+; duration: 200 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRightOuterJoinSimplificationToInner
@@ -2144,7 +2178,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2170,7 +2204,7 @@
 (assert (= q2 (set.map f6 (set.filter p5 (rel.product ((_ rel.project 0 1) (set.filter p4 DEPT)) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 299 ms.
+; duration: 322 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinCondDownToProject
@@ -2182,7 +2216,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -2202,7 +2236,7 @@
 (assert (= q2 ((_ rel.project 0 10) (set.filter p3 (rel.product (set.map f1 DEPT) (set.map f2 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 286 ms.
+; duration: 354 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRightWithFilter
@@ -2214,11 +2248,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String)) Bool))
@@ -2234,7 +2268,7 @@
 (assert (= q2 ((_ rel.project 1) (set.filter p3 (rel.product (set.filter p2 (rel.product EMP ((_ rel.project 0 1) (set.filter p1 DEPT)))) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 417 ms.
+; duration: 493 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToLeftOuter
@@ -2246,11 +2280,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int))))
 (declare-const q2 (Set (Tuple (Nullable Int))))
@@ -2276,7 +2310,7 @@
 (assert (= q2 (set.map f8 (set.union (set.map leftJoin7 (set.minus ((_ rel.project 0 1) (set.filter p5 DEPT)) ((_ rel.project 0 1) (set.filter p6 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) EMP))))) (set.filter p6 (rel.product ((_ rel.project 0 1) (set.filter p5 DEPT)) EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 858 ms.
+; duration: 894 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion
@@ -2288,7 +2322,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2317,7 +2351,7 @@
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product (set.union ((_ rel.project 7) (set.filter p4 EMP)) ((_ rel.project 7) (set.filter p5 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 398 ms.
+; duration: 1648 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoJoin
@@ -2329,11 +2363,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -2353,7 +2387,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.union (set.map leftJoin5 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1) (set.filter p4 DEPT)))))) (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1) (set.filter p4 DEPT)))))))
 (check-sat)
 ;answer: unsat
-; duration: 1251 ms.
+; duration: 1326 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSwapOuterJoin
@@ -2365,7 +2399,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
@@ -2389,7 +2423,7 @@
 (assert (= q2 (set.map f5 (set.union (set.map rightJoin4 (set.minus DEPT ((_ rel.project 9 10) (set.filter p3 (rel.product EMP DEPT))))) (set.filter p3 (rel.product EMP DEPT))))))
 (check-sat)
 ;answer: unsat
-; duration: 302 ms.
+; duration: 322 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnLeft
@@ -2401,7 +2435,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2412,7 +2446,7 @@
 (assert (= q2 ((_ rel.project 6) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (rel.product EMP EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 124 ms.
+; duration: 134 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed2
@@ -2424,7 +2458,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2447,7 +2481,7 @@
 (assert (= q2 (set.union (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 387 ms.
+; duration: 440 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsEliminatesFilter
@@ -2459,7 +2493,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -2473,7 +2507,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.filter p1 (set.singleton (tuple (nullable.some 0) (nullable.some 0)))))))
 (check-sat)
 ;answer: unsat
-; duration: 12 ms.
+; duration: 15 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter2*
@@ -2485,7 +2519,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2500,7 +2534,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p1 ((_ rel.project 3) EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 60 ms.
+; duration: 64 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSemiJoinReduceConstants
@@ -2512,7 +2546,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2535,7 +2569,7 @@
 (assert (= q2 ((_ rel.project 0) (set.filter p5 (rel.product ((_ rel.project 0 1) (set.filter p3 ((_ rel.project 6 7) EMP))) ((_ rel.project 1) (set.filter p4 ((_ rel.project 6 7) EMP))))))))
 (check-sat)
 ;answer: unsat
-; duration: 1652 ms.
+; duration: 1785 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinLeft
@@ -2547,11 +2581,11 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -2565,7 +2599,7 @@
 (assert (= q2 ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")))) ((_ rel.project 0 1 2 3 4 5 6 7 8 9 10) (set.singleton (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some ""))))))))
 (check-sat)
 ;answer: unsat
-; duration: 91 ms.
+; duration: 119 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNestedCaseWhen
@@ -2577,7 +2611,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2592,7 +2626,7 @@
 (assert (= q2 ((_ rel.project 6) (set.filter p1 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 114 ms.
+; duration: 124 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceRightOuterJoin
@@ -2604,7 +2638,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2637,7 +2671,7 @@
 (assert (= q2 (set.map f10 (set.filter p9 (set.union (set.map rightJoin8 (set.minus ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)) ((_ rel.project 9 10 11 12 13 14 15 16 17) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP))))))) (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unsat
-; duration: 1370 ms.
+; duration: 1419 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceComplexPredicate
@@ -2649,7 +2683,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2678,7 +2712,7 @@
 (assert (= q2 (set.map f8 (set.filter p7 (rel.product ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p6 ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))))))
 (check-sat)
 ;answer: unsat
-; duration: 1021 ms.
+; duration: 1082 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAlreadyFalseEliminatesFilter
@@ -2690,7 +2724,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable Int)) Bool))
@@ -2702,7 +2736,7 @@
 (assert (= q2 ((_ rel.project 0 1) (set.minus ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0)))) ((_ rel.project 0 1) (set.singleton (tuple (nullable.some 0) (nullable.some 0))))))))
 (check-sat)
 ;answer: unsat
-; duration: 24 ms.
+; duration: 27 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion2
@@ -2714,7 +2748,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2733,7 +2767,7 @@
 (assert (= q2 (set.union (set.map f2 EMP) (set.map f3 EMP))))
 (check-sat)
 ;answer: unsat
-; duration: 27 ms.
+; duration: 29 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion3
@@ -2745,7 +2779,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2766,7 +2800,7 @@
 (assert (= q2 (set.map f4 (set.union (set.map f2 EMP) (set.map f3 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 12 ms.
+; duration: 13 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed
@@ -2778,7 +2812,7 @@
 (set-option :dag-thresh 0)
 (set-option :uf-lazy-ll true)
 (set-option :fmf-bound true)
-(set-option :tlimit-per 20000)
+(set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
 (declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
@@ -2801,9 +2835,9 @@
 (assert (= q2 (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.union ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p3 EMP)) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p4 EMP)))) ((_ rel.project 0 1 2 3 4 5 6 7 8) (set.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 445 ms.
+; duration: 486 ms.
 (reset)
-; total time: 64553 ms.
+; total time: 48489 ms.
 ; sat answers    : 1
-; unsat answers  : 84
+; unsat answers  : 85
 ; unknown answers: 2

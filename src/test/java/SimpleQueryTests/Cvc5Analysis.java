@@ -16,7 +16,7 @@ public class Cvc5Analysis
     File f = new File("testData/no_aggregation.json");
     // File f = new File("testData/test.json");    
 
-    boolean isSetSemantics = true;
+    boolean isSetSemantics = false;
     PrintWriter writer;
     if (isSetSemantics)
     {

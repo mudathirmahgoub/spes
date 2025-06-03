@@ -133,7 +133,7 @@ public abstract class Cvc5AbstractTranslator
       println("(get-value (" + q2 + "))");
       println("; " + solver.getValue(q2));
 
-      String url = "jdbc:postgresql://localhost/spes?user=postgres&password=abc";
+      String url = "jdbc:postgresql://localhost/template1?user=postgres&password=abc";
       try (Connection connection = DriverManager.getConnection(url))
       {
         Statement statement = connection.createStatement();

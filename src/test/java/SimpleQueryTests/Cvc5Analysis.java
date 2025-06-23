@@ -13,10 +13,10 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
-    File f = new File("testData/no_aggregation_sat.json");
+    File f = new File("testData/no_aggregation.json");
     // File f = new File("testData/test.json");    
 
-    boolean isSetSemantics = true;
+    boolean isSetSemantics = false;
     PrintWriter writer;
     if (isSetSemantics)
     {
@@ -24,7 +24,7 @@ public class Cvc5Analysis
     }
     else
     {
-      writer = new PrintWriter(new File("min_bags_sat.smt2"));
+      writer = new PrintWriter(new File("min_bags.smt2"));
     }
 
     JsonParser parser = new JsonParser();

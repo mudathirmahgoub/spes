@@ -22,7 +22,7 @@
 (assert (= q2 ((_ table.project 0) (bag.difference_remove ((_ table.project 0) (bag (tuple (nullable.some 0)) 1)) ((_ table.project 0) (bag (tuple (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 40 ms.
+; duration: 42 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyFilterProjectUnion
@@ -46,7 +46,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag (tuple (nullable.some 30) (nullable.some 3)) 1))))
 (check-sat)
 ;answer: unsat
-; duration: 13 ms.
+; duration: 12 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullNull
@@ -74,8 +74,26 @@
 (assert (= q1 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP))))
 (assert (= q2 (bag.map f2 (bag.filter p1 EMP))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10018 ms.
+;answer: sat
+; duration: 667 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 10) (nullable.some "A") (nullable.some "B") (as nullable.null (Nullable Int)) (nullable.some (- 2)) (nullable.some (- 3)) (nullable.some 3) (nullable.some 7) (nullable.some 4)) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 10) (nullable.some "A") (nullable.some "B") (as nullable.null (Nullable Int)) (nullable.some (- 2)) (nullable.some (- 3)) (nullable.some 3) (nullable.some 7) (nullable.some 4)) 1)
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 10) (nullable.some "A") (nullable.some "B") (as nullable.null (Nullable Int)) (nullable.some (- 2)) (nullable.some 3) (nullable.some (- 3)) (nullable.some 7) (nullable.some 4)) 1)
+; insert into EMP values(10,'A','B',NULL,-2,-3,3,7,4)
+; SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 AND EMP.EMPNO = 10 AND EMP.MGR IS NULL AND EMP.EMPNO = 10) AS q1 EXCEPT ALL SELECT * FROM (SELECT 10 AS EMPNO, EMP0.ENAME, EMP0.JOB, CAST(NULL AS INT) AS MGR, EMP0.HIREDATE, EMP0.SAL, EMP0.COMM, 7 AS DEPTNO, EMP0.SLACKER FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 7 AND EMP0.MGR IS NULL AND EMP0.EMPNO = 10) AS q2;
+;(10,A,B,NULL,-2,-3,3,7,4)
+
+; SELECT * FROM (SELECT 10 AS EMPNO, EMP0.ENAME, EMP0.JOB, CAST(NULL AS INT) AS MGR, EMP0.HIREDATE, EMP0.SAL, EMP0.COMM, 7 AS DEPTNO, EMP0.SLACKER FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 7 AND EMP0.MGR IS NULL AND EMP0.EMPNO = 10) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 AND EMP.EMPNO = 10 AND EMP.MGR IS NULL AND EMP.EMPNO = 10) AS q1;
+;(10,A,B,NULL,-2,3,-3,7,4)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProjectFilter
@@ -101,7 +119,7 @@
 (assert (= q2 ((_ table.project 0 1 2) (bag.union_disjoint (bag (tuple (nullable.some 11) (nullable.some 1) (nullable.some 10)) 1) (bag (tuple (nullable.some 23) (nullable.some 3) (nullable.some 20)) 1)))))
 (check-sat)
 ;answer: unsat
-; duration: 80 ms.
+; duration: 20 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinus
@@ -136,7 +154,7 @@
 (assert (= q2 (bag.difference_remove (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 1366 ms.
+; duration: 1283 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus
@@ -160,7 +178,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 32 ms.
+; duration: 29 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesUnderProject
@@ -208,7 +226,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag (tuple (nullable.some 10) (nullable.some "x")) 1))))
 (check-sat)
 ;answer: unsat
-; duration: 7 ms.
+; duration: 6 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup
@@ -233,7 +251,7 @@
 (assert (= q2 ((_ table.project 0) (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 46 ms.
+; duration: 60 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoin
@@ -261,7 +279,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p1 (table.product EMP DEPT)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10012 ms.
+; duration: 10033 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion
@@ -290,7 +308,7 @@
 (assert (= q2 (bag.map f2 (bag.union_disjoint ((_ table.project 7 2) EMP) ((_ table.project 7 2) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10080 ms.
+; duration: 10106 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNot
@@ -321,7 +339,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p3 (bag.map f2 EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10044 ms.
+; duration: 10065 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testWhereInCorrelated
@@ -336,8 +354,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const q1 (Bag (Tuple (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String)) Bool))
 (declare-const q2 (Bag (Tuple (Nullable Int))))
@@ -357,7 +375,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p5 (table.product (bag.map f3 EMP) (bag.map f4 DEPT))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10041 ms.
+; duration: 10120 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsRequiresExecutor
@@ -383,7 +401,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 1) (nullable.some 2)) 1)))))
 (check-sat)
 ;answer: unsat
-; duration: 69 ms.
+; duration: 84 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsProjectNullable*
@@ -412,7 +430,7 @@
 (assert (= q2 (bag.map f2 (bag.filter p1 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10008 ms.
+; duration: 10010 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePreventProjectPullUp
@@ -447,7 +465,7 @@
 (assert (= q2 (bag.map f5 (bag.filter p4 (table.product ((_ table.project 5) (bag.filter p3 EMP)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10053 ms.
+; duration: 10051 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin3way
@@ -490,7 +508,7 @@
 (assert (= q2 (bag.map f9 (bag.filter p8 (table.product (bag.filter p6 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p7 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10415 ms.
+; duration: 10070 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRight
@@ -520,7 +538,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p2 (table.product (bag.filter p1 (table.product EMP DEPT)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 17850 ms.
+; duration: 18922 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceExpressionsNot
@@ -546,7 +564,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 (bag.union_disjoint (bag (tuple (nullable.some false)) 1) (bag (tuple (nullable.some true)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 324 ms.
+; duration: 381 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceProject
@@ -583,7 +601,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 12387 ms.
+; duration: 11142 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsCalc
@@ -617,7 +635,7 @@
 (assert (= q2 (bag.map f5 (bag (tuple (nullable.some true)) 1))))
 (check-sat)
 ;answer: unsat
-; duration: 340 ms.
+; duration: 355 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsDup2
@@ -645,8 +663,8 @@
 (assert (= q1 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP))))
 (assert (= q2 (bag.map f2 (bag.filter p1 EMP))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10011 ms.
+;answer: unsat
+; duration: 231 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNull
@@ -677,7 +695,7 @@
 (assert (= q2 (bag.map f3 EMP)))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10149 ms.
+; duration: 10010 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegatedInverted
@@ -702,7 +720,7 @@
 (assert (= q2 ((_ table.project 0) (bag.difference_remove ((_ table.project 0) (bag (tuple (nullable.some 0)) 1)) ((_ table.project 0) (bag (tuple (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 266 ms.
+; duration: 91 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastJoinRuleLeft
@@ -736,7 +754,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p4 (table.product (bag.filter p3 (table.product (bag.filter p2 (table.product (bag.filter p1 (table.product EMP DEPT)) EMP)) DEPT)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10015 ms.
+; duration: 10018 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testExtractJoinFilterRule
@@ -768,7 +786,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 (table.product EMP DEPT)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10144 ms.
+; duration: 10155 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceFullOuterJoin
@@ -811,7 +829,7 @@
 (assert (= q2 (bag.map f9 (bag.filter p8 (bag.union_disjoint (bag.union_disjoint (bag.map leftJoin6 (bag.difference_remove EMP ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 (table.product EMP EMP))))) (bag.map rightJoin7 (bag.difference_remove EMP ((_ table.project 9 10 11 12 13 14 15 16 17) (bag.filter p5 (table.product EMP EMP)))))) (bag.filter p5 (table.product EMP EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11253 ms.
+; duration: 10180 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testDecorrelateTwoIn
@@ -859,7 +877,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p11 (table.product (bag.map f9 (bag.filter p8 (table.product (bag.map f6 EMP) (bag.map f7 DEPT)))) (bag.map f10 EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10387 ms.
+; duration: 10154 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeFilter
@@ -888,7 +906,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p2 DEPT))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10150 ms.
+; duration: 10087 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastSetOp
@@ -911,7 +929,7 @@
 (assert (= q2 (bag.union_disjoint ((_ table.project 6) EMP) ((_ table.project 6) EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10103 ms.
+; duration: 10338 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinusRightDeep
@@ -946,7 +964,7 @@
 (assert (= q2 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 500 ms.
+; duration: 370 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoin
@@ -973,8 +991,8 @@
 (assert (= q1 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) DEPT)))))
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+;answer: unsat
+; duration: 135 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNull
@@ -999,7 +1017,7 @@
 (assert (= q2 ((_ table.project 0) (bag.difference_remove ((_ table.project 0) (bag (tuple (nullable.some 0)) 1)) ((_ table.project 0) (bag (tuple (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 148 ms.
+; duration: 51 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceJoin
@@ -1036,7 +1054,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 12517 ms.
+; duration: 14792 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToRightOuter
@@ -1078,7 +1096,7 @@
 (assert (= q2 (bag.map f8 (bag.union_disjoint (bag.map rightJoin7 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p6 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP))))))) (bag.filter p6 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10337 ms.
+; duration: 11048 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegated
@@ -1103,7 +1121,7 @@
 (assert (= q2 ((_ table.project 0) (bag.difference_remove ((_ table.project 0) (bag (tuple (nullable.some 0)) 1)) ((_ table.project 0) (bag (tuple (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 90 ms.
+; duration: 183 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNullableCase
@@ -1133,7 +1151,7 @@
 (assert (= q2 (bag.map f3 (bag.union_disjoint (bag.map leftJoin2 (bag.difference_remove (bag (tuple (nullable.some 1)) 1) ((_ table.project 0) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1))))) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 1)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 8 ms.
+; duration: 10 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConstantEquiPredicate
@@ -1164,7 +1182,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 (table.product EMP EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10010 ms.
+; duration: 10014 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceValuesToEmpty
@@ -1190,7 +1208,7 @@
 (assert (= q2 ((_ table.project 0 1 2) (bag.difference_remove ((_ table.project 0 1 2) (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1 2) (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 115 ms.
+; duration: 101 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter
@@ -1221,7 +1239,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 ((_ table.project 0 1 6 5 7) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10024 ms.
+; duration: 10021 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushFilterThroughSemiJoin
@@ -1236,8 +1254,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
@@ -1252,8 +1270,8 @@
 (assert (= q1 ((_ table.project 0 1 2) (bag.filter p1 (bag.filter p0 (table.product DEPT ((_ table.project 7) EMP)))))))
 (assert (= q2 ((_ table.project 0 1 2) (bag.filter p3 (table.product ((_ table.project 0 1) (bag.filter p2 DEPT)) ((_ table.project 7) EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10083 ms.
+;answer: unsat
+; duration: 3814 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion3way
@@ -1298,7 +1316,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (table.product (bag.union_disjoint ((_ table.project 0) (bag.union_disjoint ((_ table.project 7) (bag.filter p5 EMP)) ((_ table.project 7) (bag.filter p6 EMP)))) ((_ table.project 7) (bag.filter p7 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p8 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10116 ms.
+; duration: 26158 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinRight
@@ -1313,8 +1331,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1334,7 +1352,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.union_disjoint (bag.map rightJoin5 (bag.difference_remove (bag.map f3 DEPT) ((_ table.project 9 10 11) (bag.filter p4 (table.product (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))) (bag.map f3 DEPT)))))) (bag.filter p4 (table.product (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))) (bag.map f3 DEPT)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10112 ms.
+; duration: 11579 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceLeftOuterJoin
@@ -1379,7 +1397,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (bag.union_disjoint (bag.map leftJoin8 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP))))))) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10281 ms.
+; duration: 10900 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants2
@@ -1405,7 +1423,7 @@
 (assert (= q2 (bag.map f1 (bag (tuple (nullable.some 0)) 1))))
 (check-sat)
 ;answer: unsat
-; duration: 216 ms.
+; duration: 162 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnRight
@@ -1428,7 +1446,7 @@
 (assert (= q2 ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11702 ms.
+; duration: 28000 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToInner
@@ -1470,7 +1488,7 @@
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10418 ms.
+; duration: 10656 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceOrCaseWhen
@@ -1497,7 +1515,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10140 ms.
+; duration: 10076 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionAll
@@ -1532,7 +1550,7 @@
 (assert (= q2 (bag.union_disjoint (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 1442 ms.
+; duration: 1280 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testLeftOuterJoinSimplificationToInner
@@ -1570,7 +1588,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10042 ms.
+; duration: 10057 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus2
@@ -1596,7 +1614,7 @@
 (assert (= q2 (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 30) (nullable.some 3)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 40) (nullable.some 4)) 1)))))
 (check-sat)
 ;answer: unsat
-; duration: 52 ms.
+; duration: 75 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants
@@ -1634,7 +1652,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: unsat
-; duration: 90 ms.
+; duration: 94 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
@@ -1668,7 +1686,7 @@
 (assert (= q2 ((_ table.project 9 1) (bag.filter p4 (table.product EMP ((_ table.project 0 1) (bag.filter p3 DEPT)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+; duration: 10017 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionDistinct
@@ -1703,7 +1721,7 @@
 (assert (= q2 (bag.union_max (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 1209 ms.
+; duration: 926 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceNoPullUpExprs
@@ -1738,7 +1756,7 @@
 (assert (= q2 (bag.map f5 (bag.filter p4 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10029 ms.
+; duration: 12104 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyProject
@@ -1766,7 +1784,7 @@
 (assert (= q2 (bag.map f2 (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 217 ms.
+; duration: 161 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceConjunctInPullUp
@@ -1803,7 +1821,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10296 ms.
+; duration: 11030 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushSemiJoinPastFilter
@@ -1818,8 +1836,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1835,11 +1853,11 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p3 (table.product ((_ table.project 7 1) (bag.filter p2 (bag.filter p1 (table.product EMP DEPT)))) DEPT)))))
 (check-sat)
 ;answer: sat
-; duration: 4237 ms.
+; duration: 5070 ms.
 (get-model)
 ; (
-; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "foo") (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "A")) 2))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "foo") (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
 ; )
 ; q1
 (get-value (q1))
@@ -1847,8 +1865,8 @@
 ; q2
 (get-value (q2))
 ; (bag (tuple (nullable.some "foo")) 4)
-; insert into EMP values(1,'foo','',-1,2,-2,3,0,-3)
 ; insert into DEPT values(0,'A'),(0,'A')
+; insert into EMP values(1,'foo','',-1,2,-2,3,0,-3)
 ; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'foo') AS q1 EXCEPT ALL SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2;
 
 ; SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'foo') AS q1;
@@ -1886,7 +1904,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP))))))
 (check-sat)
 ;answer: unsat
-; duration: 493 ms.
+; duration: 368 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePullUpThruAlias
@@ -1923,7 +1941,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 5) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10017 ms.
+; duration: 10027 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeSetOpMixed
@@ -1958,7 +1976,7 @@
 (assert (= q2 (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))
 (check-sat)
 ;answer: unsat
-; duration: 628 ms.
+; duration: 551 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNotNull
@@ -1985,7 +2003,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10023 ms.
+; duration: 10020 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyIntersect
@@ -2009,7 +2027,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 48 ms.
+; duration: 44 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoProject
@@ -2040,7 +2058,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10016 ms.
+; duration: 10014 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnionAlwaysTrue
@@ -2077,7 +2095,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p6 (table.product ((_ table.project 7) (bag.filter p3 EMP)) ((_ table.project 0) (bag.filter p5 (bag.union_disjoint ((_ table.project 7) (bag.filter p4 EMP)) ((_ table.project 7) EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10108 ms.
+; duration: 11729 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeIntersect
@@ -2112,7 +2130,7 @@
 (assert (= q2 (bag.inter_min (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 700 ms.
+; duration: 574 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAddRedundantSemiJoinRule
@@ -2146,7 +2164,7 @@
 (assert (= q2 (bag.map f4 (bag.filter p3 (table.product (bag.filter p2 (table.product EMP DEPT)) DEPT)))))
 (check-sat)
 ;answer: sat
-; duration: 2519 ms.
+; duration: 2698 ms.
 (get-model)
 ; (
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "A")) 2))
@@ -2198,7 +2216,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p2 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)) DEPT)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10052 ms.
+; duration: 10051 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRightOuterJoinSimplificationToInner
@@ -2236,7 +2254,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1) (bag.filter p4 DEPT)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10042 ms.
+; duration: 10153 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinCondDownToProject
@@ -2268,7 +2286,7 @@
 (assert (= q2 ((_ table.project 0 10) (bag.filter p3 (table.product (bag.map f1 DEPT) (bag.map f2 EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10052 ms.
+; duration: 10080 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRightWithFilter
@@ -2300,7 +2318,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p3 (table.product (bag.filter p2 (table.product EMP ((_ table.project 0 1) (bag.filter p1 DEPT)))) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10102 ms.
+; duration: 10113 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToLeftOuter
@@ -2342,7 +2360,7 @@
 (assert (= q2 (bag.map f8 (bag.union_disjoint (bag.map leftJoin7 (bag.difference_remove ((_ table.project 0 1) (bag.filter p5 DEPT)) ((_ table.project 0 1) (bag.filter p6 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) EMP))))) (bag.filter p6 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10099 ms.
+; duration: 10135 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion
@@ -2383,7 +2401,7 @@
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product (bag.union_disjoint ((_ table.project 7) (bag.filter p4 EMP)) ((_ table.project 7) (bag.filter p5 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10218 ms.
+; duration: 10089 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoJoin
@@ -2419,7 +2437,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.union_disjoint (bag.map leftJoin5 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1) (bag.filter p4 DEPT)))))) (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1) (bag.filter p4 DEPT)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10083 ms.
+; duration: 10436 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSwapOuterJoin
@@ -2455,7 +2473,7 @@
 (assert (= q2 (bag.map f5 (bag.union_disjoint (bag.map rightJoin4 (bag.difference_remove DEPT ((_ table.project 9 10) (bag.filter p3 (table.product EMP DEPT))))) (bag.filter p3 (table.product EMP DEPT))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10261 ms.
+; duration: 10251 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnLeft
@@ -2478,7 +2496,7 @@
 (assert (= q2 ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11933 ms.
+; duration: 27525 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed2
@@ -2513,7 +2531,7 @@
 (assert (= q2 (bag.union_max (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 2212 ms.
+; duration: 1810 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsEliminatesFilter
@@ -2539,7 +2557,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: unsat
-; duration: 35 ms.
+; duration: 31 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushProjectPastFilter2*
@@ -2566,7 +2584,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 ((_ table.project 3) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10008 ms.
+; duration: 10012 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSemiJoinReduceConstants
@@ -2631,7 +2649,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 19270 ms.
+; duration: 10529 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNestedCaseWhen
@@ -2658,7 +2676,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10749 ms.
+; duration: 10273 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceRightOuterJoin
@@ -2703,7 +2721,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (bag.union_disjoint (bag.map rightJoin8 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)) ((_ table.project 9 10 11 12 13 14 15 16 17) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP))))))) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10079 ms.
+; duration: 10062 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceComplexPredicate
@@ -2744,7 +2762,7 @@
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10290 ms.
+; duration: 10160 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAlreadyFalseEliminatesFilter
@@ -2768,7 +2786,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: unsat
-; duration: 155 ms.
+; duration: 101 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion2
@@ -2799,7 +2817,7 @@
 (assert (= q2 (bag.union_disjoint (bag.map f2 EMP) (bag.map f3 EMP))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10021 ms.
+; duration: 10251 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantThroughUnion3
@@ -2832,7 +2850,7 @@
 (assert (= q2 (bag.map f4 (bag.union_disjoint (bag.map f2 EMP) (bag.map f3 EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10122 ms.
+; duration: 10112 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed
@@ -2867,9 +2885,9 @@
 (assert (= q2 (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unsat
-; duration: 3769 ms.
+; duration: 1546 ms.
 (reset)
-; total time: 604337 ms.
-; sat answers    : 2
-; unsat answers  : 31
-; unknown answers: 55
+; total time: 613408 ms.
+; sat answers    : 3
+; unsat answers  : 34
+; unknown answers: 51

@@ -2772,57 +2772,6 @@
 ;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
-; test name: testPushSemiJoinPastFilter
-;Translating sql query: SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0'
-;Translating sql query: SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO
-(set-logic HO_ALL)
-(set-option :produce-models true)
-(set-option :check-models true)
-(set-option :dag-thresh 0)
-(set-option :uf-lazy-ll true)
-(set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
-(set-option :strings-exp true)
-
-(declare-const DEPT (Set (Tuple (Nullable Int) (Nullable String))))
-(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
-(declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const q1 (Set (Tuple (Nullable String))))
-(declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const q2 (Set (Tuple (Nullable String))))
-(declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)) Bool))
-(assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0"))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0"))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_523 Bool) (BOUND_VARIABLE_524 Bool)) (and BOUND_VARIABLE_523 BOUND_VARIABLE_524)) (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)) (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0")))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0"))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0"))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_523 Bool) (BOUND_VARIABLE_524 Bool)) (and BOUND_VARIABLE_523 BOUND_VARIABLE_524)) (nullable.lift (lambda ((BOUND_VARIABLE_482 Int) (BOUND_VARIABLE_483 Int)) (= BOUND_VARIABLE_482 BOUND_VARIABLE_483)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)) (nullable.lift (lambda ((BOUND_VARIABLE_507 String) (BOUND_VARIABLE_508 String)) (= BOUND_VARIABLE_507 BOUND_VARIABLE_508)) ((_ tuple.select 1) t) (nullable.some "fo0"))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (= BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_559 Int) (BOUND_VARIABLE_560 Int)) (= BOUND_VARIABLE_559 BOUND_VARIABLE_560)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_577 String) (BOUND_VARIABLE_578 String)) (= BOUND_VARIABLE_577 BOUND_VARIABLE_578)) ((_ tuple.select 1) t) (nullable.some "foo"))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_577 String) (BOUND_VARIABLE_578 String)) (= BOUND_VARIABLE_577 BOUND_VARIABLE_578)) ((_ tuple.select 1) t) (nullable.some "foo")))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_620 Int) (BOUND_VARIABLE_621 Int)) (= BOUND_VARIABLE_620 BOUND_VARIABLE_621)) ((_ tuple.select 0) t) ((_ tuple.select 2) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_620 Int) (BOUND_VARIABLE_621 Int)) (= BOUND_VARIABLE_620 BOUND_VARIABLE_621)) ((_ tuple.select 0) t) ((_ tuple.select 2) t)))))))
-(assert (= q1 ((_ rel.project 1) (set.filter p0 (rel.product EMP DEPT)))))
-(assert (= q2 ((_ rel.project 1) (set.filter p3 (rel.product ((_ rel.project 7 1) (set.filter p2 (set.filter p1 (rel.product EMP DEPT)))) DEPT)))))
-(check-sat)
-;answer: sat
-; duration: 86 ms.
-(get-model)
-; (
-; (define-fun DEPT () (Set (Tuple (Nullable Int) (Nullable String))) (set.singleton (tuple (nullable.some 0) (nullable.some "A"))))
-; (define-fun EMP () (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (set.singleton (tuple (nullable.some 1) (nullable.some "fo0") (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3)))))
-; )
-; q1
-(get-value (q1))
-; (set.singleton (tuple (nullable.some "fo0")))
-; q2
-(get-value (q2))
-; (as set.empty (Set (Tuple (Nullable String))))
-; insert into DEPT values(0,'A')
-; insert into EMP values(1,'fo0','',-1,2,-2,3,0,-3)
-; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0') AS q1 EXCEPT ALL SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2;
-;(fo0)
-
-; SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0') AS q1;
-
-;Model soundness: true
-(reset)
-;-----------------------------------------------------------
 ; test name: testPullConstantIntoFilter
 ;Translating sql query: SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10) AS t WHERE t.DEPTNO + 5 > t.EMPNO
 ;Translating sql query: SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10) AS t1 WHERE 15 >= t1.EMPNO

@@ -24,7 +24,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p2 (bag (tuple (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 61 ms.
+; duration: 44 ms.
 (get-model)
 ; (
 ; )
@@ -155,8 +155,25 @@
 (assert (= q1 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))
 (assert (= q2 (bag.difference_remove (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10019 ms.
+;answer: sat
+; duration: 1503 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 20) (nullable.some 3)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 3)) (nullable.some "A") (nullable.some "B") (nullable.some 4) (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 20) (nullable.some 6)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 20) (nullable.some 9)) 1) (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some 10) (nullable.some (- 12))) 1)))))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some 10) (nullable.some (- 12))) 1)
+; insert into EMP values(0,NULL,'',1,-1,2,-2,20,3),(-3,'A','B',4,-4,5,-5,20,6),(-6,'C','D',7,-7,8,-8,20,9),(-9,'E','F',-10,11,-11,12,10,-12)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 EXCEPT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 10) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 EXCEPT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2;
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 EXCEPT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 EXCEPT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 10) AS q1;
+;(-9,E,F,-10,11,-11,12,10,-12)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus
@@ -182,7 +199,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 110 ms.
+; duration: 29 ms.
 (get-model)
 ; (
 ; )
@@ -261,7 +278,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag (tuple (nullable.some 10) (nullable.some "x")) 1))))
 (check-sat)
 ;answer: sat
-; duration: 7 ms.
+; duration: 8 ms.
 (get-model)
 ; (
 ; )
@@ -303,7 +320,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 73 ms.
+; duration: 64 ms.
 (get-model)
 ; (
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 7) (as nullable.null (Nullable String))) 1))
@@ -348,7 +365,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p1 (table.product EMP DEPT)))))
 (check-sat)
 ;answer: sat
-; duration: 137 ms.
+; duration: 135 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
@@ -395,8 +412,26 @@
 (assert (= q1 (bag.union_disjoint (bag.map f0 EMP) (bag.map f1 EMP))))
 (assert (= q2 (bag.map f2 (bag.union_disjoint ((_ table.project 7 2) EMP) ((_ table.project 7 2) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10032 ms.
+;answer: sat
+; duration: 346 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "A") (nullable.some "") (nullable.some (- 1)) (nullable.some (- 2)) (nullable.some (- 3)) (nullable.some 4) (nullable.some 0) (nullable.some (- 4))) 1))
+; )
+; q1
+(get-value (q1))
+; (bag.union_disjoint (bag (tuple (nullable.some 3) (nullable.some 0) (nullable.some "")) 1) (bag (tuple (nullable.some 2) (nullable.some 0) (nullable.some "")) 1))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 2) (nullable.some 0) (nullable.some "")) 2)
+; insert into EMP values(1,'A','',-1,-2,-3,4,0,-4)
+; SELECT * FROM (SELECT 2, EMP.DEPTNO, EMP.JOB FROM EMP AS EMP UNION ALL SELECT 3, EMP0.DEPTNO, EMP0.JOB FROM EMP AS EMP0) AS q1 EXCEPT ALL SELECT * FROM (SELECT 2, t6.DEPTNO, t6.JOB FROM (SELECT EMP1.DEPTNO, EMP1.JOB FROM EMP AS EMP1 UNION ALL SELECT EMP2.DEPTNO, EMP2.JOB FROM EMP AS EMP2) AS t6) AS q2;
+;(3,0,)
+
+; SELECT * FROM (SELECT 2, t6.DEPTNO, t6.JOB FROM (SELECT EMP1.DEPTNO, EMP1.JOB FROM EMP AS EMP1 UNION ALL SELECT EMP2.DEPTNO, EMP2.JOB FROM EMP AS EMP2) AS t6) AS q2 EXCEPT ALL SELECT * FROM (SELECT 2, EMP.DEPTNO, EMP.JOB FROM EMP AS EMP UNION ALL SELECT 3, EMP0.DEPTNO, EMP0.JOB FROM EMP AS EMP0) AS q1;
+;(2,0,)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNot
@@ -427,7 +462,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p3 (bag.map f2 EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 595 ms.
+; duration: 515 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (as nullable.null (Nullable Int)) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -479,8 +514,27 @@
 (assert (= q1 ((_ table.project 6) (bag.filter p2 (table.product EMP ((_ table.project 0 1) ((_ table.project 0 2) (bag.filter p1 (bag.map f0 DEPT)))))))))
 (assert (= q2 ((_ table.project 6) (bag.filter p5 (table.product (bag.map f3 EMP) (bag.map f4 DEPT))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10023 ms.
+;answer: sat
+; duration: 1342 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some (- 2))) 1)
+; insert into DEPT values(0,'')
+; insert into EMP values(0,NULL,'',1,-1,2,-2,3,-3)
+; SELECT * FROM (SELECT EMP.SAL FROM EMP AS EMP WHERE EMP.EMPNO IN (SELECT DEPT.DEPTNO FROM DEPT AS DEPT WHERE EMP.ENAME = DEPT.NAME)) AS q1 EXCEPT ALL SELECT * FROM (SELECT EMP0.SAL FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.JOB = DEPT0.NAME AND EMP0.EMPNO = DEPT0.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT EMP0.SAL FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.JOB = DEPT0.NAME AND EMP0.EMPNO = DEPT0.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.SAL FROM EMP AS EMP WHERE EMP.EMPNO IN (SELECT DEPT.DEPTNO FROM DEPT AS DEPT WHERE EMP.ENAME = DEPT.NAME)) AS q1;
+;(-2)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsRequiresExecutor
@@ -506,7 +560,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 1) (nullable.some 2)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 64 ms.
+; duration: 27 ms.
 (get-model)
 ; (
 ; )
@@ -550,7 +604,7 @@
 (assert (= q2 (bag.map f2 (bag.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 103 ms.
+; duration: 108 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 11) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -602,7 +656,7 @@
 (assert (= q2 (bag.map f5 (bag.filter p4 (table.product ((_ table.project 5) (bag.filter p3 EMP)) EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 695 ms.
+; duration: 710 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some 7) (nullable.some (- 2)) (nullable.some 7) (nullable.some 3)) 1))
@@ -661,8 +715,25 @@
 (assert (= q1 (bag.map f3 (bag.filter p2 (table.product (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) EMP)) EMP)))))
 (assert (= q2 (bag.map f9 (bag.filter p8 (table.product (bag.filter p6 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p7 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10438 ms.
+;answer: sat
+; duration: 8652 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 7) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into EMP values(0,NULL,'',-1,2,-2,3,7,-3)
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 7) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO INNER JOIN EMP AS EMP1 ON EMP0.DEPTNO = EMP1.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO > 7) AS t2 ON t1.DEPTNO = t2.DEPTNO INNER JOIN (SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO > 7) AS t3 ON t2.DEPTNO = t3.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO > 7) AS t2 ON t1.DEPTNO = t2.DEPTNO INNER JOIN (SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO > 7) AS t3 ON t2.DEPTNO = t3.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 7) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO INNER JOIN EMP AS EMP1 ON EMP0.DEPTNO = EMP1.DEPTNO) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRight
@@ -677,8 +748,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String) (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -692,11 +763,11 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p2 (table.product (bag.filter p1 (table.product EMP DEPT)) EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 937 ms.
+; duration: 823 ms.
 (get-model)
 ; (
-; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "")) 1))
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "A") (as nullable.null (Nullable String)) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "")) 1))
 ; )
 ; q1
 (get-value (q1))
@@ -704,8 +775,8 @@
 ; q2
 (get-value (q2))
 ; (bag (tuple (nullable.some "A")) 1)
-; insert into DEPT values(0,'')
 ; insert into EMP values(1,'A',NULL,-1,2,-2,3,0,-3)
+; insert into DEPT values(0,'')
 ; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO <> EMP0.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN DEPT AS DEPT0 ON EMP1.DEPTNO = DEPT0.DEPTNO INNER JOIN EMP AS EMP2 ON DEPT0.DEPTNO = EMP2.DEPTNO) AS q2;
 
 ; SELECT * FROM (SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN DEPT AS DEPT0 ON EMP1.DEPTNO = DEPT0.DEPTNO INNER JOIN EMP AS EMP2 ON DEPT0.DEPTNO = EMP2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO <> EMP0.DEPTNO) AS q1;
@@ -788,8 +859,25 @@
 (assert (= q1 (bag.map f2 (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) EMP)))))
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 12559 ms.
+;answer: sat
+; duration: 1283 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 7) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into EMP values(0,NULL,'',-1,2,-2,3,7,-3)
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 7) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO > 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO > 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 7) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsCalc
@@ -823,7 +911,7 @@
 (assert (= q2 (bag.map f5 (bag (tuple (nullable.some true)) 1))))
 (check-sat)
 ;answer: sat
-; duration: 326 ms.
+; duration: 29 ms.
 (get-model)
 ; (
 ; )
@@ -867,7 +955,7 @@
 (assert (= q2 (bag.map f2 (bag.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 133 ms.
+; duration: 129 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (as nullable.null (Nullable Int)) (nullable.some 0) (nullable.some (- 1)) (nullable.some 1) (nullable.some 7) (nullable.some 2)) 1))
@@ -914,8 +1002,25 @@
 (assert (= q1 ((_ table.project 0) (bag.filter p2 ((_ table.project 0) (bag.filter p1 (bag.map f0 EMP)))))))
 (assert (= q2 (bag.map f3 EMP)))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10063 ms.
+;answer: sat
+; duration: 290 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (as nullable.null (Nullable Int))) 1)
+; insert into EMP values(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP) AS t WHERE t.N IS NULL AND t.N IS NULL) AS t0 WHERE t0.N IS NOT NULL) AS q1 EXCEPT ALL SELECT * FROM (SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP0) AS q2;
+
+; SELECT * FROM (SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP0) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT CAST(NULL AS INT) AS N FROM EMP AS EMP) AS t WHERE t.N IS NULL AND t.N IS NULL) AS t0 WHERE t0.N IS NOT NULL) AS q1;
+;(NULL)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegatedInverted
@@ -942,7 +1047,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 (bag (tuple (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 294 ms.
+; duration: 68 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -993,7 +1098,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p4 (table.product (bag.filter p3 (table.product (bag.filter p2 (table.product (bag.filter p1 (table.product EMP DEPT)) EMP)) DEPT)) EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11893 ms.
+; duration: 10071 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testExtractJoinFilterRule
@@ -1025,7 +1130,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 (table.product EMP DEPT)))))
 (check-sat)
 ;answer: sat
-; duration: 314 ms.
+; duration: 277 ms.
 (get-model)
 ; (
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "A")) 1))
@@ -1087,7 +1192,7 @@
 (assert (= q2 (bag.map f9 (bag.filter p8 (bag.union_disjoint (bag.union_disjoint (bag.map leftJoin6 (bag.difference_remove EMP ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 (table.product EMP EMP))))) (bag.map rightJoin7 (bag.difference_remove EMP ((_ table.project 9 10 11 12 13 14 15 16 17) (bag.filter p5 (table.product EMP EMP)))))) (bag.filter p5 (table.product EMP EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11236 ms.
+; duration: 33942 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testDecorrelateTwoIn
@@ -1131,7 +1236,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p9 (table.product (bag.map f7 (bag.filter p6 (table.product (bag.map f4 EMP) (bag.map f5 DEPT)))) (bag.map f8 EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10401 ms.
+; duration: 10728 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeFilter
@@ -1160,7 +1265,7 @@
 (assert (= q2 ((_ table.project 1) (bag.filter p2 DEPT))))
 (check-sat)
 ;answer: sat
-; duration: 298 ms.
+; duration: 213 ms.
 (get-model)
 ; (
 ; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 10) (as nullable.null (Nullable String))) 1))
@@ -1199,8 +1304,25 @@
 (assert (= q1 ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) EMP) ((_ table.project 0 1 2 3 4 5 6 7 8) EMP)))))
 (assert (= q2 (bag.union_max ((_ table.project 6) EMP) ((_ table.project 6) EMP))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10015 ms.
+;answer: sat
+; duration: 542 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (as nullable.null (Nullable Int)) (nullable.some (- 2)) (nullable.some 3)) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (as nullable.null (Nullable Int))) 2)
+; q2
+(get-value (q2))
+; (bag (tuple (as nullable.null (Nullable Int))) 1)
+; insert into EMP values(0,NULL,'',1,-1,2,NULL,-2,3)
+; SELECT * FROM (SELECT t.SAL FROM (SELECT * FROM EMP AS EMP UNION ALL SELECT * FROM EMP AS EMP0) AS t) AS q1 EXCEPT ALL SELECT * FROM (SELECT EMP1.SAL FROM EMP AS EMP1 UNION SELECT EMP2.SAL FROM EMP AS EMP2) AS q2;
+;(NULL)
+
+; SELECT * FROM (SELECT EMP1.SAL FROM EMP AS EMP1 UNION SELECT EMP2.SAL FROM EMP AS EMP2) AS q2 EXCEPT ALL SELECT * FROM (SELECT t.SAL FROM (SELECT * FROM EMP AS EMP UNION ALL SELECT * FROM EMP AS EMP0) AS t) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeMinusRightDeep
@@ -1234,8 +1356,25 @@
 (assert (= q1 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))))
 (assert (= q2 (bag.difference_subtract ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10143 ms.
+;answer: sat
+; duration: 904 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some (- 3)) (nullable.some "A") (nullable.some "B") (nullable.some 4) (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 30) (nullable.some 6)) 1) (bag.union_disjoint (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 10) (nullable.some 3)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 30) (nullable.some 9)) 1) (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some 30) (nullable.some (- 12))) 1)))))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 10) (nullable.some 3)) 1)
+; insert into EMP values(-3,'A','B',4,-4,5,-5,30,6),(0,NULL,'',1,-1,2,-2,10,3),(-6,'C','D',7,-7,8,-8,30,9),(-9,'E','F',-10,11,-11,12,30,-12)
+; SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 EXCEPT SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS t2) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 EXCEPT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS t7) AS q2;
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 EXCEPT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS t7) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 EXCEPT SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10 EXCEPT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS t2) AS q1;
+;(0,NULL,,1,-1,2,-2,10,3)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoin
@@ -1250,8 +1389,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
@@ -1262,8 +1401,25 @@
 (assert (= q1 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) DEPT)))))
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10169 ms.
+;answer: sat
+; duration: 2917 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))))
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String)))))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE FALSE) AS t INNER JOIN DEPT AS DEPT ON t.DEPTNO = DEPT.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM (VALUES (0,'','',0,0,0,0,0,0,0,''))) AS t0) AS q2;
+
+; SELECT * FROM (SELECT * FROM (SELECT * FROM (VALUES (0,'','',0,0,0,0,0,0,0,''))) AS t0) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE FALSE) AS t INNER JOIN DEPT AS DEPT ON t.DEPTNO = DEPT.DEPTNO) AS q1;
+;(0,,,0,0,0,0,0,0,0,)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNull
@@ -1288,7 +1444,7 @@
 (assert (= q2 ((_ table.project 0) (bag (tuple (nullable.some 0)) 1))))
 (check-sat)
 ;answer: sat
-; duration: 129 ms.
+; duration: 64 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))))
@@ -1340,8 +1496,25 @@
 (assert (= q1 (bag.map f2 (bag.filter p1 (table.product EMP ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)))))))
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 12463 ms.
+;answer: sat
+; duration: 5155 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 10)) (nullable.some "E") (nullable.some "F") (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 7) (nullable.some 13)) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 1)) 1)
+; insert into EMP values(-10,'E','F',11,-11,12,-12,7,13)
+; SELECT * FROM (SELECT 1 FROM EMP AS EMP INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO > 7) AS t ON EMP.DEPTNO = t.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 7) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 7) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM EMP AS EMP INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO > 7) AS t ON EMP.DEPTNO = t.DEPTNO) AS q1;
+;(1)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToRightOuter
@@ -1382,8 +1555,26 @@
 (assert (= q1 (bag.map f4 (bag.filter p3 (bag.union_disjoint (bag.union_disjoint (bag.map leftJoin1 (bag.difference_remove DEPT ((_ table.project 0 1) (bag.filter p0 (table.product DEPT EMP))))) (bag.map rightJoin2 (bag.difference_remove EMP ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p0 (table.product DEPT EMP)))))) (bag.filter p0 (table.product DEPT EMP)))))))
 (assert (= q2 (bag.map f8 (bag.union_disjoint (bag.map rightJoin7 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p6 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP))))))) (bag.filter p6 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10312 ms.
+;answer: sat
+; duration: 1029 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 4)) (nullable.some "D") (nullable.some "E") (nullable.some 5) (nullable.some (- 5)) (nullable.some 6) (nullable.some 100) (as nullable.null (Nullable Int)) (nullable.some (- 6))) 1))
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String)))))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into EMP values(-4,'D','E',5,-5,6,100,NULL,-6)
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE EMP.SAL >= 100) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT0 RIGHT JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t1 ON DEPT0.DEPTNO = t1.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT0 RIGHT JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t1 ON DEPT0.DEPTNO = t1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE EMP.SAL >= 100) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsNegated
@@ -1410,7 +1601,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 (bag (tuple (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 117 ms.
+; duration: 83 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 10) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -1457,7 +1648,7 @@
 (assert (= q2 (bag.map f3 (bag.union_disjoint (bag.map leftJoin2 (bag.difference_remove (bag (tuple (nullable.some 1)) 1) ((_ table.project 0) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 0)) 1))))) (table.product (bag (tuple (nullable.some 1)) 1) (bag (tuple (nullable.some 0)) 1))))))
 (check-sat)
 ;answer: sat
-; duration: 12 ms.
+; duration: 9 ms.
 (get-model)
 ; (
 ; )
@@ -1503,7 +1694,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 (table.product EMP EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 312 ms.
+; duration: 305 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 1)) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some (- 3)) (nullable.some 0) (nullable.some 4)) 1))
@@ -1548,7 +1739,7 @@
 (assert (= q2 ((_ table.project 0 1 2) (bag.filter p2 (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 23 ms.
+; duration: 22 ms.
 (get-model)
 ; (
 ; )
@@ -1595,7 +1786,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 ((_ table.project 0 1 6 5 7) EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 808 ms.
+; duration: 813 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (nullable.some "foo") (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 0) (nullable.some 0) (as nullable.null (Nullable Int)) (nullable.some 2)) 1))
@@ -1627,8 +1818,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
 (declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int)) Bool))
@@ -1643,8 +1834,28 @@
 (assert (= q1 ((_ table.project 0 1 2) (bag.filter p1 (bag.filter p0 (table.product DEPT ((_ table.project 7) EMP)))))))
 (assert (= q2 ((_ table.project 0 1 2) (bag.filter p3 (table.product ((_ table.project 0 1) (bag.filter p2 DEPT)) ((_ table.project 7) EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10052 ms.
+;answer: sat
+; duration: 4310 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (nullable.some "C") (nullable.some "D") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 10) (nullable.some 3)) 2))
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 10) (nullable.some "")) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 10) (nullable.some "") (nullable.some 10)) 2)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable Int))))
+; insert into EMP values(0,'C','D',1,-1,2,-2,10,3),(0,'C','D',1,-1,2,-2,10,3)
+; insert into DEPT values(10,'')
+; SELECT * FROM (SELECT * FROM DEPT AS DEPT INNER JOIN (SELECT EMP.DEPTNO FROM EMP AS EMP) AS t ON DEPT.DEPTNO = t.DEPTNO WHERE DEPT.DEPTNO <= 10) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO < 10) AS t1 INNER JOIN (SELECT EMP0.DEPTNO FROM EMP AS EMP0) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2;
+;(10,,10)
+;(10,,10)
+
+; SELECT * FROM (SELECT * FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO < 10) AS t1 INNER JOIN (SELECT EMP0.DEPTNO FROM EMP AS EMP0) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM DEPT AS DEPT INNER JOIN (SELECT EMP.DEPTNO FROM EMP AS EMP) AS t ON DEPT.DEPTNO = t.DEPTNO WHERE DEPT.DEPTNO <= 10) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion3way
@@ -1689,7 +1900,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (table.product (bag.union_disjoint ((_ table.project 0) (bag.union_disjoint ((_ table.project 7) (bag.filter p5 EMP)) ((_ table.project 7) (bag.filter p6 EMP)))) ((_ table.project 7) (bag.filter p7 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p8 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10137 ms.
+; duration: 25469 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinRight
@@ -1704,8 +1915,8 @@
 (set-option :tlimit-per 10000)
 (set-option :strings-exp true)
 
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
+(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
 (declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
 (declare-const q1 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
 (declare-const q2 (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String))))
@@ -1725,7 +1936,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.union_disjoint (bag.map rightJoin5 (bag.difference_remove (bag.map f3 DEPT) ((_ table.project 9 10 11) (bag.filter p4 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))) (bag.map f3 DEPT)))))) (bag.filter p4 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1))) (bag.map f3 DEPT)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10117 ms.
+; duration: 10728 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceLeftOuterJoin
@@ -1770,7 +1981,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (bag.union_disjoint (bag.map leftJoin8 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP))))))) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10263 ms.
+; duration: 10352 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstants2
@@ -1796,7 +2007,7 @@
 (assert (= q2 (bag.map f1 (bag (tuple (nullable.some 0)) 1))))
 (check-sat)
 ;answer: sat
-; duration: 211 ms.
+; duration: 117 ms.
 (get-model)
 ; (
 ; )
@@ -1834,7 +2045,7 @@
 (assert (= q2 ((_ table.project 0) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11958 ms.
+; duration: 18289 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToInner
@@ -1875,8 +2086,27 @@
 (assert (= q1 (bag.map f4 (bag.filter p3 (bag.union_disjoint (bag.union_disjoint (bag.map leftJoin1 (bag.difference_remove DEPT ((_ table.project 0 1) (bag.filter p0 (table.product DEPT EMP))))) (bag.map rightJoin2 (bag.difference_remove EMP ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p0 (table.product DEPT EMP)))))) (bag.filter p0 (table.product DEPT EMP)))))))
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10562 ms.
+;answer: sat
+; duration: 7618 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 8) (nullable.some "D") (nullable.some "E") (nullable.some (- 8)) (nullable.some 9) (nullable.some (- 9)) (nullable.some 101) (nullable.some 101) (nullable.some 10)) 1))
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 101) (nullable.some "Charli")) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into EMP values(8,'D','E',-8,9,-9,101,101,10)
+; insert into DEPT values(101,'Charli')
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli' AND EMP.SAL > 100) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli' AND EMP.SAL > 100) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceOrCaseWhen
@@ -1903,7 +2133,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 215 ms.
+; duration: 169 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 100) (nullable.some 3) (nullable.some (- 3))) 1))
@@ -1955,7 +2185,7 @@
 (assert (= q2 (bag.union_disjoint (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 11391 ms.
+; duration: 10015 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testLeftOuterJoinSimplificationToInner
@@ -1992,8 +2222,27 @@
 (assert (= q1 (bag.map f3 (bag.filter p2 (bag.union_disjoint (bag.map leftJoin1 (bag.difference_remove DEPT ((_ table.project 0 1) (bag.filter p0 (table.product DEPT EMP))))) (bag.filter p0 (table.product DEPT EMP)))))))
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product DEPT ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10319 ms.
+;answer: sat
+; duration: 8853 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 1001) (nullable.some "B")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 3)) (nullable.some "C") (nullable.some "D") (nullable.some 4) (nullable.some (- 4)) (nullable.some 5) (nullable.some 1000) (nullable.some 1001) (nullable.some (- 5))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 1)) 1)
+; insert into DEPT values(1001,'B')
+; insert into EMP values(-3,'C','D',4,-4,5,1000,1001,-5)
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT LEFT JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE EMP.SAL > 1000) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT0 INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t1 ON DEPT0.DEPTNO = t1.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT0 INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t1 ON DEPT0.DEPTNO = t1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT LEFT JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE EMP.SAL > 1000) AS q1;
+;(1)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyMinus2
@@ -2019,7 +2268,7 @@
 (assert (= q2 (bag.difference_remove ((_ table.project 0 1) (bag (tuple (nullable.some 30) (nullable.some 4)) 1)) ((_ table.project 0 1) (bag (tuple (nullable.some 40) (nullable.some 40)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 49 ms.
+; duration: 58 ms.
 (get-model)
 ; (
 ; )
@@ -2073,7 +2322,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (bag (tuple (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10031 ms.
+; duration: 10021 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeJoinFilter
@@ -2106,8 +2355,27 @@
 (assert (= q1 ((_ table.project 0 1) (bag.filter p2 ((_ table.project 9 1) (bag.filter p1 (table.product EMP (bag.map f0 DEPT))))))))
 (assert (= q2 ((_ table.project 9 1) (bag.filter p4 (table.product EMP ((_ table.project 0 1) (bag.filter p3 DEPT)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10239 ms.
+;answer: sat
+; duration: 4113 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 11) (nullable.some "F")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 3)) (nullable.some "D") (nullable.some "E") (nullable.some 4) (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 11) (nullable.some 6)) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 11) (nullable.some "D")) 1)
+; insert into DEPT values(11,'F')
+; insert into EMP values(-3,'D','E',4,-4,5,-5,11,6)
+; SELECT * FROM (SELECT * FROM (SELECT DEPT.DEPTNO, EMP.ENAME FROM EMP AS EMP INNER JOIN DEPT AS DEPT ON EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = 10) AS t WHERE t.DEPTNO = 10) AS q1 EXCEPT ALL SELECT * FROM (SELECT t1.DEPTNO, EMP0.ENAME FROM EMP AS EMP0 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO >= 10) AS t1 ON EMP0.DEPTNO = t1.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT t1.DEPTNO, EMP0.ENAME FROM EMP AS EMP0 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO >= 10) AS t1 ON EMP0.DEPTNO = t1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT DEPT.DEPTNO, EMP.ENAME FROM EMP AS EMP INNER JOIN DEPT AS DEPT ON EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = 10) AS t WHERE t.DEPTNO = 10) AS q1;
+;(11,D)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionDistinct
@@ -2141,8 +2409,25 @@
 (assert (= q1 (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))
 (assert (= q2 (bag.union_max (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10174 ms.
+;answer: sat
+; duration: 1827 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 11) (nullable.some 13)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 16)) (nullable.some "I") (nullable.some "J") (nullable.some 17) (nullable.some (- 17)) (nullable.some 18) (nullable.some (- 18)) (nullable.some 10) (nullable.some 19)) 1) (bag (tuple (nullable.some 23) (nullable.some "M") (nullable.some "N") (nullable.some (- 23)) (nullable.some 24) (nullable.some (- 24)) (nullable.some 25) (nullable.some 10) (nullable.some (- 25))) 1))))
+; )
+; q1
+(get-value (q1))
+; (bag.union_disjoint (bag (tuple (nullable.some (- 16)) (nullable.some "I") (nullable.some "J") (nullable.some 17) (nullable.some (- 17)) (nullable.some 18) (nullable.some (- 18)) (nullable.some 10) (nullable.some 19)) 1) (bag (tuple (nullable.some 23) (nullable.some "M") (nullable.some "N") (nullable.some (- 23)) (nullable.some 24) (nullable.some (- 24)) (nullable.some 25) (nullable.some 10) (nullable.some (- 25))) 1))
+; q2
+(get-value (q2))
+; (bag.union_disjoint (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 11) (nullable.some 13)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 16)) (nullable.some "I") (nullable.some "J") (nullable.some 17) (nullable.some (- 17)) (nullable.some 18) (nullable.some (- 18)) (nullable.some 10) (nullable.some 19)) 1) (bag (tuple (nullable.some 23) (nullable.some "M") (nullable.some "N") (nullable.some (- 23)) (nullable.some 24) (nullable.some (- 24)) (nullable.some 25) (nullable.some 10) (nullable.some (- 25))) 1)))
+; insert into EMP values(-9,'E','F',-10,-11,12,-12,11,13),(-16,'I','J',17,-17,18,-18,10,19),(23,'M','N',-23,24,-24,25,10,-25)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 UNION SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2;
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 UNION SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1;
+;(-9,E,F,-10,-11,12,-12,11,13)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceNoPullUpExprs
@@ -2176,8 +2461,25 @@
 (assert (= q1 (bag.map f2 (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) EMP)))))
 (assert (= q2 (bag.map f5 (bag.filter p4 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10144 ms.
+;answer: sat
+; duration: 6669 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some 10) (nullable.some (- 10)) (as nullable.null (Nullable Int)) (nullable.some (- 11)) (nullable.some 8) (nullable.some (- 12))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 1)) 1)
+; insert into EMP values(-9,'E','F',10,-10,NULL,-11,8,-12)
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 OR EMP.DEPTNO = 9 OR EMP.COMM > 10) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7 OR EMP1.DEPTNO = 9 OR EMP1.COMM > 10) AS t1 INNER JOIN EMP AS EMP2 ON t1.DEPTNO = EMP2.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7 OR EMP1.DEPTNO = 9 OR EMP1.COMM > 10) AS t1 INNER JOIN EMP AS EMP2 ON t1.DEPTNO = EMP2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 OR EMP.DEPTNO = 9 OR EMP.COMM > 10) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1;
+;(1)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyProject
@@ -2207,7 +2509,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 201 ms.
+; duration: 71 ms.
 (get-model)
 ; (
 ; )
@@ -2259,57 +2561,23 @@
 (assert (= q1 (bag.map f2 (bag.filter p1 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) EMP)))))
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10292 ms.
-(reset)
-;-----------------------------------------------------------
-; test name: testPushSemiJoinPastFilter
-;Translating sql query: SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0'
-;Translating sql query: SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO
-(set-logic HO_ALL)
-(set-option :produce-models true)
-(set-option :check-models true)
-(set-option :dag-thresh 0)
-(set-option :uf-lazy-ll true)
-(set-option :fmf-bound true)
-(set-option :tlimit-per 10000)
-(set-option :strings-exp true)
-
-(declare-const DEPT (Bag (Tuple (Nullable Int) (Nullable String))))
-(declare-const EMP (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
-(declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const q1 (Bag (Tuple (Nullable String))))
-(declare-const p1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const q2 (Bag (Tuple (Nullable String))))
-(declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)) Bool))
-(declare-const p3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)) Bool))
-(assert (not (= q1 q2)))
-(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0"))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0"))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_519 Bool) (BOUND_VARIABLE_520 Bool)) (and BOUND_VARIABLE_519 BOUND_VARIABLE_520)) (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)) (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0")))))) (nullable.val (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))))) (nullable.some false) (ite (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0"))) (not (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0"))))) (nullable.some false) (nullable.lift (lambda ((BOUND_VARIABLE_519 Bool) (BOUND_VARIABLE_520 Bool)) (and BOUND_VARIABLE_519 BOUND_VARIABLE_520)) (nullable.lift (lambda ((BOUND_VARIABLE_478 Int) (BOUND_VARIABLE_479 Int)) (= BOUND_VARIABLE_478 BOUND_VARIABLE_479)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)) (nullable.lift (lambda ((BOUND_VARIABLE_503 String) (BOUND_VARIABLE_504 String)) (= BOUND_VARIABLE_503 BOUND_VARIABLE_504)) ((_ tuple.select 1) t) (nullable.some "fo0"))))))))))
-(assert (= p1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_555 Int) (BOUND_VARIABLE_556 Int)) (= BOUND_VARIABLE_555 BOUND_VARIABLE_556)) ((_ tuple.select 7) t) ((_ tuple.select 9) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_555 Int) (BOUND_VARIABLE_556 Int)) (= BOUND_VARIABLE_555 BOUND_VARIABLE_556)) ((_ tuple.select 7) t) ((_ tuple.select 9) t)))))))
-(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_573 String) (BOUND_VARIABLE_574 String)) (= BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 1) t) (nullable.some "foo"))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_573 String) (BOUND_VARIABLE_574 String)) (= BOUND_VARIABLE_573 BOUND_VARIABLE_574)) ((_ tuple.select 1) t) (nullable.some "foo")))))))
-(assert (= p3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable Int) (Nullable String)))) (and (nullable.is_some (nullable.lift (lambda ((BOUND_VARIABLE_616 Int) (BOUND_VARIABLE_617 Int)) (= BOUND_VARIABLE_616 BOUND_VARIABLE_617)) ((_ tuple.select 0) t) ((_ tuple.select 2) t))) (nullable.val (nullable.lift (lambda ((BOUND_VARIABLE_616 Int) (BOUND_VARIABLE_617 Int)) (= BOUND_VARIABLE_616 BOUND_VARIABLE_617)) ((_ tuple.select 0) t) ((_ tuple.select 2) t)))))))
-(assert (= q1 ((_ table.project 1) (bag.filter p0 (table.product EMP DEPT)))))
-(assert (= q2 ((_ table.project 1) (bag.filter p3 (table.product ((_ table.project 7 1) (bag.filter p2 (bag.filter p1 (table.product EMP DEPT)))) DEPT)))))
-(check-sat)
 ;answer: sat
-; duration: 821 ms.
+; duration: 9639 ms.
 (get-model)
 ; (
-; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "")) 1))
-; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "foo") (nullable.some "A") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 10)) (nullable.some "E") (nullable.some "F") (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 13) (nullable.some 8) (nullable.some (- 13))) 1))
 ; )
 ; q1
 (get-value (q1))
-; (as bag.empty (Bag (Tuple (Nullable String))))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
 ; q2
 (get-value (q2))
-; (bag (tuple (nullable.some "foo")) 1)
-; insert into DEPT values(0,'')
-; insert into EMP values(1,'foo','A',-1,2,-2,3,0,-3)
-; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0') AS q1 EXCEPT ALL SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2;
+; (bag (tuple (nullable.some 1)) 1)
+; insert into EMP values(-10,'E','F',-11,12,-12,13,8,-13)
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 OR EMP.DEPTNO = 9 OR EMP.DEPTNO > 10) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7 OR EMP1.DEPTNO = 9 OR EMP1.DEPTNO > 10) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 7 OR EMP2.DEPTNO = 9 OR EMP2.DEPTNO > 10) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2;
 
-; SELECT * FROM (SELECT t1.ENAME FROM (SELECT EMP0.DEPTNO,EMP0.ENAME FROM EMP AS EMP0 INNER JOIN DEPT AS DEPT0 ON EMP0.DEPTNO = DEPT0.DEPTNO WHERE EMP0.ENAME = 'foo') AS t1 INNER JOIN DEPT AS DEPT1 ON t1.DEPTNO = DEPT1.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'fo0') AS q1;
-;(foo)
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 7 OR EMP1.DEPTNO = 9 OR EMP1.DEPTNO > 10) AS t1 INNER JOIN (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 7 OR EMP2.DEPTNO = 9 OR EMP2.DEPTNO > 10) AS t2 ON t1.DEPTNO = t2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 7 OR EMP.DEPTNO = 9 OR EMP.DEPTNO > 10) AS t INNER JOIN EMP AS EMP0 ON t.DEPTNO = EMP0.DEPTNO) AS q1;
+;(1)
 
 ;Model soundness: true
 (reset)
@@ -2341,8 +2609,25 @@
 (assert (= q1 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP))))))
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10651 ms.
+;answer: sat
+; duration: 322 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 15) (nullable.some "C") (nullable.some "D") (nullable.some 6) (nullable.some (- 6)) (nullable.some 7) (nullable.some (- 7)) (nullable.some 10) (nullable.some 8)) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 15) (nullable.some "C") (nullable.some "D") (nullable.some 6) (nullable.some (- 6)) (nullable.some 7) (nullable.some (- 7)) (nullable.some 10) (nullable.some 8)) 1)
+; insert into EMP values(15,'C','D',6,-6,7,-7,10,8)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10) AS t WHERE t.DEPTNO + 5 > t.EMPNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10) AS t1 WHERE 15 >= t1.EMPNO) AS q2;
+
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10) AS t1 WHERE 15 >= t1.EMPNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10) AS t WHERE t.DEPTNO + 5 > t.EMPNO) AS q1;
+;(15,C,D,6,-6,7,-7,10,8)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferencePullUpThruAlias
@@ -2379,7 +2664,7 @@
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 5) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10200 ms.
+; duration: 10015 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeSetOpMixed
@@ -2413,8 +2698,32 @@
 (assert (= q1 (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))))
 (assert (= q2 (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10053 ms.
+;answer: sat
+; duration: 2751 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some 4) (nullable.some "A") (nullable.some "B") (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 6) (nullable.some 30) (nullable.some (- 6))) 1) (bag.union_disjoint (bag (tuple (nullable.some 11) (nullable.some "E") (nullable.some "F") (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 13) (nullable.some 30) (nullable.some (- 13))) 1) (bag.union_disjoint (bag (tuple (nullable.some 14) (nullable.some "G") (nullable.some "H") (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 16) (nullable.some 10) (nullable.some (- 16))) 1) (bag.union_disjoint (bag (tuple (nullable.some 17) (nullable.some "I") (nullable.some "J") (nullable.some (- 17)) (nullable.some 18) (nullable.some (- 18)) (nullable.some 19) (nullable.some 30) (nullable.some (- 19))) 1) (bag.union_disjoint (bag (tuple (nullable.some 20) (nullable.some "K") (nullable.some "L") (nullable.some (- 20)) (nullable.some 21) (nullable.some (- 21)) (nullable.some 22) (nullable.some 30) (nullable.some (- 22))) 1) (bag.union_disjoint (bag (tuple (nullable.some 23) (nullable.some "M") (nullable.some "N") (nullable.some (- 23)) (nullable.some 24) (nullable.some (- 24)) (nullable.some 25) (nullable.some 30) (nullable.some (- 25))) 1) (bag.union_disjoint (bag (tuple (nullable.some 26) (nullable.some "O") (nullable.some "P") (nullable.some (- 26)) (nullable.some 27) (nullable.some (- 27)) (nullable.some 28) (nullable.some 30) (nullable.some (- 28))) 1) (bag.union_disjoint (bag (tuple (nullable.some 29) (nullable.some "Q") (nullable.some "R") (nullable.some (- 29)) (nullable.some (- 30)) (nullable.some 31) (nullable.some (- 31)) (nullable.some 30) (nullable.some 32)) 1) (bag (tuple (nullable.some (- 32)) (nullable.some "S") (nullable.some "T") (nullable.some 33) (nullable.some (- 33)) (nullable.some 34) (nullable.some (- 34)) (nullable.some 30) (nullable.some 35)) 1))))))))))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 14) (nullable.some "G") (nullable.some "H") (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 16) (nullable.some 10) (nullable.some (- 16))) 1)
+; q2
+(get-value (q2))
+; (bag.union_disjoint (bag (tuple (nullable.some 4) (nullable.some "A") (nullable.some "B") (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 6) (nullable.some 30) (nullable.some (- 6))) 1) (bag.union_disjoint (bag (tuple (nullable.some 11) (nullable.some "E") (nullable.some "F") (nullable.some (- 11)) (nullable.some 12) (nullable.some (- 12)) (nullable.some 13) (nullable.some 30) (nullable.some (- 13))) 1) (bag.union_disjoint (bag (tuple (nullable.some 14) (nullable.some "G") (nullable.some "H") (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 16) (nullable.some 10) (nullable.some (- 16))) 1) (bag.union_disjoint (bag (tuple (nullable.some 17) (nullable.some "I") (nullable.some "J") (nullable.some (- 17)) (nullable.some 18) (nullable.some (- 18)) (nullable.some 19) (nullable.some 30) (nullable.some (- 19))) 1) (bag.union_disjoint (bag (tuple (nullable.some 20) (nullable.some "K") (nullable.some "L") (nullable.some (- 20)) (nullable.some 21) (nullable.some (- 21)) (nullable.some 22) (nullable.some 30) (nullable.some (- 22))) 1) (bag.union_disjoint (bag (tuple (nullable.some 23) (nullable.some "M") (nullable.some "N") (nullable.some (- 23)) (nullable.some 24) (nullable.some (- 24)) (nullable.some 25) (nullable.some 30) (nullable.some (- 25))) 1) (bag.union_disjoint (bag (tuple (nullable.some 26) (nullable.some "O") (nullable.some "P") (nullable.some (- 26)) (nullable.some 27) (nullable.some (- 27)) (nullable.some 28) (nullable.some 30) (nullable.some (- 28))) 1) (bag.union_disjoint (bag (tuple (nullable.some 29) (nullable.some "Q") (nullable.some "R") (nullable.some (- 29)) (nullable.some (- 30)) (nullable.some 31) (nullable.some (- 31)) (nullable.some 30) (nullable.some 32)) 1) (bag (tuple (nullable.some (- 32)) (nullable.some "S") (nullable.some "T") (nullable.some 33) (nullable.some (- 33)) (nullable.some 34) (nullable.some (- 34)) (nullable.some 30) (nullable.some 35)) 1)))))))))
+; insert into EMP values(4,'A','B',-4,5,-5,6,30,-6),(11,'E','F',-11,12,-12,13,30,-13),(14,'G','H',-14,15,-15,16,10,-16),(17,'I','J',-17,18,-18,19,30,-19),(20,'K','L',-20,21,-21,22,30,-22),(23,'M','N',-23,24,-24,25,30,-25),(26,'O','P',-26,27,-27,28,30,-28),(29,'Q','R',-29,-30,31,-31,30,32),(-32,'S','T',33,-33,34,-34,30,35)
+; SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS t2) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS t7) AS q2;
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM (SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS t7) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS t2) AS q1;
+;(20,K,L,-20,21,-21,22,30,-22)
+;(26,O,P,-26,27,-27,28,30,-28)
+;(29,Q,R,-29,-30,31,-31,30,32)
+;(11,E,F,-11,12,-12,13,30,-13)
+;(17,I,J,-17,18,-18,19,30,-19)
+;(4,A,B,-4,5,-5,6,30,-6)
+;(23,M,N,-23,24,-24,25,30,-25)
+;(-32,S,T,33,-33,34,-34,30,35)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsIsNotNull
@@ -2441,7 +2750,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 292 ms.
+; duration: 149 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 11) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -2484,7 +2793,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p1 (bag (tuple (nullable.some 0) (nullable.some 0)) 1)))))
 (check-sat)
 ;answer: sat
-; duration: 12 ms.
+; duration: 11 ms.
 (get-model)
 ; (
 ; )
@@ -2530,7 +2839,7 @@
 (assert (= q2 (bag.map f3 (bag.filter p2 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 461 ms.
+; duration: 458 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 0) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some 10) (nullable.some (- 2))) 1))
@@ -2585,7 +2894,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag.filter p6 (table.product ((_ table.project 7) (bag.filter p3 EMP)) ((_ table.project 0) (bag.filter p5 (bag.union_disjoint ((_ table.project 7) (bag.filter p4 EMP)) ((_ table.project 7) EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10075 ms.
+; duration: 10825 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeIntersect
@@ -2619,8 +2928,25 @@
 (assert (= q1 (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))
 (assert (= q2 (bag.inter_min (bag.inter_min ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10093 ms.
+;answer: sat
+; duration: 1100 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 20) (nullable.some 3)) 1) (bag.union_disjoint (bag (tuple (nullable.some (- 3)) (nullable.some "A") (nullable.some "B") (nullable.some 4) (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 21) (nullable.some 6)) 1) (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 30) (nullable.some 9)) 1))))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 30) (nullable.some 9)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+; insert into EMP values(0,NULL,'',1,-1,2,-2,20,3),(-3,'A','B',4,-4,5,-5,21,6),(-6,'C','D',7,-7,8,-8,30,9)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 10 INTERSECT SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 30) AS t1 INTERSECT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 20) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 INTERSECT SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2;
+;(-6,C,D,7,-7,8,-8,30,9)
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 10 INTERSECT SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 INTERSECT SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO >= 10 INTERSECT SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 30) AS t1 INTERSECT SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO >= 20) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinWithFilter
@@ -2649,8 +2975,27 @@
 (assert (= q1 ((_ table.project 1) (bag.filter p0 (table.product EMP DEPT)))))
 (assert (= q2 ((_ table.project 1) (bag.filter p2 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)) DEPT)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10156 ms.
+;answer: sat
+; duration: 647 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "fo0") (nullable.some "A") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable String))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some "fo0")) 1)
+; insert into DEPT values(0,'')
+; insert into EMP values(1,'fo0','A',-1,2,-2,3,0,-3)
+; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'foo') AS q1 EXCEPT ALL SELECT * FROM (SELECT t1.ENAME FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.ENAME = 'fo0') AS t1 INNER JOIN DEPT AS DEPT0 ON t1.DEPTNO = DEPT0.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT t1.ENAME FROM (SELECT * FROM EMP AS EMP0 WHERE EMP0.ENAME = 'fo0') AS t1 INNER JOIN DEPT AS DEPT0 ON t1.DEPTNO = DEPT0.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT WHERE EMP.DEPTNO = DEPT.DEPTNO AND EMP.ENAME = 'foo') AS q1;
+;(fo0)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRightOuterJoinSimplificationToInner
@@ -2687,8 +3032,27 @@
 (assert (= q1 (bag.map f3 (bag.filter p2 (bag.union_disjoint (bag.map rightJoin1 (bag.difference_remove EMP ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p0 (table.product DEPT EMP))))) (bag.filter p0 (table.product DEPT EMP)))))))
 (assert (= q2 (bag.map f6 (bag.filter p5 (table.product ((_ table.project 0 1) (bag.filter p4 DEPT)) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10045 ms.
+;answer: sat
+; duration: 1776 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "Charli")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some (- 5)) (nullable.some "B") (nullable.some "C") (nullable.some 6) (nullable.some (- 6)) (nullable.some 7) (nullable.some (- 7)) (nullable.some 0) (nullable.some 8)) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into DEPT values(0,'Charli')
+; insert into EMP values(-5,'B','C',6,-6,7,-7,0,8)
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT RIGHT JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli') AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 INNER JOIN EMP AS EMP0 ON t1.DEPTNO = EMP0.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 INNER JOIN EMP AS EMP0 ON t1.DEPTNO = EMP0.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT RIGHT JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli') AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinCondDownToProject
@@ -2720,7 +3084,7 @@
 (assert (= q2 ((_ table.project 0 10) (bag.filter p3 (table.product (bag.map f1 DEPT) (bag.map f2 EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10049 ms.
+; duration: 10029 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testRemoveSemiJoinRightWithFilter
@@ -2751,8 +3115,27 @@
 (assert (= q1 ((_ table.project 1) (bag.filter p0 (table.product (table.product EMP DEPT) EMP)))))
 (assert (= q2 ((_ table.project 1) (bag.filter p3 (table.product (bag.filter p2 (table.product EMP ((_ table.project 0 1) (bag.filter p1 DEPT)))) EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10107 ms.
+;answer: sat
+; duration: 1966 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "fo0")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 1) (nullable.some "A") (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 0) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable String))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some "A")) 1)
+; insert into DEPT values(0,'fo0')
+; insert into EMP values(1,'A','',-1,2,-2,3,0,-3)
+; SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = EMP0.DEPTNO AND DEPT.NAME = 'foo') AS q1 EXCEPT ALL SELECT * FROM (SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'fo0') AS t1 ON EMP1.DEPTNO = t1.DEPTNO INNER JOIN EMP AS EMP2 ON t1.DEPTNO = EMP2.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'fo0') AS t1 ON EMP1.DEPTNO = t1.DEPTNO INNER JOIN EMP AS EMP2 ON t1.DEPTNO = EMP2.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = EMP0.DEPTNO AND DEPT.NAME = 'foo') AS q1;
+;(A)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testFullOuterJoinSimplificationToLeftOuter
@@ -2793,8 +3176,26 @@
 (assert (= q1 (bag.map f4 (bag.filter p3 (bag.union_disjoint (bag.union_disjoint (bag.map leftJoin1 (bag.difference_remove DEPT ((_ table.project 0 1) (bag.filter p0 (table.product DEPT EMP))))) (bag.map rightJoin2 (bag.difference_remove EMP ((_ table.project 2 3 4 5 6 7 8 9 10) (bag.filter p0 (table.product DEPT EMP)))))) (bag.filter p0 (table.product DEPT EMP)))))))
 (assert (= q2 (bag.map f8 (bag.union_disjoint (bag.map leftJoin7 (bag.difference_remove ((_ table.project 0 1) (bag.filter p5 DEPT)) ((_ table.project 0 1) (bag.filter p6 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) EMP))))) (bag.filter p6 (table.product ((_ table.project 0 1) (bag.filter p5 DEPT)) EMP))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10384 ms.
+;answer: sat
+; duration: 493 ms.
+(get-model)
+; (
+; (define-fun DEPT () (Bag (Tuple (Nullable Int) (Nullable String))) (bag (tuple (nullable.some 0) (nullable.some "Charli")) 1))
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (as bag.empty (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into DEPT values(0,'Charli')
+; SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli') AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 LEFT JOIN EMP AS EMP0 ON t1.DEPTNO = EMP0.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'Charlie') AS t1 LEFT JOIN EMP AS EMP0 ON t1.DEPTNO = EMP0.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM DEPT AS DEPT FULL JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE DEPT.NAME = 'Charli') AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceUnion
@@ -2834,8 +3235,25 @@
 (assert (= q1 (bag.map f3 (bag.filter p2 (table.product (bag.union_disjoint ((_ table.project 7) (bag.filter p0 EMP)) ((_ table.project 7) (bag.filter p1 EMP))) EMP)))))
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product (bag.union_disjoint ((_ table.project 7) (bag.filter p4 EMP)) ((_ table.project 7) (bag.filter p5 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10207 ms.
+;answer: sat
+; duration: 1273 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3) (nullable.some 7) (nullable.some (- 3))) 1))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some 1)) 1)
+; q2
+(get-value (q2))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; insert into EMP values(0,NULL,'',-1,2,-2,3,7,-3)
+; SELECT * FROM (SELECT 1 FROM (SELECT EMP.DEPTNO FROM EMP AS EMP WHERE EMP.DEPTNO >= 7 UNION ALL SELECT EMP0.DEPTNO FROM EMP AS EMP0 WHERE EMP0.DEPTNO > 10) AS t3 INNER JOIN EMP AS EMP1 ON t3.DEPTNO = EMP1.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT EMP2.DEPTNO FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7 UNION ALL SELECT EMP3.DEPTNO FROM EMP AS EMP3 WHERE EMP3.DEPTNO > 10) AS t9 INNER JOIN (SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO > 7 OR EMP4.DEPTNO > 10) AS t10 ON t9.DEPTNO = t10.DEPTNO) AS q2;
+;(1)
+
+; SELECT * FROM (SELECT 1 FROM (SELECT EMP2.DEPTNO FROM EMP AS EMP2 WHERE EMP2.DEPTNO > 7 UNION ALL SELECT EMP3.DEPTNO FROM EMP AS EMP3 WHERE EMP3.DEPTNO > 10) AS t9 INNER JOIN (SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO > 7 OR EMP4.DEPTNO > 10) AS t10 ON t9.DEPTNO = t10.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT 1 FROM (SELECT EMP.DEPTNO FROM EMP AS EMP WHERE EMP.DEPTNO >= 7 UNION ALL SELECT EMP0.DEPTNO FROM EMP AS EMP0 WHERE EMP0.DEPTNO > 10) AS t3 INNER JOIN EMP AS EMP1 ON t3.DEPTNO = EMP1.DEPTNO) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPullConstantIntoJoin
@@ -2871,7 +3289,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag.union_disjoint (bag.map leftJoin5 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1) (bag.filter p4 DEPT)))))) (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1) (bag.filter p4 DEPT)))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10059 ms.
+; duration: 10034 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testSwapOuterJoin
@@ -2907,7 +3325,7 @@
 (assert (= q2 (bag.map f5 (bag.union_disjoint (bag.map rightJoin4 (bag.difference_remove DEPT ((_ table.project 9 10) (bag.filter p3 (table.product EMP DEPT))))) (bag.filter p3 (table.product EMP DEPT))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10258 ms.
+; duration: 10205 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testPushJoinThroughUnionOnLeft
@@ -2930,7 +3348,7 @@
 (assert (= q2 ((_ table.project 6) (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17) (table.product EMP EMP))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 75749 ms.
+; duration: 18143 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testMergeUnionMixed2
@@ -2964,8 +3382,25 @@
 (assert (= q1 (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))
 (assert (= q2 (bag.union_max (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 13889 ms.
+;answer: sat
+; duration: 1200 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 20) (nullable.some 9)) 1) (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some 10) (nullable.some (- 12))) 1)))
+; )
+; q1
+(get-value (q1))
+; (bag.union_disjoint (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 20) (nullable.some 9)) 1) (bag (tuple (nullable.some (- 9)) (nullable.some "E") (nullable.some "F") (nullable.some (- 10)) (nullable.some 11) (nullable.some (- 11)) (nullable.some 12) (nullable.some 10) (nullable.some (- 12))) 1))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 20) (nullable.some 9)) 2)
+; insert into EMP values(-6,'C','D',7,-7,8,-8,20,9),(-9,'E','F',-10,11,-11,12,10,-12)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 20 UNION ALL SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 UNION SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2;
+;(-9,E,F,-10,11,-11,12,10,-12)
+
+; SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO = 20 UNION ALL SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20 UNION SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1;
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceConstantsEliminatesFilter
@@ -2989,7 +3424,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))
 (check-sat)
 ;answer: sat
-; duration: 198 ms.
+; duration: 24 ms.
 (get-model)
 ; (
 ; )
@@ -3031,7 +3466,7 @@
 (assert (= q2 ((_ table.project 0) (bag.filter p1 ((_ table.project 3) EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 145 ms.
+; duration: 136 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 10) (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some (- 2)) (nullable.some 3)) 1))
@@ -3082,8 +3517,25 @@
 (assert (= q1 ((_ table.project 0) (bag.filter p2 (table.product ((_ table.project 0 1) (bag.filter p0 ((_ table.project 6 7) EMP))) ((_ table.project 1) (bag.filter p1 ((_ table.project 6 7) EMP))))))))
 (assert (= q2 ((_ table.project 0) (bag.filter p5 (table.product ((_ table.project 0 1) (bag.filter p3 ((_ table.project 6 7) EMP))) ((_ table.project 1) (bag.filter p4 ((_ table.project 6 7) EMP))))))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10026 ms.
+;answer: sat
+; duration: 9935 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (as nullable.null (Nullable String)) (nullable.some "") (nullable.some 1) (nullable.some (- 1)) (nullable.some 2) (nullable.some 100) (nullable.some 201) (nullable.some (- 2))) 1))
+; )
+; q1
+(get-value (q1))
+; (as bag.empty (Bag (Tuple (Nullable Int))))
+; q2
+(get-value (q2))
+; (bag (tuple (nullable.some 100)) 1)
+; insert into EMP values(0,NULL,'',1,-1,2,100,201,-2)
+; SELECT * FROM (SELECT t0.SAL FROM (SELECT * FROM (SELECT EMP.SAL, EMP.DEPTNO FROM EMP AS EMP) AS t WHERE t.DEPTNO = 200) AS t0 INNER JOIN (SELECT t1.DEPTNO FROM (SELECT EMP0.SAL, EMP0.DEPTNO FROM EMP AS EMP0) AS t1 WHERE t1.SAL = 100) AS t3 ON t0.DEPTNO = t3.DEPTNO) AS q1 EXCEPT ALL SELECT * FROM (SELECT t6.SAL FROM (SELECT * FROM (SELECT EMP1.SAL, EMP1.DEPTNO FROM EMP AS EMP1) AS t5 WHERE t5.DEPTNO >= 200) AS t6 INNER JOIN (SELECT t7.DEPTNO FROM (SELECT EMP2.SAL, EMP2.DEPTNO FROM EMP AS EMP2) AS t7 WHERE t7.SAL = 100) AS t9 ON t6.DEPTNO = t9.DEPTNO) AS q2;
+
+; SELECT * FROM (SELECT t6.SAL FROM (SELECT * FROM (SELECT EMP1.SAL, EMP1.DEPTNO FROM EMP AS EMP1) AS t5 WHERE t5.DEPTNO >= 200) AS t6 INNER JOIN (SELECT t7.DEPTNO FROM (SELECT EMP2.SAL, EMP2.DEPTNO FROM EMP AS EMP2) AS t7 WHERE t7.SAL = 100) AS t9 ON t6.DEPTNO = t9.DEPTNO) AS q2 EXCEPT ALL SELECT * FROM (SELECT t0.SAL FROM (SELECT * FROM (SELECT EMP.SAL, EMP.DEPTNO FROM EMP AS EMP) AS t WHERE t.DEPTNO = 200) AS t0 INNER JOIN (SELECT t1.DEPTNO FROM (SELECT EMP0.SAL, EMP0.DEPTNO FROM EMP AS EMP0) AS t1 WHERE t1.SAL = 100) AS t3 ON t0.DEPTNO = t3.DEPTNO) AS q1;
+;(100)
+
+;Model soundness: true
 (reset)
 ;-----------------------------------------------------------
 ; test name: testEmptyJoinLeft
@@ -3113,7 +3565,7 @@
 (assert (= q2 ((_ table.project 0 1 2 3 4 5 6 7 8 9 10) (bag (tuple (nullable.some 0) (nullable.some "") (nullable.some "") (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some 0) (nullable.some "")) 1))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10074 ms.
+; duration: 10086 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testReduceNestedCaseWhen
@@ -3140,7 +3592,7 @@
 (assert (= q2 ((_ table.project 6) (bag.filter p1 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 528 ms.
+; duration: 598 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 4) (nullable.some "A") (nullable.some "B") (nullable.some (- 4)) (nullable.some 5) (nullable.some (- 5)) (nullable.some 1000) (nullable.some 6) (nullable.some (- 6))) 1))
@@ -3202,7 +3654,7 @@
 (assert (= q2 (bag.map f10 (bag.filter p9 (bag.union_disjoint (bag.map rightJoin8 (bag.difference_remove ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)) ((_ table.project 9 10 11 12 13 14 15 16 17) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP))))))) (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10025 ms.
+; duration: 10023 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testTransitiveInferenceComplexPredicate
@@ -3243,7 +3695,7 @@
 (assert (= q2 (bag.map f8 (bag.filter p7 (table.product ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p6 ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))))))
 (check-sat)
 ;answer: unknown (TIMEOUT)
-; duration: 10245 ms.
+; duration: 10169 ms.
 (reset)
 ;-----------------------------------------------------------
 ; test name: testAlreadyFalseEliminatesFilter
@@ -3267,7 +3719,7 @@
 (assert (= q2 ((_ table.project 0 1) (bag (tuple (nullable.some 0) (nullable.some 0)) 1))))
 (check-sat)
 ;answer: sat
-; duration: 158 ms.
+; duration: 95 ms.
 (get-model)
 ; (
 ; )
@@ -3313,7 +3765,7 @@
 (assert (= q2 (bag.union_disjoint (bag.map f2 EMP) (bag.map f3 EMP))))
 (check-sat)
 ;answer: sat
-; duration: 331 ms.
+; duration: 345 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (nullable.some 0) (nullable.some "") (as nullable.null (Nullable String)) (nullable.some (- 1)) (nullable.some (- 2)) (nullable.some 3) (nullable.some (- 3)) (as nullable.null (Nullable Int)) (nullable.some 4)) 1))
@@ -3364,7 +3816,7 @@
 (assert (= q2 (bag.map f4 (bag.union_disjoint (bag.map f2 EMP) (bag.map f3 EMP)))))
 (check-sat)
 ;answer: sat
-; duration: 215 ms.
+; duration: 227 ms.
 (get-model)
 ; (
 ; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag (tuple (as nullable.null (Nullable Int)) (as nullable.null (Nullable String)) (as nullable.null (Nullable String)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int)) (as nullable.null (Nullable Int))) 1))
@@ -3415,10 +3867,27 @@
 (assert (= q1 (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p0 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p1 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p2 EMP)))))
 (assert (= q2 (bag.union_disjoint ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.union_max ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p3 EMP)) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p4 EMP)))) ((_ table.project 0 1 2 3 4 5 6 7 8) (bag.filter p5 EMP)))))
 (check-sat)
-;answer: unknown (TIMEOUT)
-; duration: 10015 ms.
+;answer: sat
+; duration: 1066 ms.
+(get-model)
+; (
+; (define-fun EMP () (Bag (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))) (bag.union_disjoint (bag (tuple (nullable.some (- 13)) (nullable.some "G") (nullable.some "H") (nullable.some 14) (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 10) (nullable.some 16)) 1) (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 11) (nullable.some 9)) 1)))
+; )
+; q1
+(get-value (q1))
+; (bag (tuple (nullable.some (- 13)) (nullable.some "G") (nullable.some "H") (nullable.some 14) (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 10) (nullable.some 16)) 1)
+; q2
+(get-value (q2))
+; (bag.union_disjoint (bag (tuple (nullable.some (- 13)) (nullable.some "G") (nullable.some "H") (nullable.some 14) (nullable.some (- 14)) (nullable.some 15) (nullable.some (- 15)) (nullable.some 10) (nullable.some 16)) 1) (bag (tuple (nullable.some (- 6)) (nullable.some "C") (nullable.some "D") (nullable.some 7) (nullable.some (- 7)) (nullable.some 8) (nullable.some (- 8)) (nullable.some 11) (nullable.some 9)) 1))
+; insert into EMP values(-13,'G','H',14,-14,15,-15,10,16),(-6,'C','D',7,-7,8,-8,11,9)
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION ALL SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20) AS t6 UNION ALL SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2;
+
+; SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP2 WHERE EMP2.DEPTNO >= 10 UNION SELECT * FROM EMP AS EMP3 WHERE EMP3.DEPTNO = 20) AS t6 UNION ALL SELECT * FROM EMP AS EMP4 WHERE EMP4.DEPTNO = 30) AS q2 EXCEPT ALL SELECT * FROM (SELECT * FROM (SELECT * FROM EMP AS EMP WHERE EMP.DEPTNO = 10 UNION SELECT * FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 20) AS t1 UNION ALL SELECT * FROM EMP AS EMP1 WHERE EMP1.DEPTNO = 30) AS q1;
+;(-6,C,D,7,-7,8,-8,11,9)
+
+;Model soundness: true
 (reset)
-; total time: 567243 ms.
-; sat answers    : 39
+; total time: 336362 ms.
+; sat answers    : 68
 ; unsat answers  : 0
-; unknown answers: 47
+; unknown answers: 18

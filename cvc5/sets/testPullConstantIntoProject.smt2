@@ -1,0 +1,30 @@
+; test name: testPullConstantIntoProject
+;Translating sql query: SELECT EMP.DEPTNO, EMP.DEPTNO + 1, EMP.EMPNO + EMP.DEPTNO FROM EMP AS EMP WHERE EMP.DEPTNO = 10
+;Translating sql query: SELECT 10 AS DEPTNO, 11, EMP0.EMPNO + 10 FROM EMP AS EMP0 WHERE EMP0.DEPTNO = 10
+(set-logic HO_ALL)
+(set-option :produce-models true)
+(set-option :debug-check-models true)
+(set-option :dag-thresh 0)
+(set-option :uf-lazy-ll true)
+(set-option :fmf-bound true)
+(set-option :tlimit-per 6000)
+(set-option :strings-exp true)
+
+(declare-const EMP (Set (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p0 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const q1 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const q2 (Set (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const p2 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) Bool))
+(declare-const f1 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
+(declare-const f3 (-> (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)) (Tuple (Nullable Int) (Nullable Int) (Nullable Int))))
+(assert (= p0 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 10)))))
+(assert (= f1 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple ((_ tuple.select 7) t) (nullable.lift (lambda ((BOUND_VARIABLE_410775 Int) (BOUND_VARIABLE_410776 Int)) (+ BOUND_VARIABLE_410775 BOUND_VARIABLE_410776)) ((_ tuple.select 7) t) (nullable.some 1)) (nullable.lift (lambda ((BOUND_VARIABLE_410782 Int) (BOUND_VARIABLE_410783 Int)) (+ BOUND_VARIABLE_410782 BOUND_VARIABLE_410783)) ((_ tuple.select 0) t) ((_ tuple.select 7) t))))))
+(assert (= p2 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (and (nullable.is_some ((_ tuple.select 7) t)) (= (nullable.val ((_ tuple.select 7) t)) 10)))))
+(assert (not (= q1 q2)))
+(assert (= f3 (lambda ((t (Tuple (Nullable Int) (Nullable String) (Nullable String) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int) (Nullable Int)))) (tuple (nullable.some 10) (nullable.some 11) (nullable.lift (lambda ((BOUND_VARIABLE_410812 Int) (BOUND_VARIABLE_410813 Int)) (+ BOUND_VARIABLE_410812 BOUND_VARIABLE_410813)) ((_ tuple.select 0) t) (nullable.some 10))))))
+(assert (= q1 (set.map f1 (set.filter p0 EMP))))
+(assert (= q2 (set.map f3 (set.filter p2 EMP))))
+(check-sat)
+;answer: unknown (TIMEOUT)
+; duration: 6010 ms.
+(reset)

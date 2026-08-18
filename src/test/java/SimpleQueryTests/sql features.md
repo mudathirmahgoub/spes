@@ -117,8 +117,22 @@ under set semantics):
 ### One-time setup
 
 Requires a JDK, Maven, a z3 build with Java bindings, and a cvc5 build with Java
-bindings. `pom.xml` locates the two solvers through properties -- override them if
-your builds live elsewhere:
+bindings.
+
+If Maven is installed somewhere (`~/tools/apache-maven-3.9.16`)
+you can add it to your `PATH`:
+
+```bash
+echo 'export PATH="$HOME/tools/apache-maven-3.9.16/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+mvn -v          # should print 3.9.16
+```
+
+Or skip `PATH` entirely and call it by absolute path, substituting
+`~/tools/apache-maven-3.9.16/bin/mvn` for `mvn` in every command below.
+
+`pom.xml` locates the two solvers through properties -- override them if your
+builds live elsewhere:
 
 ```bash
 mvn -Dz3.home=/path/to/z3 -Dcvc5.home=/path/to/cvc5/build/install test-compile

@@ -10,19 +10,76 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- z3 is installed under the project's .venv (official release archive,
-             which ships com.microsoft.z3.jar + libz3java.dylib). -->
-        <z3.home>${project.basedir}/.venv/z3</z3.home>
-        <z3.jar>${z3.home}/bin/com.microsoft.z3.jar</z3.jar>
+        <cvc5.version>1.3.4</cvc5.version>
+        <!-- z3 is taken from the GitHub release, which is well ahead of the
+             z3-turnkey artifact on Maven Central. To bump: change z3.version and
+             the z3.dir of your platform below (the OS suffix moves between
+             releases), then re-run `mvn initialize`. -->
+        <z3.version>5.1.0</z3.version>
+        <z3.cache>${user.home}/.cache/z3</z3.cache>
+        <z3.home>${z3.cache}/${z3.dir}</z3.home>
         <z3.lib>${z3.home}/bin</z3.lib>
-        <!-- cvc5 built from source. -->
-        <cvc5.home>/Users/mahgoubyahia/cvc5/main/build/install</cvc5.home>
-        <cvc5.jar>${cvc5.home}/share/java/cvc5.jar</cvc5.jar>
-        <cvc5.lib>${cvc5.home}/lib</cvc5.lib>
+        <!-- Only used by the local-cvc5 profile; harmless default otherwise. -->
+        <cvc5.lib>${project.basedir}</cvc5.lib>
+        <!-- overridden on the command line by exec:exec; blank means "not given" -->
+        <q1></q1>
+        <q2></q2>
+        <sem></sem>
+        <out></out>
     </properties>
 
     <build>
+        <extensions>
+            <!-- provides ${os.detected.classifier}, e.g. osx-aarch_64, which is exactly
+                 how cvc5 names its native-library jars on Maven Central -->
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
         <plugins>
+            <plugin>
+                <!-- Downloads the z3 release for this platform into ${z3.cache} and
+                     installs its jar into the local repository. Both steps are
+                     skipped once the files exist, so this costs nothing after the
+                     first build. -->
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.9.0</version>
+                <executions>
+                    <execution>
+                        <id>fetch-z3</id>
+                        <phase>initialize</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <uri>https://github.com/Z3Prover/z3/releases/download/z3-${z3.version}/${z3.dir}.zip</uri>
+                            <unpack>true</unpack>
+                            <outputDirectory>${z3.cache}</outputDirectory>
+                            <overwrite>false</overwrite>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>install-z3-jar</id>
+                        <phase>initialize</phase>
+                        <goals><goal>install-file</goal></goals>
+                        <configuration>
+                            <groupId>com.microsoft.z3</groupId>
+                            <artifactId>z3</artifactId>
+                            <version>${z3.version}</version>
+                            <packaging>jar</packaging>
+                            <file>${z3.home}/bin/com.microsoft.z3.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -37,11 +94,42 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Native libraries for the z3 and cvc5 JNI bindings. -->
                     <argLine>-Djava.library.path=${z3.lib}:${cvc5.lib} --enable-native-access=ALL-UNNAMED</argLine>
                     <environmentVariables>
-                        <DYLD_LIBRARY_PATH>${z3.lib}:${cvc5.lib}</DYLD_LIBRARY_PATH>
+                        <DYLD_LIBRARY_PATH>${z3.lib}</DYLD_LIBRARY_PATH>
+                        <LD_LIBRARY_PATH>${z3.lib}</LD_LIBRARY_PATH>
                     </environmentVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- mvn exec:exec                            runs the JSON batch
+                     mvn exec:exec -Dq1='...' -Dq2='...'      compares one pair
+                     ... -Dsem=sets -Dout=my.smt2             optional extras
+                     exec:exec (not exec:java) because java.library.path is only
+                     honoured by a freshly forked JVM. -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <!-- the JDK's own java: /usr/bin/java is SIP-protected on macOS
+                         and would have DYLD_LIBRARY_PATH stripped from its env -->
+                    <executable>${java.home}/bin/java</executable>
+                    <environmentVariables>
+                        <DYLD_LIBRARY_PATH>${z3.lib}</DYLD_LIBRARY_PATH>
+                        <LD_LIBRARY_PATH>${z3.lib}</LD_LIBRARY_PATH>
+                    </environmentVariables>
+                    <classpathScope>test</classpathScope>
+                    <arguments>
+                        <argument>-Djava.library.path=${z3.lib}:${cvc5.lib}</argument>
+                        <argument>--enable-native-access=ALL-UNNAMED</argument>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>SimpleQueryTests.Cvc5Analysis</argument>
+                        <argument>${q1}</argument>
+                        <argument>${q2}</argument>
+                        <argument>${sem}</argument>
+                        <argument>${out}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
@@ -70,26 +158,92 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <!-- Installed from the GitHub release by the initialize phase above. -->
         <dependency>
             <groupId>com.microsoft.z3</groupId>
             <artifactId>z3</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${z3.jar}</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>io.github.cvc5</groupId>
-            <artifactId>cvc5</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${cvc5.jar}</systemPath>
+            <version>${z3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.1</version>
         </dependency>
-
     </dependencies>
 
+    <profiles>
+        <!-- z3 names its release archives per platform, and the OS-version suffix
+             changes between releases; check the GitHub release page when bumping. -->
+        <profile>
+            <id>z3-osx-arm64</id>
+            <activation><os><family>mac</family><arch>aarch64</arch></os></activation>
+            <properties><z3.dir>z3-${z3.version}-arm64-osx-13.3</z3.dir></properties>
+        </profile>
+        <profile>
+            <id>z3-osx-x64</id>
+            <activation><os><family>mac</family><arch>x86_64</arch></os></activation>
+            <properties><z3.dir>z3-${z3.version}-x64-osx-13.3</z3.dir></properties>
+        </profile>
+        <profile>
+            <id>z3-linux-arm64</id>
+            <activation><os><family>unix</family><name>linux</name><arch>aarch64</arch></os></activation>
+            <properties><z3.dir>z3-${z3.version}-arm64-glibc-2.38</z3.dir></properties>
+        </profile>
+        <profile>
+            <id>z3-linux-x64</id>
+            <activation><os><family>unix</family><name>linux</name><arch>amd64</arch></os></activation>
+            <properties><z3.dir>z3-${z3.version}-x64-glibc-2.39</z3.dir></properties>
+        </profile>
+        <profile>
+            <id>z3-windows-x64</id>
+            <activation><os><family>windows</family><arch>amd64</arch></os></activation>
+            <properties><z3.dir>z3-${z3.version}-x64-win</z3.dir></properties>
+        </profile>
+
+        <!-- cvc5 from Maven Central. Active unless -Dcvc5.home is given.
+             The platform classifier carries libcvc5jni, which cvc5 extracts from
+             the classpath at load time, so no java.library.path is needed. -->
+        <profile>
+            <id>central-cvc5</id>
+            <activation>
+                <property><name>!cvc5.home</name></property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.cvc5</groupId>
+                    <artifactId>cvc5</artifactId>
+                    <version>${cvc5.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.cvc5</groupId>
+                    <artifactId>cvc5</artifactId>
+                    <version>${cvc5.version}</version>
+                    <classifier>${os.detected.classifier}</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- cvc5 from a local checkout, for developing cvc5 itself:
+               mvn -Dcvc5.home=/path/to/cvc5/build/install ...
+             Activating this deactivates central-cvc5, so the local Java classes are
+             never paired with a mismatched native library from Central. -->
+        <profile>
+            <id>local-cvc5</id>
+            <activation>
+                <property><name>cvc5.home</name></property>
+            </activation>
+            <properties>
+                <cvc5.lib>${cvc5.home}/lib</cvc5.lib>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.cvc5</groupId>
+                    <artifactId>cvc5</artifactId>
+                    <version>local</version>
+                    <scope>system</scope>
+                    <systemPath>${cvc5.home}/share/java/cvc5.jar</systemPath>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

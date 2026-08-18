@@ -114,62 +114,58 @@ under set semantics):
 
 ## Building and running
 
-### One-time setup
+### Setup
 
-Requires a JDK, Maven, a z3 build with Java bindings, and a cvc5 build with Java
-bindings.
-
-If Maven is installed somewhere (`~/tools/apache-maven-3.9.16`)
-you can add it to your `PATH`:
+A JDK and Maven, then:
 
 ```bash
-echo 'export PATH="$HOME/tools/apache-maven-3.9.16/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-mvn -v          # should print 3.9.16
-```
-
-Or skip `PATH` entirely and call it by absolute path, substituting
-`~/tools/apache-maven-3.9.16/bin/mvn` for `mvn` in every command below.
-
-`pom.xml` locates the two solvers through properties -- override them if your
-builds live elsewhere:
-
-```bash
-mvn -Dz3.home=/path/to/z3 -Dcvc5.home=/path/to/cvc5/build/install test-compile
-```
-
-Build, then dump the dependency classpath once so plain `java` can find everything:
-
-```bash
+mvn initialize      # one-time: fetches z3 and installs it locally
 mvn test-compile
-mvn dependency:build-classpath -Dmdep.outputFile=cp.txt -Dmdep.includeScope=test
 ```
 
-Both solvers load native libraries through JNI, so `java.library.path` has to point
-at them. Define a shell helper once and every later command stays short:
+`mvn initialize` downloads the z3 release archive for your platform into
+`~/.cache/z3` and installs its jar into your local Maven repository. It has to be a
+separate invocation the first time, because Maven resolves the dependency graph
+before the `initialize` phase runs, so the jar has to exist before `test-compile`
+can see it. Afterwards it is a no-op and you can ignore it.
+
+Where the two solvers come from:
+
+- **z3** from the [GitHub release](https://github.com/Z3Prover/z3/releases),
+  currently **5.1.0**. Maven Central only has `z3-turnkey`, which lags well behind
+  (4.14.1, June 2025), so the release archive is used instead. The natives are
+  loaded from `~/.cache/z3/.../bin` via `DYLD_LIBRARY_PATH` / `LD_LIBRARY_PATH`,
+  which the build sets for you.
+- **cvc5** from Maven Central (`io.github.cvc5:cvc5`), whose platform classifier
+  jar carries `libcvc5jni`; cvc5 extracts it from the classpath itself. The
+  classifier is chosen automatically by `os-maven-plugin`.
+
+To move to a newer z3, bump `z3.version` in `pom.xml` and the `z3.dir` for your
+platform -- z3 puts an OS version in the archive name (`-osx-13.3`,
+`-glibc-2.39`) and it moves between releases, so check the release page. Then
+re-run `mvn initialize`. For cvc5, bump `cvc5.version`.
+
+To build against a local cvc5 checkout instead -- what you want when developing
+cvc5 itself -- pass `-Dcvc5.home`. That deactivates the Maven Central artifacts
+entirely, so local Java classes are never paired with a mismatched native library:
 
 ```bash
-# run from the repository root
-spes() {
-  java -cp "target/classes:target/test-classes:$(cat cp.txt)" \
-       -Djava.library.path=".venv/z3/bin:/Users/mahgoubyahia/cvc5/main/build/install/lib" \
-       SimpleQueryTests.Cvc5Analysis "$@"
-}
+mvn -Dcvc5.home=/path/to/cvc5/build/install test-compile
 ```
 
 ### Running a single pair
 
-```
-Cvc5Analysis "<query1>" "<query2>" [bags|sets] [output.smt2]
+```bash
+mvn exec:exec -Dq1='<query1>' -Dq2='<query2>' [-Dsem=sets] [-Dout=my.smt2]
 ```
 
-Semantics defaults to `bags`, output file to `single.smt2`. It prints the raw cvc5
-answer and its reading: `unsat` = proved equivalent, `sat` = counterexample found,
-`unknown` = solver hit `tlimit-per`.
+`sem` defaults to `bags`, `out` to `single.smt2`. The output reads `unsat` = proved
+equivalent, `sat` = counterexample found, `unknown` = solver hit `tlimit-per`.
 
 ```bash
-spes 'SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t'
 ```
 ```
 q1        : SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u
@@ -177,30 +173,27 @@ q2        : SELECT * FROM (VALUES (1),(1)) AS t
 semantics : bags
 smt2 file : single.smt2
 result: sat -- the queries are NOT equivalent
-elapsed: 17 ms
-```
-
-Same pair under set semantics, writing somewhere else:
-
-```bash
-spes 'SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t' \
-     sets /tmp/out.smt2
+elapsed: 65 ms
 ```
 
 Use **single** quotes. Column names like `EXPR$0` are otherwise eaten by the shell.
 
+Two Maven details worth knowing. It has to be `exec:exec`, not `exec:java`:
+`java.library.path` is read once at JVM start, so cvc5's JNI library only loads in
+a freshly forked JVM. And Maven reads stdin, so inside a `while read` loop you must
+redirect it (`mvn ... </dev/null`) or the loop will consume only its first line.
+
 ### Running the JSON batch
 
-With no arguments `Cvc5Analysis` runs the file named at the top of `main`
+With no `-Dq1`/`-Dq2`, the same command runs the file named at the top of `main`
 (`testData/no_aggregation_sat.json`) and writes `min_bags_sat.smt2`:
 
 ```bash
-spes
+mvn exec:exec
 ```
 
 Expect this to take a while: the per-query limit is 10 s (`tlimit-per`) and most
-queries involving `EMP`/`DEPT` hit it.
+queries over `EMP`/`DEPT` hit it.
 
 ### Inspecting the generated SMT-LIB
 
@@ -211,7 +204,7 @@ for their values:
 ```bash
 grep -v '^(assert (not (= q1 q2)))$' single.smt2 > /tmp/eval.smt2
 echo '(get-value (q1 q2))' >> /tmp/eval.smt2
-/Users/mahgoubyahia/cvc5/main/build/install/bin/cvc5 --tlimit=5000 /tmp/eval.smt2
+cvc5 --tlimit=5000 /tmp/eval.smt2
 ```
 ```
 sat
@@ -281,71 +274,84 @@ itself to run it.
 
 ## Commands for the regression pairs
 
-Copy-pasteable, assuming the `spes` helper from the setup section above. Each
-prints one `result:` line.
+Copy-pasteable from the repository root. Each prints one `result:` line.
 
 ### NOT equivalent -- expect `sat`
 
 ```bash
 # B1  UNION must deduplicate
-spes 'SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t'
 
 # B2  EXCEPT must deduplicate
-spes 'SELECT * FROM (VALUES (1),(1)) AS t EXCEPT SELECT * FROM (VALUES (2)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1)) AS t EXCEPT SELECT * FROM (VALUES (2)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t'
 
 # B3  INTERSECT must differ from INTERSECT ALL
-spes 'SELECT * FROM (VALUES (1),(1)) AS t INTERSECT SELECT * FROM (VALUES (1),(1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t INTERSECT ALL SELECT * FROM (VALUES (1),(1)) AS u'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1)) AS t INTERSECT SELECT * FROM (VALUES (1),(1)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t INTERSECT ALL SELECT * FROM (VALUES (1),(1)) AS u'
 
 # B4  SELECT DISTINCT must deduplicate
-spes 'SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1)) AS t' \
-     'SELECT t.EXPR$0 FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1)) AS t' \
+  -Dq2='SELECT t.EXPR$0 FROM (VALUES (1),(1)) AS t'
 
 # B5  SUM must not be MAX          -- STILL FAILS (reports unsat)
-spes 'SELECT t.EXPR$0, SUM(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0' \
-     'SELECT t.EXPR$0, MAX(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0'
+mvn -q exec:exec \
+  -Dq1='SELECT t.EXPR$0, SUM(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0' \
+  -Dq2='SELECT t.EXPR$0, MAX(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0'
 
 # B6  MIN must not be MAX          -- STILL FAILS (reports unsat)
-spes 'SELECT t.EXPR$0, MIN(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0' \
-     'SELECT t.EXPR$0, MAX(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0'
+mvn -q exec:exec \
+  -Dq1='SELECT t.EXPR$0, MIN(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0' \
+  -Dq2='SELECT t.EXPR$0, MAX(t.EXPR$1) FROM (VALUES (1,2),(1,3)) AS t GROUP BY t.EXPR$0'
 
 # B7  COUNT(DISTINCT x) must not be COUNT(x)  -- STILL FAILS (reports unsat)
-spes 'SELECT t.EXPR$0, COUNT(DISTINCT t.EXPR$1) FROM (VALUES (1,2),(1,2)) AS t GROUP BY t.EXPR$0' \
-     'SELECT t.EXPR$0, COUNT(t.EXPR$1) FROM (VALUES (1,2),(1,2)) AS t GROUP BY t.EXPR$0'
+mvn -q exec:exec \
+  -Dq1='SELECT t.EXPR$0, COUNT(DISTINCT t.EXPR$1) FROM (VALUES (1,2),(1,2)) AS t GROUP BY t.EXPR$0' \
+  -Dq2='SELECT t.EXPR$0, COUNT(t.EXPR$1) FROM (VALUES (1,2),(1,2)) AS t GROUP BY t.EXPR$0'
 ```
 
 ### Equivalent -- expect `unsat`
 
 ```bash
 # P1  UNION is commutative
-spes 'SELECT * FROM (VALUES (1),(2)) AS t UNION SELECT * FROM (VALUES (2),(3)) AS u' \
-     'SELECT * FROM (VALUES (2),(3)) AS u UNION SELECT * FROM (VALUES (1),(2)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(2)) AS t UNION SELECT * FROM (VALUES (2),(3)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (2),(3)) AS u UNION SELECT * FROM (VALUES (1),(2)) AS t'
 
 # P2  DISTINCT equals a bare GROUP BY
-spes 'SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t' \
-     'SELECT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t GROUP BY t.EXPR$0'
+mvn -q exec:exec \
+  -Dq1='SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t' \
+  -Dq2='SELECT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t GROUP BY t.EXPR$0'
 
 # P3  UNION equals DISTINCT of UNION ALL
-spes 'SELECT * FROM (VALUES (1),(2)) AS t UNION SELECT * FROM (VALUES (2),(3)) AS u' \
-     'SELECT DISTINCT v.EXPR$0 FROM (SELECT * FROM (VALUES (1),(2)) AS t UNION ALL SELECT * FROM (VALUES (2),(3)) AS u) AS v'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(2)) AS t UNION SELECT * FROM (VALUES (2),(3)) AS u' \
+  -Dq2='SELECT DISTINCT v.EXPR$0 FROM (SELECT * FROM (VALUES (1),(2)) AS t UNION ALL SELECT * FROM (VALUES (2),(3)) AS u) AS v'
 
 # P4  A INTERSECT A equals DISTINCT A
-spes 'SELECT * FROM (VALUES (1),(1),(2)) AS t INTERSECT SELECT * FROM (VALUES (1),(1),(2)) AS u' \
-     'SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1),(2)) AS t INTERSECT SELECT * FROM (VALUES (1),(1),(2)) AS u' \
+  -Dq2='SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t'
 
 # P5  EXCEPT over disjoint inputs equals DISTINCT A
-spes 'SELECT * FROM (VALUES (1),(1),(2)) AS t EXCEPT SELECT * FROM (VALUES (99)) AS u' \
-     'SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1),(2)) AS t EXCEPT SELECT * FROM (VALUES (99)) AS u' \
+  -Dq2='SELECT DISTINCT t.EXPR$0 FROM (VALUES (1),(1),(2)) AS t'
 
 # P6  UNION ALL keeps multiplicity
-spes 'SELECT * FROM (VALUES (1)) AS t UNION ALL SELECT * FROM (VALUES (1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1)) AS t UNION ALL SELECT * FROM (VALUES (1)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t'
 
 # P7  EXCEPT ALL subtracts multiplicity
-spes 'SELECT * FROM (VALUES (1),(1),(1)) AS t EXCEPT ALL SELECT * FROM (VALUES (1)) AS u' \
-     'SELECT * FROM (VALUES (1),(1)) AS t'
+mvn -q exec:exec \
+  -Dq1='SELECT * FROM (VALUES (1),(1),(1)) AS t EXCEPT ALL SELECT * FROM (VALUES (1)) AS u' \
+  -Dq2='SELECT * FROM (VALUES (1),(1)) AS t'
 ```
 
 ### Run them all at once
@@ -354,9 +360,11 @@ spes 'SELECT * FROM (VALUES (1),(1),(1)) AS t EXCEPT ALL SELECT * FROM (VALUES (
 run_all() {
   while IFS='|' read -r name expected q1 q2; do
     [ -z "$name" ] && continue
-    got=$(spes "$q1" "$q2" 2>/dev/null | sed -n 's/^result: \([a-z]*\).*/\1/p')
-    [ "$got" = "$expected" ] && verdict=PASS || verdict=FAIL
-    printf '%-4s %-6s got=%-8s %s\n' "$name" "$expected" "$got" "$verdict"
+    # </dev/null keeps Maven from swallowing the rest of the heredoc
+    got=$(mvn -q exec:exec -Dq1="$q1" -Dq2="$q2" </dev/null 2>/dev/null \
+          | sed -n 's/^result: \([a-z]*\).*/\1/p')
+    [ "$got" = "$expected" ] && v=PASS || v=FAIL
+    printf '%-4s %-6s got=%-8s %s\n' "$name" "$expected" "$got" "$v"
   done <<'PAIRS'
 B1|sat|SELECT * FROM (VALUES (1),(1)) AS t UNION SELECT * FROM (VALUES (1)) AS u|SELECT * FROM (VALUES (1),(1)) AS t
 B2|sat|SELECT * FROM (VALUES (1),(1)) AS t EXCEPT SELECT * FROM (VALUES (2)) AS u|SELECT * FROM (VALUES (1),(1)) AS t

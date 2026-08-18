@@ -13,11 +13,22 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
+    // Drop blank arguments. Maven's exec:exec always passes the -Dq1/-Dq2/-Dsem/-Dout
+    // placeholders, and the ones the user did not set arrive as empty strings.
+    List<String> given = new ArrayList<>();
+    for (String arg : args)
+    {
+      if (arg != null && !arg.trim().isEmpty())
+      {
+        given.add(arg.trim());
+      }
+    }
+
     // Two-query mode: compare a single pair given on the command line.
     //   Cvc5Analysis "<query1>" "<query2>" [bags|sets] [output.smt2]
-    if (args.length >= 2)
+    if (given.size() >= 2)
     {
-      verifyPair(args);
+      verifyPair(given.toArray(new String[0]));
       return;
     }
 

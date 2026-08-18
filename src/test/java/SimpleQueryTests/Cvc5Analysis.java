@@ -13,6 +13,14 @@ public class Cvc5Analysis
   public static List<String> cvc5ProvenTests = new ArrayList<>();
   public static void main(String[] args) throws Exception
   {
+    // Two-query mode: compare a single pair given on the command line.
+    //   Cvc5Analysis "<query1>" "<query2>" [bags|sets] [output.smt2]
+    if (args.length >= 2)
+    {
+      verifyPair(args);
+      return;
+    }
+
     File f = new File("testData/no_aggregation_sat.json");
     // File f = new File("testData/test.json");    
 
@@ -61,6 +69,60 @@ public class Cvc5Analysis
     //   }
     //   System.out.println(test);
     // }
+  }
+
+  /**
+   * Checks a single pair of queries supplied on the command line.
+   *
+   * <pre>
+   *   Cvc5Analysis "&lt;query1&gt;" "&lt;query2&gt;" [bags|sets] [output.smt2]
+   * </pre>
+   *
+   * Semantics defaults to bags, output file to single.smt2. Prints the raw cvc5 answer
+   * plus its reading: unsat means the two queries were proved equivalent, sat means a
+   * counterexample database was found, unknown means the solver hit its time limit.
+   */
+  public static void verifyPair(String[] args) throws Exception
+  {
+    String sql1 = args[0];
+    String sql2 = args[1];
+    boolean isSetSemantics = args.length >= 3 && args[2].equalsIgnoreCase("sets");
+    String output = args.length >= 4 ? args[3] : "single.smt2";
+
+    System.out.println("q1        : " + sql1);
+    System.out.println("q2        : " + sql2);
+    System.out.println("semantics : " + (isSetSemantics ? "sets" : "bags"));
+    System.out.println("smt2 file : " + output);
+    System.out.println();
+
+    PrintWriter writer = new PrintWriter(new File(output));
+    try
+    {
+      verify(sql1, sql2, "commandLine", writer, isSetSemantics);
+    }
+    finally
+    {
+      writer.close();
+    }
+
+    System.out.println();
+    if (Cvc5AbstractTranslator.unsatAnswers > 0)
+    {
+      System.out.println("result: unsat -- the queries are EQUIVALENT");
+    }
+    else if (Cvc5AbstractTranslator.satAnswers > 0)
+    {
+      System.out.println("result: sat -- the queries are NOT equivalent");
+    }
+    else if (Cvc5AbstractTranslator.unknownAnswers > 0)
+    {
+      System.out.println("result: unknown -- solver gave up (see tlimit-per)");
+    }
+    else
+    {
+      System.out.println("result: skipped -- unsupported query (see isSupported)");
+    }
+    System.out.println("elapsed: " + Cvc5AbstractTranslator.totalTime + " ms");
   }
 
   public static void verify(

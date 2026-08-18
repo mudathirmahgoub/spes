@@ -401,13 +401,25 @@ public abstract class Cvc5AbstractTranslator
 
   private Term translate(LogicalIntersect intersect) throws CVC5ApiException
   {
-    Term a = translate(intersect.getInput(0));
-    Term b = translate(intersect.getInput(1));
-    Term difference = tm.mkTerm(getIntersectionKind(), a, b);
-    return difference;
+    List<RelNode> inputs = intersect.getInputs();
+    Term result = translate(inputs.get(0));
+    for (int i = 1; i < inputs.size(); i++)
+    {
+      result = tm.mkTerm(getIntersectionKind(), result, translate(inputs.get(i)));
+    }
+    // INTERSECT (without ALL) returns distinct rows
+    return intersect.all ? result : mkDistinct(result);
   }
 
   protected abstract Kind getIntersectionKind();
+
+  /**
+   * Duplicate removal. Under set semantics this is the identity, since sets carry no
+   * duplicates. Under bag semantics it is bag.setof, which caps every multiplicity at 1.
+   * Needed wherever SQL specifies distinct results: SELECT DISTINCT, a GROUP BY with no
+   * aggregate calls, and the non-ALL forms of UNION / EXCEPT / INTERSECT.
+   */
+  protected abstract Term mkDistinct(Term table);
 
   protected abstract Term translate(LogicalMinus minus) throws CVC5ApiException;
 
@@ -419,11 +431,11 @@ public abstract class Cvc5AbstractTranslator
     int[] indices = getGroupIndices(bitSet);
     if (aggregate.getAggCallList().isEmpty())
     {
-      // it is similar to duplicate removal of a projection
+      // duplicate removal of a projection: SELECT DISTINCT, or GROUP BY with no aggregates
 
-      // ((_ table.project indices) child)
+      // (bag.setof ((_ table.project indices) child))
       Op op = tm.mkOp(getProjectKind(), indices);
-      Term ret = tm.mkTerm(op, child);
+      Term ret = mkDistinct(tm.mkTerm(op, child));
       return ret;
     }
 

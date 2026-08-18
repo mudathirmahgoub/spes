@@ -7,17 +7,44 @@
     <groupId>GT</groupId>
     <artifactId>equitas</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- z3 is installed under the project's .venv (official release archive,
+             which ships com.microsoft.z3.jar + libz3java.dylib). -->
+        <z3.home>${project.basedir}/.venv/z3</z3.home>
+        <z3.jar>${z3.home}/bin/com.microsoft.z3.jar</z3.jar>
+        <z3.lib>${z3.home}/bin</z3.lib>
+        <!-- cvc5 built from source. -->
+        <cvc5.home>/Users/mahgoubyahia/cvc5/main/build/install</cvc5.home>
+        <cvc5.jar>${cvc5.home}/share/java/cvc5.jar</cvc5.jar>
+        <cvc5.lib>${cvc5.home}/lib</cvc5.lib>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
                 </configuration>
             </plugin>
-                    </plugins>       
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!-- Native libraries for the z3 and cvc5 JNI bindings. -->
+                    <argLine>-Djava.library.path=${z3.lib}:${cvc5.lib} --enable-native-access=ALL-UNNAMED</argLine>
+                    <environmentVariables>
+                        <DYLD_LIBRARY_PATH>${z3.lib}:${cvc5.lib}</DYLD_LIBRARY_PATH>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>
@@ -48,14 +75,14 @@
             <artifactId>z3</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>/home/mudathir/all/z3/build/install/lib/com.microsoft.z3.jar</systemPath>
+            <systemPath>${z3.jar}</systemPath>
         </dependency>
         <dependency>
             <groupId>io.github.cvc5</groupId>
             <artifactId>cvc5</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>/home/mudathir/all/cvc5/mudathir/build/install/share/java/cvc5.jar</systemPath>
+            <systemPath>${cvc5.jar}</systemPath>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

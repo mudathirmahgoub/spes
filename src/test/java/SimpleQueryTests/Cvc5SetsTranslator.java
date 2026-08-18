@@ -92,9 +92,17 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
     return tm.mkEmptySet(sort);
   }
 
+  @Override
   protected Term mkSingleton(Term smtTuple)
   {
     return tm.mkTerm(Kind.SET_SINGLETON, smtTuple);
+  }
+
+  /** Sets carry no duplicates, so duplicate removal is the identity here. */
+  @Override
+  protected Term mkDistinct(Term table)
+  {
+    return table;
   }
 
   @Override
@@ -107,7 +115,7 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
-  public Term translate(LogicalUnion n) throws CVC5ApiException
+  protected Term translate(LogicalUnion n) throws CVC5ApiException
   {
     List<RelNode> inputs = n.getInputs();
     Kind k = Kind.SET_UNION;

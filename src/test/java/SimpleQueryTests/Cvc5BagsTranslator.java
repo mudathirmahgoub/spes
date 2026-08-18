@@ -91,33 +91,43 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     return tm.mkEmptyBag(sort);
   }
 
+  @Override
   protected Term mkSingleton(Term smtTuple)
   {
     return tm.mkTerm(Kind.BAG_MAKE, smtTuple, one);
   }
 
   @Override
-  protected Term translate(LogicalMinus minus) throws CVC5ApiException
+  protected Term mkDistinct(Term table)
   {
-    Term a = translate(minus.getInput(0));
-    Term b = translate(minus.getInput(1));
-    Term difference = minus.all ? tm.mkTerm(Kind.BAG_DIFFERENCE_SUBTRACT, a, b)
-                                : tm.mkTerm(Kind.BAG_DIFFERENCE_REMOVE, a, b);
-    return difference;
+    return tm.mkTerm(Kind.BAG_SETOF, table);
   }
 
   @Override
-  public Term translate(LogicalUnion n) throws CVC5ApiException
+  protected Term translate(LogicalMinus minus) throws CVC5ApiException
   {
-    List<RelNode> inputs = n.getInputs();
-    Kind k = n.all ? Kind.BAG_UNION_DISJOINT : Kind.BAG_UNION_MAX;
+    List<RelNode> inputs = minus.getInputs();
+    Kind k = minus.all ? Kind.BAG_DIFFERENCE_SUBTRACT : Kind.BAG_DIFFERENCE_REMOVE;
     Term result = translate(inputs.get(0));
-    result = tm.mkTerm(k, result, translate(inputs.get(1)));
-    for (int i = 2; i < inputs.size(); i++)
+    for (int i = 1; i < inputs.size(); i++)
     {
       result = tm.mkTerm(k, result, translate(inputs.get(i)));
     }
-    return result;
+    // EXCEPT (without ALL) returns distinct rows
+    return minus.all ? result : mkDistinct(result);
+  }
+
+  @Override
+  protected Term translate(LogicalUnion n) throws CVC5ApiException
+  {
+    List<RelNode> inputs = n.getInputs();
+    Term result = translate(inputs.get(0));
+    for (int i = 1; i < inputs.size(); i++)
+    {
+      result = tm.mkTerm(Kind.BAG_UNION_DISJOINT, result, translate(inputs.get(i)));
+    }
+    // UNION (without ALL) returns distinct rows
+    return n.all ? result : mkDistinct(result);
   }
 
   @Override

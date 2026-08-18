@@ -1,23 +1,35 @@
 package SimpleQueryTests;
 import io.github.cvc5.*;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalMinus;
 import org.apache.calcite.rel.logical.LogicalUnion;
 
+/**
+ * Encodes SQL under bag (multiset) semantics, where a table is a cvc5 {@code Bag} of tuples and
+ * a row's multiplicity is how many times it occurs.
+ *
+ * <p>This is the semantics SQL actually has, so it is the default. The mapping is mostly direct
+ * -- {@code UNION ALL} is {@code bag.union_disjoint}, a projection is {@code table.project},
+ * and both accumulate multiplicities the way SQL does. The one place care is needed is SQL's
+ * duplicate-eliminating constructs: {@code SELECT DISTINCT} and the non-{@code ALL} set
+ * operators. Those go through {@link #mkDistinct}, which caps every multiplicity at one.
+ * Without it the encoding silently keeps duplicates and reports queries as equivalent when
+ * they are not.
+ *
+ * @see Cvc5SetsTranslator for the set-semantics encoding, where duplicates never arise
+ */
 public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
 {
+  /** Refuse to materialise a counterexample row more times than this. */
+  private static final BigInteger MAX_MULTIPLICITY = BigInteger.valueOf(10_000);
+
   public Cvc5BagsTranslator(boolean isNullable, PrintWriter writer)
   {
     super(isNullable, writer);
-  }
-
-  @Override
-  protected boolean isSetSemantics()
-  {
-    return false;
   }
 
   @Override
@@ -79,6 +91,7 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   {
     return Kind.BAG_EMPTY;
   }
+
   @Override
   protected Sort mkTableSort(Sort tupleSort)
   {
@@ -97,6 +110,7 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     return tm.mkTerm(Kind.BAG_MAKE, smtTuple, one);
   }
 
+  /** {@code bag.setof}: caps every multiplicity at one. */
   @Override
   protected Term mkDistinct(Term table)
   {
@@ -130,6 +144,13 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     return n.all ? result : mkDistinct(result);
   }
 
+  /**
+   * Expands a bag value from a cvc5 model into the rows of a counterexample table.
+   *
+   * <p>Model values are always built from {@code bag.empty}, {@code bag} (a single row with a
+   * multiplicity) and {@code bag.union_disjoint}, so those are the only three shapes handled;
+   * anything else means the term was not a value and is a bug rather than a limitation.
+   */
   @Override
   protected List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException
   {
@@ -141,11 +162,21 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     }
     if (k == Kind.BAG_MAKE)
     {
-      List<Object> tupleValues = getTupleValues(tableValue.getChild(0));
-      int multiplicity = tableValue.getChild(1).getIntegerValue().intValue();
-      for (int i = 0; i < multiplicity; i++)
+      BigInteger multiplicity = tableValue.getChild(1).getIntegerValue();
+      if (multiplicity.signum() <= 0)
       {
-        rows.add(tupleValues);
+        return rows;
+      }
+      if (multiplicity.compareTo(MAX_MULTIPLICITY) > 0)
+      {
+        throw new RuntimeException(
+            "refusing to materialise " + multiplicity + " copies of a row in " + tableValue);
+      }
+      List<Object> tupleValues = getTupleValues(tableValue.getChild(0));
+      for (int i = 0; i < multiplicity.intValue(); i++)
+      {
+        // a fresh list per row: callers are free to treat rows as independent
+        rows.add(new ArrayList<>(tupleValues));
       }
       return rows;
     }

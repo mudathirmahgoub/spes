@@ -7,17 +7,25 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.logical.LogicalMinus;
 import org.apache.calcite.rel.logical.LogicalUnion;
 
+/**
+ * Encodes SQL under set semantics, where a table is a cvc5 {@code Set} of tuples and a row is
+ * either present or absent.
+ *
+ * <p>This is deliberately an approximation of SQL: {@code UNION ALL}, {@code EXCEPT ALL} and
+ * {@code INTERSECT ALL} collapse onto the plain set operators, so multiplicities are lost and
+ * two queries differing only in duplicates are reported equivalent. In exchange the encoding
+ * is much easier for the solver, which in practice proves considerably more benchmarks than
+ * the bag encoding does. Use it when duplicates are known not to matter.
+ *
+ * <p>Because sets carry no duplicates, {@link #mkDistinct} is the identity here.
+ *
+ * @see Cvc5BagsTranslator for the faithful, and default, encoding
+ */
 public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
 {
   public Cvc5SetsTranslator(boolean isNullable, PrintWriter writer)
   {
     super(isNullable, writer);
-  }
-
-  @Override
-  protected boolean isSetSemantics()
-  {
-    return true;
   }
 
   @Override

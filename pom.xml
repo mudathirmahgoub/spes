@@ -26,6 +26,7 @@
         <q2></q2>
         <sem></sem>
         <out></out>
+        <batch>testData/no_aggregation_sat.json</batch>
     </properties>
 
     <build>
@@ -94,6 +95,17 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <!-- Cvc5Test and simpleTest are main()-driven demos, not JUnit classes;
+                         surefire's default pattern would pick them up and fail on
+                         "no runnable methods". -->
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/Cvc5Test.java</exclude>
+                        <exclude>**/simpleTest.java</exclude>
+                        <exclude>**/testOftest.java</exclude>
+                    </excludes>
                     <argLine>-Djava.library.path=${z3.lib}:${cvc5.lib} --enable-native-access=ALL-UNNAMED</argLine>
                     <environmentVariables>
                         <DYLD_LIBRARY_PATH>${z3.lib}</DYLD_LIBRARY_PATH>
@@ -124,6 +136,9 @@
                         <argument>--enable-native-access=ALL-UNNAMED</argument>
                         <argument>-classpath</argument>
                         <classpath/>
+                        <argument>-Dbatch=${batch}</argument>
+                        <argument>-Dsem=${sem}</argument>
+                        <argument>-Dout=${out}</argument>
                         <argument>SimpleQueryTests.Cvc5Analysis</argument>
                         <argument>${q1}</argument>
                         <argument>${q2}</argument>

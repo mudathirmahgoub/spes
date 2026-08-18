@@ -34,9 +34,33 @@ import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.type.BasicSqlType;
-import org.apache.calcite.util.ImmutableBitSet;
 
+/**
+ * Translates a pair of Calcite relational plans into an SMT problem that is unsatisfiable
+ * exactly when the two SQL queries are equivalent.
+ *
+ * <p>A table becomes a cvc5 collection of tuples and each relational operator becomes a term
+ * over that collection. The two queries are bound to constants {@code q1} and {@code q2},
+ * {@code (assert (not (= q1 q2)))} is added, and the solver is asked for a model: {@code unsat}
+ * means no database distinguishes them, {@code sat} yields a counterexample database, and
+ * {@code unknown} means the per-query time limit was reached.
+ *
+ * <p>Everything specific to the choice between bag and set semantics is deferred to the
+ * subclasses through the abstract hooks below -- which collection sort to use, which kind
+ * implements each operator, and what duplicate elimination means. See {@link
+ * Cvc5BagsTranslator} and {@link Cvc5SetsTranslator}.
+ *
+ * <p>Nullable columns are modelled with cvc5's {@code Nullable} sort and SQL's three-valued
+ * logic is obtained by lifting operators over it, with {@code AND} and {@code OR} handled
+ * explicitly so that {@code FALSE AND NULL} is {@code FALSE} and {@code TRUE OR NULL} is
+ * {@code TRUE}.
+ *
+ * <p>Constructs with no faithful encoding raise {@link UnsupportedOperationException} rather
+ * than being approximated. That matters: a wrong encoding surfaces as a bogus {@code unsat},
+ * which reads as a proof of equivalence.
+ */
 public abstract class Cvc5AbstractTranslator
 {
   protected final PrintWriter writer;
@@ -63,8 +87,6 @@ public abstract class Cvc5AbstractTranslator
     this.writer = writer;
     startTime = System.currentTimeMillis();
   }
-
-  protected abstract boolean isSetSemantics();
 
   public void reset() throws CVC5ApiException
   {
@@ -96,6 +118,16 @@ public abstract class Cvc5AbstractTranslator
     prologue.append("(set-option :" + option + " " + value + ")\n");
   }
 
+  /**
+   * Asks whether two queries are equivalent.
+   *
+   * <p>Encodes both, asserts they differ, and checks satisfiability. On {@code sat} the model is
+   * turned into a concrete database and, if a PostgreSQL server is reachable on localhost, both
+   * queries are run against it to confirm the counterexample independently.
+   *
+   * @return {@code unsat} if the queries are equivalent, {@code sat} if a database distinguishes
+   *     them, {@code unknown} on timeout
+   */
   public Result translate(String name, RelNode n1, String sql1, RelNode n2, String sql2)
       throws CVC5ApiException
   {
@@ -219,8 +251,10 @@ public abstract class Cvc5AbstractTranslator
     return result;
   }
 
+  /** Expands a collection value from a model into the rows of a counterexample table. */
   protected abstract List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException;
 
+  /** The kind of the empty-collection value, used to recognise it in a model. */
   protected abstract Kind getEmptyKind();
 
   protected List<Object> getTupleValues(Term tuple)
@@ -358,6 +392,7 @@ public abstract class Cvc5AbstractTranslator
     return translate(n);
   }
 
+  /** Dispatches on the relational operator. Anything not handled is refused by name. */
   public Term translate(RelNode n) throws CVC5ApiException
   {
     if (n instanceof EnumerableTableScan)
@@ -396,7 +431,12 @@ public abstract class Cvc5AbstractTranslator
     {
       return translate((LogicalValues) n);
     }
-    return null;
+    // Returning null here used to surface much later as a NullPointerException on the
+    // caller's Term; naming the node makes the gap obvious and lets the batch skip it.
+    // LogicalSort (ORDER BY, LIMIT, OFFSET), LogicalWindow, LogicalCorrelate and
+    // LogicalTableFunctionScan all land here.
+    throw new UnsupportedOperationException(
+        "unsupported relational operator " + n.getClass().getSimpleName() + ": " + n);
   }
 
   private Term translate(LogicalIntersect intersect) throws CVC5ApiException
@@ -411,6 +451,7 @@ public abstract class Cvc5AbstractTranslator
     return intersect.all ? result : mkDistinct(result);
   }
 
+  /** {@code INTERSECT ALL}: bag.inter_min or set.inter. */
   protected abstract Kind getIntersectionKind();
 
   /**
@@ -421,25 +462,51 @@ public abstract class Cvc5AbstractTranslator
    */
   protected abstract Term mkDistinct(Term table);
 
+  /** {@code EXCEPT} / {@code EXCEPT ALL}; the subclass picks the difference operator. */
   protected abstract Term translate(LogicalMinus minus) throws CVC5ApiException;
 
   private Term translate(LogicalAggregate aggregate) throws CVC5ApiException
   {
     Term child = translate(aggregate.getInput());
-    // get the indices of the group set
-    ImmutableBitSet bitSet = aggregate.getGroupSet();
-    int[] indices = getGroupIndices(bitSet);
-    if (aggregate.getAggCallList().isEmpty())
+    int[] indices = aggregate.getGroupSet().toArray();
+    List<AggregateCall> calls = aggregate.getAggCallList();
+    if (calls.isEmpty())
     {
       // duplicate removal of a projection: SELECT DISTINCT, or GROUP BY with no aggregates
 
       // (bag.setof ((_ table.project indices) child))
       Op op = tm.mkOp(getProjectKind(), indices);
-      Term ret = mkDistinct(tm.mkTerm(op, child));
-      return ret;
+      return mkDistinct(tm.mkTerm(op, child));
     }
 
-    List<AggregateCall> calls = aggregate.getAggCallList();
+    // The argument column of each call, or -1 for COUNT(*).
+    int[] argIndices = new int[calls.size()];
+    for (int j = 0; j < calls.size(); j++)
+    {
+      AggregateCall call = calls.get(j);
+      checkSupported(call);
+      argIndices[j] = call.getArgList().isEmpty() ? -1 : call.getArgList().get(0);
+    }
+
+    if (calls.stream().anyMatch(AggregateCall::isDistinct))
+    {
+      // table.aggr folds over every copy in the bag, so a DISTINCT aggregate needs its
+      // duplicates removed first. Projecting onto (group keys, argument) and applying
+      // bag.setof does that, but it only serves one call: a second aggregate would need
+      // its own, differently de-duplicated, input.
+      if (calls.size() != 1 || argIndices[0] < 0)
+      {
+        throw new UnsupportedOperationException(
+            "DISTINCT aggregate alongside other aggregates is not supported: " + calls);
+      }
+      int groupCount = indices.length;
+      int[] keep = Arrays.copyOf(indices, groupCount + 1);
+      keep[groupCount] = argIndices[0];
+      child = mkDistinct(tm.mkTerm(tm.mkOp(getProjectKind(), keep), child));
+      indices = IntStream.range(0, groupCount).toArray();
+      argIndices[0] = groupCount;
+    }
+
     // construct a lambda function that handles all aggregate functions
     Sort xTupleSort = getElementSort(child.getSort());
     Term x = tm.mkVar(xTupleSort, "x");
@@ -455,32 +522,18 @@ public abstract class Cvc5AbstractTranslator
     int yIndex = 0;
     for (int index : indices)
     {
-      Term tupleSelect = mkTupleSelect(xTupleSort, x, index);
-      tupleElements[yIndex] = tupleSelect;
-      // initial value is needed for grouping fields
-      initialValues[yIndex] = tm.mkNullableNull(yTupleSorts[yIndex]);
+      tupleElements[yIndex] = mkTupleSelect(xTupleSort, x, index);
+      // never read: the first element of each group overwrites it. It only has to typecheck.
+      initialValues[yIndex] = mkNullOfSort(yTupleSorts[yIndex]);
       yIndex++;
     }
 
     // add aggregate functions
     for (int j = 0; j < calls.size(); j++)
     {
-      AggregateCall call = calls.get(j);
-      List<Integer> argList = call.getArgList();
-      Term yTupleSelect = mkTupleSelect(yTupleSort, y, yIndex);
-      if (yTupleSelect.getSort().isNullable())
-      {
-        yTupleSelect = tm.mkNullableVal(yTupleSelect);
-      }
-      if (argList.isEmpty())
-      {
-        mkCountFun(tupleElements, initialValues, yIndex, yTupleSelect);
-      }
-      else
-      {
-        mkAggregateFun(
-            xTupleSort, x, yTupleSort, yTupleSelect, y, tupleElements, initialValues, yIndex, call);
-      }
+      Term arg = argIndices[j] < 0 ? null : mkTupleSelect(xTupleSort, x, argIndices[j]);
+      Term acc = mkTupleSelect(yTupleSort, y, yIndex);
+      mkAggregateFun(calls.get(j), arg, acc, tupleElements, initialValues, yIndex);
       yIndex++;
     }
 
@@ -488,77 +541,121 @@ public abstract class Cvc5AbstractTranslator
     Term initialValue = tm.mkTuple(initialValues);
     Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name, true);
     Op op = tm.mkOp(getAggregateKind(), indices);
-    Term ret = tm.mkTerm(op, new Term[] {f, initialValue, child});
-    return ret;
+    return tm.mkTerm(op, new Term[] {f, initialValue, child});
   }
 
-  private void mkAggregateFun(Sort xTupleSort,
-      Term x,
-      Sort yTupleSort,
-      Term yTupleSelect,
-      Term y,
-      Term[] tupleElements,
-      Term[] initialValues,
-      int yIndex,
-      AggregateCall call)
+  private void checkSupported(AggregateCall call)
   {
-    int xIndex = call.getArgList().get(0);
-    Term xTupleSelect = mkTupleSelect(xTupleSort, x, xIndex);
+    if (call.hasFilter())
+    {
+      throw new UnsupportedOperationException("aggregate FILTER is not supported: " + call);
+    }
+    if (call.getArgList().size() > 1)
+    {
+      throw new UnsupportedOperationException("multi-argument aggregate: " + call);
+    }
+    switch (call.getAggregation().kind)
+    {
+      case COUNT:
+      case SUM:
+      case SUM0:
+      case MIN:
+      case MAX: break;
+      default: throw new UnsupportedOperationException("unsupported aggregate: " + call);
+    }
+    if (!isNullable)
+    {
+      // SUM/MIN/MAX seed the fold with null to mean "no value yet", and the grouping
+      // columns need a null placeholder too, so the tuple sorts have to be nullable.
+      throw new UnsupportedOperationException("aggregates require nullable sorts: " + call);
+    }
+  }
+
+  /**
+   * Builds one accumulator slot of the fold performed by table.aggr / relation.aggr.
+   *
+   * <p>{@code arg} is the aggregated column of the current row, null for COUNT(*).
+   * {@code acc} is the running value, still wrapped in its Nullable sort. SQL aggregates
+   * skip null inputs, and SUM/MIN/MAX over a group with no non-null value are null, so
+   * those seed the accumulator with null rather than zero and treat a null accumulator as
+   * "nothing seen yet". COUNT is different: it starts at zero and never returns null.
+   */
+  private void mkAggregateFun(
+      AggregateCall call, Term arg, Term acc, Term[] tupleElements, Term[] initialValues, int yIndex)
+  {
+    Sort accSort = acc.getSort();
     switch (call.getAggregation().kind)
     {
       case COUNT:
       {
-        mkCountFun(tupleElements, initialValues, yIndex, yTupleSelect);
+        Term incremented = tm.mkTerm(Kind.ADD, mkVal(acc), one);
+        // COUNT(*) counts every row, COUNT(x) skips the rows where x is null
+        Term result = arg == null
+            ? incremented
+            : tm.mkTerm(Kind.ITE, mkIsNull(arg), mkVal(acc), incremented);
+        tupleElements[yIndex] = mkSome(accSort, result);
+        initialValues[yIndex] = mkSome(accSort, zero);
+        return;
       }
-      break;
       case SUM:
-      {
-        if (xTupleSelect.getSort().isNullable())
-        {
-          Term isNull = tm.mkNullableIsNull(xTupleSelect);
-          Term val = tm.mkNullableVal(xTupleSelect);
-          Term ite = tm.mkTerm(Kind.ITE, isNull, zero, val);
-          Term result = tm.mkTerm(Kind.ADD, ite, yTupleSelect);
-          tupleElements[yIndex] = tm.mkNullableSome(result);
-          initialValues[yIndex] = tm.mkNullableSome(zero);
-        }
-      }
+      case SUM0:
       case MIN:
-      {
-        if (xTupleSelect.getSort().isNullable())
-        {
-          Term isNull = tm.mkNullableIsNull(xTupleSelect);
-          Term val = tm.mkNullableVal(xTupleSelect);
-          Term ite = tm.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
-          Term lt = tm.mkTerm(Kind.LT, ite, yTupleSelect);
-          Term result = tm.mkTerm(Kind.ITE, lt, ite, yTupleSelect);
-          tupleElements[yIndex] = tm.mkNullableSome(result);
-          initialValues[yIndex] = tm.mkNullableSome(zero);
-        }
-      }
       case MAX:
       {
-        if (xTupleSelect.getSort().isNullable())
+        Term combined;
+        switch (call.getAggregation().kind)
         {
-          Term isNull = tm.mkNullableIsNull(xTupleSelect);
-          Term val = tm.mkNullableVal(xTupleSelect);
-          Term ite = tm.mkTerm(Kind.ITE, isNull, yTupleSelect, val);
-          Term gt = tm.mkTerm(Kind.GT, ite, yTupleSelect);
-          Term result = tm.mkTerm(Kind.ITE, gt, ite, yTupleSelect);
-          tupleElements[yIndex] = tm.mkNullableSome(result);
-          initialValues[yIndex] = tm.mkNullableSome(zero);
+          case MIN: combined = tm.mkTerm(Kind.ITE, mkLess(arg, acc), arg, acc); break;
+          case MAX: combined = tm.mkTerm(Kind.ITE, mkLess(acc, arg), arg, acc); break;
+          default:
+            combined = mkSome(accSort, tm.mkTerm(Kind.ADD, mkVal(arg), mkVal(acc)));
         }
+        // a null row leaves the accumulator alone; the first non-null row seeds it
+        tupleElements[yIndex] = tm.mkTerm(Kind.ITE,
+            mkIsNull(arg),
+            acc,
+            tm.mkTerm(Kind.ITE, mkIsNull(acc), arg, combined));
+        // SUM0 is Calcite's null-free SUM: it returns 0 rather than null for an empty group
+        initialValues[yIndex] = call.getAggregation().kind == SqlKind.SUM0
+            ? mkSome(accSort, zero)
+            : mkNullOfSort(accSort);
+        return;
       }
-      break;
-      default: break;
+      default: throw new UnsupportedOperationException("unsupported aggregate: " + call);
     }
   }
 
-  private void mkCountFun(Term[] tupleElements, Term[] initialValues, int yIndex, Term yTupleSelect)
+  /** {@code a < b} on the unwrapped values, using the string ordering where applicable. */
+  private Term mkLess(Term a, Term b)
   {
-    Term result = tm.mkTerm(Kind.ADD, yTupleSelect, one);
-    tupleElements[yIndex] = tm.mkNullableSome(result);
-    initialValues[yIndex] = tm.mkNullableSome(zero);
+    Sort sort = a.getSort();
+    Sort elementSort = sort.isNullable() ? sort.getNullableElementSort() : sort;
+    Kind k = elementSort.isString() ? Kind.STRING_LT : Kind.LT;
+    return tm.mkTerm(k, mkVal(a), mkVal(b));
+  }
+
+  private Term mkIsNull(Term term)
+  {
+    return term.getSort().isNullable() ? tm.mkNullableIsNull(term) : falseTerm;
+  }
+
+  private Term mkVal(Term term)
+  {
+    return term.getSort().isNullable() ? tm.mkNullableVal(term) : term;
+  }
+
+  private Term mkSome(Sort sort, Term value)
+  {
+    return sort.isNullable() ? tm.mkNullableSome(value) : value;
+  }
+
+  private Term mkNullOfSort(Sort sort)
+  {
+    if (!sort.isNullable())
+    {
+      throw new UnsupportedOperationException("a null placeholder needs a nullable sort: " + sort);
+    }
+    return tm.mkNullableNull(sort);
   }
 
   private Term mkTupleSelect(Sort tupleSort, Term t, int index)
@@ -570,25 +667,15 @@ public abstract class Cvc5AbstractTranslator
     return selectedTerm;
   }
 
+  /** The fold operator: table.aggr or relation.aggr. */
   protected abstract Kind getAggregateKind();
 
-  private int[] getGroupIndices(ImmutableBitSet bitSet)
-  {
-    int[] indices = new int[bitSet.asList().size()];
-    int index = 0;
-    for (int i = 0; i < indices.length; i++)
-    {
-      if (bitSet.get(i))
-      {
-        indices[index] = i;
-        index++;
-      }
-    }
-    return indices;
-  }
 
+  /** {@code UNION} / {@code UNION ALL}; the subclass picks the union operator. */
   protected abstract Term translate(LogicalUnion n) throws CVC5ApiException;
 
+  /** Column projection: table.project or relation.project. Under bags this sums
+   * multiplicities, which is what a plain SQL projection does. */
   protected abstract Kind getProjectKind();
 
   protected Term translate(LogicalValues values)
@@ -609,7 +696,8 @@ public abstract class Cvc5AbstractTranslator
     }
     if (smtTuples.length == 0)
     {
-      Sort sort = getSort(values.getRowType());
+      // mkEmptyBag/mkEmptySet want the collection sort, not the tuple sort
+      Sort sort = mkTableSort(getSort(values.getRowType()));
       Term empty = mkEmptyTable(sort);
       return empty;
     }
@@ -625,10 +713,13 @@ public abstract class Cvc5AbstractTranslator
     return union;
   }
 
+  /** Multiset sum, used for {@code UNION ALL}, literal {@code VALUES} and outer-join padding. */
   protected abstract Kind getUnionAllKind();
 
+  /** The empty table. {@code sort} is the collection sort, not the tuple sort. */
   protected abstract Term mkEmptyTable(Sort sort);
 
+  /** A one-row table holding {@code smtTuple}. */
   protected abstract Term mkSingleton(Term smtTuple);
 
   protected Term translate(LogicalJoin n) throws CVC5ApiException
@@ -663,10 +754,21 @@ public abstract class Cvc5AbstractTranslator
         join = tm.mkTerm(getUnionAllKind(), join, product);
         return join;
       }
-      default: throw new RuntimeException(n.toString());
+      // SEMI and ANTI joins have no encoding here; Calcite usually rewrites them into
+      // an inner join over an aggregate before we see them.
+      default:
+        throw new UnsupportedOperationException("unsupported join type " + n.getJoinType());
     }
   }
 
+  /**
+   * The {@code LEFT JOIN} rows that the inner join misses: the rows of {@code a} that no
+   * product row projects back onto, each padded with nulls on the right.
+   *
+   * <p>The difference has to drop a row entirely once it matches anything, rather than
+   * subtracting multiplicities, so that a left row matching {@code k} right rows contributes no
+   * padded row at all while an unmatched row keeps every one of its copies.
+   */
   private Term mkLeft(Term a, Term product) throws CVC5ApiException
   {
     //(set.map
@@ -707,6 +809,7 @@ public abstract class Cvc5AbstractTranslator
     return mapF;
   }
 
+  /** The mirror image of {@link #mkLeft}: unmatched rows of {@code b}, padded on the left. */
   private Term mkRight(Term b, Term product) throws CVC5ApiException
   {
     //(set.map
@@ -752,10 +855,14 @@ public abstract class Cvc5AbstractTranslator
     return mapF;
   }
 
+  /** Difference that drops a row entirely once it matches, used to find the unmatched
+   * rows of an outer join. */
   protected abstract Kind getDifferenceRemoveKind();
 
+  /** The tuple sort held by a collection sort. */
   protected abstract Sort getElementSort(Sort sort);
 
+  /** Cartesian product: table.product or relation.product. */
   protected abstract Kind getProductKind();
 
   protected Term translate(LogicalFilter n) throws CVC5ApiException
@@ -779,6 +886,7 @@ public abstract class Cvc5AbstractTranslator
     return ret;
   }
 
+  /** {@code WHERE}: bag.filter or set.filter. */
   protected abstract Kind getFilterKind();
 
   protected Term defineFun(
@@ -808,6 +916,10 @@ public abstract class Cvc5AbstractTranslator
     return f;
   }
 
+  /**
+   * A projection. When every expression is a plain column reference this is the cheap
+   * {@code table.project}; otherwise a lambda is mapped over the table.
+   */
   protected Term translate(LogicalProject project) throws CVC5ApiException
   {
     // check whether to use table.project or set.map
@@ -856,6 +968,7 @@ public abstract class Cvc5AbstractTranslator
     }
   }
 
+  /** Projection through an expression: bag.map or set.map. */
   protected abstract Kind getMapKind();
 
   protected Term translateRowExpr(
@@ -950,10 +1063,19 @@ public abstract class Cvc5AbstractTranslator
         case "||": k = Kind.STRING_CONCAT; break;
         case "CASE":
         {
-          k = Kind.ITE;
-          // condition part should not be nullable
-          argTerms[0] = mkIsSomeValIfNullable(argTerms[0]);
-          return tm.mkTerm(k, argTerms);
+          // Calcite flattens CASE WHEN c1 THEN v1 WHEN c2 THEN v2 ELSE e into the single call
+          // CASE(c1, v1, c2, v2, e), so fold it into nested ite terms from the back. Each
+          // condition is read two-valued: a NULL condition takes the else branch.
+          if (argTerms.length % 2 == 0)
+          {
+            throw new UnsupportedOperationException("CASE without an ELSE branch: " + call);
+          }
+          Term result = argTerms[argTerms.length - 1];
+          for (int i = argTerms.length - 3; i >= 0; i -= 2)
+          {
+            result = tm.mkTerm(Kind.ITE, mkIsSomeValIfNullable(argTerms[i]), argTerms[i + 1], result);
+          }
+          return result;
         }
         case "IS TRUE": return mkIsSomeValIfNullable(argTerms[0]);
         case "IS NOT TRUE":
@@ -980,11 +1102,7 @@ public abstract class Cvc5AbstractTranslator
           return trueTerm;
         }
         default:
-        {
-          println(call);
-          k = Kind.UNDEFINED_KIND;
-          System.exit(1);
-        }
+          throw new UnsupportedOperationException("unsupported operator: " + call);
       }
 
       if (needsLifting)
@@ -995,7 +1113,7 @@ public abstract class Cvc5AbstractTranslator
     }
     else
     {
-      throw new RuntimeException(expr.toString());
+      throw new UnsupportedOperationException("unsupported row expression: " + expr);
     }
   }
 
@@ -1052,50 +1170,52 @@ public abstract class Cvc5AbstractTranslator
 
   private Term translateAnd(boolean needsLifting, Term[] argTerms)
   {
-    if (needsLifting)
-    {
-      Term someFalse = tm.mkNullableSome(falseTerm);
-      Term fstIsSome = tm.mkNullableIsSome(argTerms[0]);
-      Term sndIsSome = tm.mkNullableIsSome(argTerms[1]);
-      Term fstVal = tm.mkNullableVal(argTerms[0]);
-      Term sndVal = tm.mkNullableVal(argTerms[1]);
-      Term fstValFalse = fstVal.notTerm();
-      Term sndValFalse = sndVal.notTerm();
-      Term isFirstFalse = fstIsSome.andTerm(fstValFalse);
-      Term isSecondFalse = sndIsSome.andTerm(sndValFalse);
-      Term ite = tm.mkTerm(Kind.ITE,
-          isFirstFalse,
-          someFalse,
-          tm.mkTerm(Kind.ITE, isSecondFalse, someFalse, tm.mkNullableLift(Kind.AND, argTerms)));
-      return ite;
-    }
-    else
+    if (!needsLifting)
     {
       return tm.mkTerm(Kind.AND, argTerms);
     }
+    return mkShortCircuit(argTerms, Kind.AND, false);
   }
 
   private Term translateOr(boolean needsLifting, Term[] argTerms)
   {
-    if (needsLifting)
-    {
-      Term someTrue = tm.mkNullableSome(trueTerm);
-      Term fstIsSome = tm.mkNullableIsSome(argTerms[0]);
-      Term sndIsSome = tm.mkNullableIsSome(argTerms[1]);
-      Term fstVal = tm.mkNullableVal(argTerms[0]);
-      Term sndVal = tm.mkNullableVal(argTerms[1]);
-      Term isFirstTrue = fstIsSome.andTerm(fstVal);
-      Term isSecondTrue = sndIsSome.andTerm(sndVal);
-      Term ite = tm.mkTerm(Kind.ITE,
-          isFirstTrue,
-          someTrue,
-          tm.mkTerm(Kind.ITE, isSecondTrue, someTrue, tm.mkNullableLift(Kind.OR, argTerms)));
-      return ite;
-    }
-    else
+    if (!needsLifting)
     {
       return tm.mkTerm(Kind.OR, argTerms);
     }
+    return mkShortCircuit(argTerms, Kind.OR, true);
+  }
+
+  /**
+   * Three-valued {@code AND} / {@code OR} over nullable booleans.
+   *
+   * <p>Lifting alone is not enough: {@code nullable.lift} propagates null from any operand,
+   * but SQL's {@code AND} is {@code FALSE} as soon as *some* operand is {@code FALSE}, however
+   * many of the others are {@code NULL} -- and dually for {@code OR} and {@code TRUE}. So the
+   * dominant value is tested for first, across every operand, and the lift is used only once
+   * no operand is known to be dominant.
+   *
+   * <p>Calcite flattens {@code a AND b AND c} into a single n-ary call, so this has to scan all
+   * the operands rather than just the first two.
+   *
+   * @param dominant {@code true} for {@code OR}, whose dominant value is {@code TRUE};
+   *     {@code false} for {@code AND}, whose dominant value is {@code FALSE}
+   */
+  private Term mkShortCircuit(Term[] argTerms, Kind kind, boolean dominant)
+  {
+    if (argTerms.length == 1)
+    {
+      return argTerms[0];
+    }
+    Term isDominant = null;
+    for (Term arg : argTerms)
+    {
+      Term value = tm.mkNullableVal(arg);
+      Term known = tm.mkNullableIsSome(arg).andTerm(dominant ? value : value.notTerm());
+      isDominant = isDominant == null ? known : isDominant.orTerm(known);
+    }
+    Term dominantValue = tm.mkNullableSome(dominant ? trueTerm : falseTerm);
+    return tm.mkTerm(Kind.ITE, isDominant, dominantValue, tm.mkNullableLift(kind, argTerms));
   }
 
   private Term[] getNullableTerms(boolean needsLifting, Term[] argTerms)
@@ -1115,11 +1235,15 @@ public abstract class Cvc5AbstractTranslator
     return argTerms;
   }
 
+  /**
+   * Reads a nullable boolean as a plain one for a context that needs two-valued logic, such as
+   * a {@code WHERE} clause: only {@code some(true)} passes, so {@code NULL} filters the row out.
+   */
   private Term mkIsSomeValIfNullable(Term term)
   {
     Sort sort = term.getSort();
-    assert (
-        !(sort.isBoolean() || (sort.isNullable() && sort.getNullableElementSort().isBoolean())));
+    assert sort.isBoolean() || (sort.isNullable() && sort.getNullableElementSort().isBoolean())
+        : "expected a boolean condition but got " + sort;
 
     if (sort.isNullable())
     {
@@ -1196,7 +1320,8 @@ public abstract class Cvc5AbstractTranslator
     }
     else
     {
-      throw new RuntimeException(literal.toString());
+      throw new UnsupportedOperationException(
+          "unsupported literal type " + typeString + ": " + literal);
     }
   }
 
@@ -1220,11 +1345,14 @@ public abstract class Cvc5AbstractTranslator
     return tableName;
   }
 
+  /** Wraps a tuple sort into the collection sort for this semantics. */
   protected abstract Sort mkTableSort(Sort tupleSort);
 
   protected Sort getSort(RelDataType relDataType)
   {
-    if (relDataType.getFieldList() != null)
+    // isStruct(), not getFieldList() != null: Calcite asserts isStruct() inside getFieldList(),
+    // so the null check only worked because assertions happen to be off outside the test run.
+    if (relDataType.isStruct())
     {
       List<Sort> columnSorts = new ArrayList<>();
       for (RelDataTypeField type : relDataType.getFieldList())
@@ -1255,7 +1383,7 @@ public abstract class Cvc5AbstractTranslator
       }
       else
       {
-        throw new RuntimeException("Unsupported sql type: " + type);
+        throw new UnsupportedOperationException("unsupported sql type: " + type);
       }
     }
     else if (type instanceof BasicSqlType)
@@ -1279,14 +1407,12 @@ public abstract class Cvc5AbstractTranslator
       }
       else
       {
-        print("Unsupported sql type: " + type);
-        System.exit(1);
-        throw new RuntimeException("Unsupported sql type: " + type);
+        throw new UnsupportedOperationException("unsupported sql type: " + type);
       }
     }
     else
     {
-      throw new RuntimeException("Unsupported sql type: " + type);
+      throw new UnsupportedOperationException("unsupported sql type: " + type);
     }
   }
 

@@ -341,6 +341,65 @@ sensitive to all three, so the `uk` column is the least comparable.
 | cvc5 | (s) | 67 | 9 | 10 | 86 | paper Figure 4b |
 | **cvc5** | **(s)** | **34** | **7** | **44** | **85** | **this run** |
 
+### cvc5 numbers
+
+Three columns: the released cvc5 (1.3.4 from Maven Central), the same cvc5 with the
+projection and map-composition rewrites described below, and the paper.
+
+**Original -- `testData/no_aggregation.json`** (paper Figure 4a)
+
+| | | inequivalent | equivalent | unknown | total |
+| --- | --- | ---: | ---: | ---: | ---: |
+| cvc5 1.3.4 | (b) | 2 | 31 | 55 | 88 |
+| **cvc5 + rewrites** | **(b)** | **3** | **35** | **50** | **88** |
+| cvc5, paper | (b) | 2 | 42 | 44 | 88 |
+| cvc5 1.3.4 | (s) | 0 | 61 | 27 | 88 |
+| **cvc5 + rewrites** | **(s)** | **1** | **73** | **14** | **88** |
+| cvc5, paper | (s) | 1 | 83 | 4 | 88 |
+
+**Mutated (made inequivalent) -- `testData/no_aggregation_sat.json`** (paper Figure 4b)
+
+| | | inequivalent | equivalent | unknown | total |
+| --- | --- | ---: | ---: | ---: | ---: |
+| cvc5 1.3.4 | (b) | 41 | 0 | 44 | 85 |
+| **cvc5 + rewrites** | **(b)** | **66** | **0** | **19** | **85** |
+| cvc5, paper | (b) | 81 | 0 | 5 | 86 |
+| cvc5 1.3.4 | (s) | 34 | 7 | 44 | 85 |
+| **cvc5 + rewrites** | **(s)** | **46** | **7** | **32** | **85** |
+| cvc5, paper | (s) | 67 | 9 | 10 | 86 |
+
+Across the four configurations the rewrites take the number of benchmarks decided from
+176 to 231. No benchmark changes verdict, only `unknown` turning into a decision, and the
+mutated set still reports zero `equivalent` -- no false proofs.
+
+### Why cvc5 was timing out
+
+cvc5's bags rewriter had no case for `TABLE_PROJECT` at all, so a projection was never
+simplified. Each one survived into the solver, where it is reduced to a `bag.map` over a
+lambda; every map then triggers an injectivity check that spawns a subsolver, and
+non-injective maps get a quantified pre-image encoding instantiated per element.
+
+That matters here because `SELECT *` becomes a Calcite projection naming every column in
+order, which this translator emits as an *identity* projection such as
+`((_ table.project 0 1 2 3 4 5 6 7 8) EMP)` -- a no-op. `no_aggregation_sat.json` contains
+207 of them. Benchmarks containing one timed out 40 times out of 55; those without, 4 out
+of 30.
+
+The fix is three rewrites, added for `TABLE_PROJECT` in `src/theory/bags/bags_rewriter.cpp`
+and for `RELATION_PROJECT` in `src/theory/sets/theory_sets_rewriter.cpp`:
+
+- `project(I, empty)` = `empty`
+- `project(0 1 ... n-1, A)` = `A`
+- `project(J, project(I, A))` = `project(I∘J, A)`
+
+plus map composition in the bags rewriter, `map f (map g A)` = `map (f∘g) A`, since nesting
+made the solver build the quantified encoding once per layer. This has to compose over any
+function term, not just literal lambdas: `defineFun` reaches the solver as a function-sorted
+variable, so a lambda-only version almost never fires.
+
+What remains is inherent: the projections in these benchmarks drop columns, so their maps
+are genuinely non-injective and take the expensive path.
+
 ### Reading the differences
 
 **Nothing became wrong.** On the mutated set, where every benchmark is inequivalent by

@@ -26,6 +26,9 @@
         <q2></q2>
         <sem></sem>
         <out></out>
+        <!-- the tables to check against, and the accent they are written in -->
+        <schema></schema>
+        <dialect></dialect>
         <batch>testData/no_aggregation_sat.json</batch>
     </properties>
 
@@ -117,6 +120,7 @@
                 <!-- mvn exec:exec                            runs the JSON batch
                      mvn exec:exec -Dq1='...' -Dq2='...'      compares one pair
                      ... -Dsem=sets -Dout=my.smt2             optional extras
+                     ... -Dschema=my.sql -Ddialect=postgres   another schema
                      exec:exec (not exec:java) because java.library.path is only
                      honoured by a freshly forked JVM. -->
                 <groupId>org.codehaus.mojo</groupId>
@@ -139,6 +143,8 @@
                         <argument>-Dbatch=${batch}</argument>
                         <argument>-Dsem=${sem}</argument>
                         <argument>-Dout=${out}</argument>
+                        <argument>-Dschema=${schema}</argument>
+                        <argument>-Ddialect=${dialect}</argument>
                         <argument>SimpleQueryTests.Cvc5Analysis</argument>
                         <argument>${q1}</argument>
                         <argument>${q2}</argument>

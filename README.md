@@ -60,6 +60,101 @@ One line is printed per query pair:
 
 Expect around 25 minutes per file: most queries over `EMP`/`DEPT` reach the 10 s limit.
 
+The pairs in `testData/*.json` are written against the default schema; give `-Dschema` a file
+of your own to run them, or your own pairs, against other tables.
+
+## Choose a schema
+
+Queries are checked against a set of tables. Without any option those tables are Calcite's
+`EMP`/`DEPT` test schema, kept in
+[schemas/calcite.sql](src/main/resources/schemas/calcite.sql). Point `-Dschema` at a file of
+`CREATE TABLE` statements to use your own:
+
+```bash
+mvn exec:exec -Dschema=schemas/postgres_example.sql -Ddialect=postgres \
+  -Dq1='SELECT empno, deptno FROM emp' \
+  -Dq2='SELECT e.empno, e.deptno FROM emp AS e'
+```
+
+The run begins by printing what it read:
+
+```
+; schema    : classpath:schemas/postgres_example.sql (postgresql): 6 tables -- dept, emp, bonus, account, t, anon
+result: unsat -- the queries are EQUIVALENT
+```
+
+`-Dschema` takes a path, a classpath resource, or the DDL itself — the last is how SQLSolver's
+API passes a schema, and it is useful for a one-off table:
+
+```bash
+mvn exec:exec -Dschema='CREATE TABLE r (x INT PRIMARY KEY, y INT)' \
+  -Dq1='SELECT x FROM r' -Dq2='SELECT r.x FROM r'
+```
+
+```
+; schema    : <inline DDL> (calcite): 1 table -- R
+result: unsat -- the queries are EQUIVALENT
+```
+
+The schema applies to a `-Dbatch` file exactly as it does to a single pair.
+
+### Accents
+
+`-Ddialect` says which SQL the schema **and the queries** are written in — chiefly how a name
+that was not quoted is folded, which is the difference between finding a table and not
+finding it. `CREATE TABLE emp` registers `EMP` under Calcite's rules and `emp` under
+PostgreSQL's; the same rule is then applied to the query, so both find the table either way.
+
+| dialect | also known as | quotes | unquoted names | lookup |
+| --- | --- | --- | --- | --- |
+| `calcite` (default) | `ansi`, `standard`, `h2` | `"x"` | fold to upper case | case sensitive |
+| `postgresql` | `postgres`, `pg`, `redshift` | `"x"` | fold to lower case | case sensitive |
+| `mysql` | `mariadb` | `` `x` `` | kept as written | ignores case |
+| `sqlite` | `sqlite3` | `"x"` | kept as written | ignores case |
+| `sqlserver` | `mssql`, `tsql` | `[x]` | kept as written | ignores case |
+| `oracle` | | `"x"` | fold to upper case | case sensitive |
+| `spark` | `hive` | `` `x` `` | kept as written | ignores case |
+| `bigquery` | `bq` | `` `x` `` | kept as written | ignores case |
+
+The dialect also picks Calcite's conformance level, so MySQL's `!=`, SQL Server's `APPLY` and
+PostgreSQL's `GROUP BY` ordinals are accepted where they belong. That cuts both ways, and a
+query is not always portable between accents: of the 134 pairs in `calcite_tests.json` that
+this project decides quickly, six stop parsing under `postgres` because they name Calcite's
+generated `EXPR$0` column unquoted (PostgreSQL folds that to `expr$0`), and one stops under
+`mysql` and `sqlite` because `GROUP BY 4` is an ordinal there and a constant under Calcite.
+The other 127 are decided identically in all four.
+
+The same six tables are written out in three accents as worked examples — read them for what
+each reader tolerates:
+[postgres](src/main/resources/schemas/postgres_example.sql) (a `pg_dump`, keys in
+`ALTER TABLE`), [mysql](src/main/resources/schemas/mysql_example.sql) (a `mysqldump`, back
+quotes and `ENGINE=` trailers), [sqlite](src/main/resources/schemas/sqlite_example.sql)
+(`TEXT`, `AUTOINCREMENT`, three quoting styles at once).
+
+### What is read out of a schema file
+
+`CREATE TABLE` gives the columns and their types; `PRIMARY KEY`, `UNIQUE` and
+`CREATE UNIQUE INDEX` give the keys, whether written inline, as a table constraint, or in a
+later `ALTER TABLE ... ADD CONSTRAINT`. Everything else a dump contains — views, sequences,
+triggers, `SET`, non-unique indexes, `/*!40101 ... */` blocks — is skipped, so a
+332-table `pg_dump` loads even though a query touches four of its tables.
+
+Three things are worth knowing before trusting a verdict:
+
+- **A declared key is an assumption the planner acts on and the solver never hears about.**
+  Calcite will drop a `DISTINCT` or an aggregate that the key makes redundant, but the table
+  is encoded as an unconstrained bag, so a reported counterexample may be a database the key
+  forbids — the `IN`-versus-join rewrites over `DEPT (deptno PRIMARY KEY)` are exactly this
+  case. Drop the `PRIMARY KEY` lines for the weaker reading in which neither happens.
+- **`PRIMARY KEY` is not read as `NOT NULL`.** Only an explicit `NOT NULL` makes a column
+  non-null, because leaving a column nullable only widens the set of databases a proof has to
+  cover.
+- **A type nobody recognises becomes `ANY`,** which every query over that table then fails on
+  with `unsupported sql type`. Integer widths are all one integer and `text`/`varchar` are one
+  string, since the solver has neither machine words nor fixed-width strings; `DECIMAL`,
+  `DATE` and `TIMESTAMP` are read faithfully and then rejected by the translator, which does
+  not encode them.
+
 ## Options
 
 All options are passed as `-Dname=value`.
@@ -71,6 +166,8 @@ All options are passed as `-Dname=value`.
 | `batch` | JSON file of query pairs to run instead of `q1`/`q2` | `testData/no_aggregation_sat.json` |
 | `sem` | `bags` counts duplicate rows, `sets` ignores them | `bags` |
 | `out` | where to write the generated SMT-LIB | `single.smt2` |
+| `schema` | schema file, classpath resource, or DDL text | `schemas/calcite.sql` |
+| `dialect` | which SQL the schema and queries are written in | `calcite` |
 | `cvc5.home` | use a local cvc5 build instead of the released one | — |
 
 `sem=sets` is faster and proves more, but treats `UNION ALL` like `UNION`, so use it only

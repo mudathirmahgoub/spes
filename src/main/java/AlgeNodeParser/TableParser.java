@@ -3,6 +3,7 @@ package AlgeNodeParser;
 import AlgeNode.AlgeNode;
 import AlgeNode.TableNode;
 import AlgeNode.SPJNode;
+import DbSchema.TableDef;
 import com.microsoft.z3.Context;
 import org.apache.calcite.adapter.enumerable.EnumerableTableScan;
 import org.apache.calcite.plan.RelOptTable;
@@ -22,7 +23,7 @@ public class TableParser extends AlgeNodeParser{
     public AlgeNode constructRelNode(RelNode input, Context z3Context){
         EnumerableTableScan tableScan = (EnumerableTableScan) input;
         RelOptTable table = tableScan.getTable();
-        String tableName = table.getQualifiedName().get(0);
+        String tableName = tableName(table);
         List<RelDataTypeField> columns = tableScan.getRowType().getFieldList();
         ArrayList<RelDataType> columnTypes = new ArrayList<>();
         for (RelDataTypeField column:columns){
@@ -31,6 +32,16 @@ public class TableParser extends AlgeNodeParser{
         TableNode tableNode = new TableNode(tableName,columnTypes,z3Context);
         return wrapBySPJ(tableNode,z3Context);
 
+    }
+
+    /**
+     * The schema's own name for the table, so that a table reached as public.emp and the same
+     * table reached as emp are recognised as one -- and two tables of the same name in
+     * different schemas are not.
+     */
+    private String tableName(RelOptTable table){
+        TableDef def = table.unwrap(TableDef.class);
+        return def != null ? def.qualifiedName() : String.join(".", table.getQualifiedName());
     }
 
     private SPJNode wrapBySPJ (TableNode tableNode, Context z3Context){

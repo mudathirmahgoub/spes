@@ -1,4 +1,5 @@
 package SimpleQueryTests;
+import DbSchema.TableDef;
 import com.google.common.collect.ImmutableList;
 import io.github.cvc5.*;
 import java.io.PrintWriter;
@@ -1339,10 +1340,21 @@ public abstract class Cvc5AbstractTranslator
     return cvc5Table;
   }
 
+  /**
+   * The name the table gets as an SMT constant.
+   *
+   * <p>It comes from the schema, not from the path the query used to reach the table, so that
+   * {@code emp} and {@code public.emp} are one constant rather than two independent ones --
+   * and so that two tables of the same name in different schemas stay two.
+   */
   private String getTableName(EnumerableTableScan table)
   {
-    String tableName = String.join("_", table.getTable().getQualifiedName());
-    return tableName;
+    TableDef def = table.getTable().unwrap(TableDef.class);
+    if (def != null)
+    {
+      return def.qualifiedName().replace('.', '_');
+    }
+    return String.join("_", table.getTable().getQualifiedName());
   }
 
   /** Wraps a tuple sort into the collection sort for this semantics. */

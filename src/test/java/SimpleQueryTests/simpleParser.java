@@ -1,45 +1,53 @@
 package SimpleQueryTests;
 
-import SimpleQueryTests.tableSchema.ACCOUNT;
-import SimpleQueryTests.tableSchema.ANON;
-import SimpleQueryTests.tableSchema.BONUS;
-import SimpleQueryTests.tableSchema.DEPT;
-import SimpleQueryTests.tableSchema.EMP;
-import SimpleQueryTests.tableSchema.T;
+import DbSchema.DatabaseSchema;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
-import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.apache.calcite.sql2rel.SqlToRelConverter;
-import org.apache.calcite.tools.*;
+import org.apache.calcite.tools.FrameworkConfig;
+import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.tools.Planner;
+import org.apache.calcite.tools.RelConversionException;
+import org.apache.calcite.tools.ValidationException;
 
+/**
+ * Parses one query into a relational plan, against a chosen {@link DatabaseSchema}.
+ *
+ * <p>A planner can only be used for one query, so a parser is short-lived: one per query. The
+ * schema behind it is not -- it is parsed once and shared -- and it carries the accent, so the
+ * same object decides both which tables exist and how a query's identifiers are folded to find
+ * them.
+ */
 public class simpleParser
 {
   public static final JavaTypeFactory typeFactory =
       new JavaTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
-  public static final SchemaPlus defaultSchema = Frameworks.createRootSchema(true);
 
-  private FrameworkConfig config =
-      Frameworks.newConfigBuilder().defaultSchema(defaultSchema).build();
-  private Planner planner = Frameworks.getPlanner(config);
+  private final DatabaseSchema schema;
+  private final Planner planner;
 
+  /** Parses against the built-in EMP/DEPT schema, in Calcite's own accent. */
   public simpleParser()
   {
-    addTableSchema();
+    this(DatabaseSchema.defaultSchema());
   }
 
-  public void addTableSchema()
+  public simpleParser(DatabaseSchema schema)
   {
-    SqlToRelConverter.configBuilder().build();
-    defaultSchema.add("EMP", new EMP());
-    defaultSchema.add("DEPT", new DEPT());
-    defaultSchema.add("BONUS", new BONUS());
-    defaultSchema.add("ACCOUNT", new ACCOUNT());
-    defaultSchema.add("T", new T());
-    defaultSchema.add("ANON", new ANON());
+    this.schema = schema;
+    FrameworkConfig config = Frameworks.newConfigBuilder()
+                                 .defaultSchema(schema.rootSchema())
+                                 .parserConfig(schema.parserConfig())
+                                 .build();
+    this.planner = Frameworks.getPlanner(config);
+  }
+
+  public DatabaseSchema schema()
+  {
+    return schema;
   }
 
   public RelNode getRelNode(String sql)
@@ -47,12 +55,7 @@ public class simpleParser
   {
     System.out.println("parsing query: " + sql);
     SqlNode parse = planner.parse(sql);
-    // System.out.println(parse.toString());
-    SqlToRelConverter.configBuilder().build();
     SqlNode validate = planner.validate(parse);
-    RelNode tree = planner.rel(validate).rel;
-    // String plan = RelOptUtil.toString(tree,SqlExplainLevel.EXPPLAN_ATTRIBUTES); //explain(tree,
-    // SqlExplainLevel.ALL_ATTRIBUTES); System.out.println(plan);
-    return tree;
+    return planner.rel(validate).rel;
   }
 }

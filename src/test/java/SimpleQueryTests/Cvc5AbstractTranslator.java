@@ -143,6 +143,7 @@ public abstract class Cvc5AbstractTranslator
     reset();
     println(";-----------------------------------------------------------");
     println("; test name: " + name);
+    enableKeyReasoning(n1, n2);
     Term q1Term = translate(n1, sql1);
     Term q2Term = translate(n2, sql2);
     // declare a variable for q1, q2.
@@ -1352,6 +1353,67 @@ public abstract class Cvc5AbstractTranslator
     tables.put(table, cvc5Table);
     assertKeys(cvc5Table, table.getTable().unwrap(TableDef.class));
     return cvc5Table;
+  }
+
+  /**
+   * Turns on the cvc5 rule the key constraints depend on, when a query reads a table that has
+   * a key.
+   *
+   * <p>A key is stated as {@code setof(project_K(T)) = project_K(T)}, which caps the
+   * multiplicity of every key value at one. Contradicting that takes a lower bound of two, and
+   * only {@code bags-map-up-pair} derives one from two distinct rows sharing a key: without it
+   * the constraints can still rule a model out, but nothing follows from them. The rule costs
+   * a lemma per pair of known elements, so queries over tables without keys are left at cvc5's
+   * default. It has to be set here rather than where the keys are asserted, because cvc5
+   * refuses an option once the solver has seen its first assertion.
+   */
+  private void enableKeyReasoning(RelNode... plans)
+  {
+    // Under set semantics no key constraint is asserted, so there is nothing for it to do.
+    if (!mkTableSort(tm.mkTupleSort(new Sort[] {tm.getIntegerSort()})).isBag())
+    {
+      return;
+    }
+    for (RelNode plan : plans)
+    {
+      if (!hasDeclaredKey(plan))
+      {
+        continue;
+      }
+      try
+      {
+        setOption("bags-map-up-pair", "true");
+      }
+      catch (RuntimeException e)
+      {
+        // a cvc5 released before the rule landed: the constraints are still asserted, the
+        // solver just has less to derive from them
+        println("; note: this cvc5 has no bags-map-up-pair option, so a key constraint"
+            + " cannot be contradicted by two rows that share a key");
+      }
+      return;
+    }
+  }
+
+  /** Whether any table the plan reads declares a key. */
+  private static boolean hasDeclaredKey(RelNode node)
+  {
+    if (node.getTable() != null)
+    {
+      TableDef definition = node.getTable().unwrap(TableDef.class);
+      if (definition != null && !definition.keys().isEmpty())
+      {
+        return true;
+      }
+    }
+    for (RelNode input : node.getInputs())
+    {
+      if (hasDeclaredKey(input))
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

@@ -10,7 +10,15 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cvc5.version>1.3.4</cvc5.version>
+        <!-- cvc5 is cloned and built from this branch by the initialize phase; the branch
+             carries the bags-map-up-pair rule that the primary-key constraints rely on.
+             Override the whole thing with -Dcvc5.home=<install dir> to use your own build. -->
+        <cvc5.git.url>https://github.com/mudathirmahgoub/cvc5</cvc5.git.url>
+        <cvc5.git.branch>bags-map-up-pair</cvc5.git.branch>
+        <cvc5.src>${user.home}/.cache/cvc5/${cvc5.git.branch}</cvc5.src>
+        <cvc5.install>${cvc5.src}/build/install</cvc5.install>
+        <cvc5.version>1.3.5-${cvc5.git.branch}</cvc5.version>
+        <cvc5.skipBuild>false</cvc5.skipBuild>
         <!-- z3 is taken from the GitHub release, which is well ahead of the
              z3-turnkey artifact on Maven Central. To bump: change z3.version and
              the z3.dir of your platform below (the OS suffix moves between
@@ -33,15 +41,6 @@
     </properties>
 
     <build>
-        <extensions>
-            <!-- provides ${os.detected.classifier}, e.g. osx-aarch_64, which is exactly
-                 how cvc5 names its native-library jars on Maven Central -->
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.1</version>
-            </extension>
-        </extensions>
         <plugins>
             <plugin>
                 <!-- Downloads the z3 release for this platform into ${z3.cache} and
@@ -61,6 +60,33 @@
                             <unpack>true</unpack>
                             <outputDirectory>${z3.cache}</outputDirectory>
                             <overwrite>false</overwrite>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Clones and builds cvc5 from ${cvc5.git.branch}, before the jar it
+                     produces is installed below. antrun rather than exec:exec because
+                     exec:exec resolves the project's dependencies before it runs, and one
+                     of those is the very jar this step creates. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>build-cvc5</id>
+                        <phase>initialize</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <skip>${cvc5.skipBuild}</skip>
+                            <target>
+                                <exec executable="bash" failonerror="true">
+                                    <arg value="${project.basedir}/scripts/build-cvc5.sh"/>
+                                    <arg value="${cvc5.git.url}"/>
+                                    <arg value="${cvc5.git.branch}"/>
+                                    <arg value="${cvc5.src}"/>
+                                </exec>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
@@ -221,25 +247,35 @@
             <properties><z3.dir>z3-${z3.version}-x64-win</z3.dir></properties>
         </profile>
 
-        <!-- cvc5 from Maven Central. Active unless -Dcvc5.home is given.
-             The platform classifier carries libcvc5jni, which cvc5 extracts from
-             the classpath at load time, so no java.library.path is needed. -->
+        <!-- The default: the cvc5 built from ${cvc5.git.branch} by the initialize phase.
+             Active unless -Dcvc5.home names a build of your own. -->
         <profile>
-            <id>central-cvc5</id>
+            <id>branch-cvc5</id>
             <activation>
+                <!-- Both conditions, and they are ANDed. The file check is what lets the very
+                     first `mvn initialize` work: until that has built cvc5 there is no jar to
+                     depend on, and a dependency Maven cannot resolve stops the build before
+                     the step that would create it ever runs. Profile activation cannot see
+                     POM properties, hence the spelled-out path. -->
                 <property><name>!cvc5.home</name></property>
+                <file>
+                    <exists>${user.home}/.cache/cvc5/bags-map-up-pair/build/install/share/java/cvc5.jar</exists>
+                </file>
             </activation>
+            <properties>
+                <cvc5.lib>${cvc5.install}/lib</cvc5.lib>
+                <cvc5.skipBuild>false</cvc5.skipBuild>
+            </properties>
             <dependencies>
+                <!-- system scope so that Maven never looks for this in a repository: the
+                     jar does not exist until the initialize phase has built it, and a
+                     repository dependency would have to be resolved before that runs. -->
                 <dependency>
                     <groupId>io.github.cvc5</groupId>
                     <artifactId>cvc5</artifactId>
                     <version>${cvc5.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>io.github.cvc5</groupId>
-                    <artifactId>cvc5</artifactId>
-                    <version>${cvc5.version}</version>
-                    <classifier>${os.detected.classifier}</classifier>
+                    <scope>system</scope>
+                    <systemPath>${cvc5.install}/share/java/cvc5.jar</systemPath>
                 </dependency>
             </dependencies>
         </profile>
@@ -255,6 +291,7 @@
             </activation>
             <properties>
                 <cvc5.lib>${cvc5.home}/lib</cvc5.lib>
+                <cvc5.skipBuild>true</cvc5.skipBuild>
             </properties>
             <dependencies>
                 <dependency>

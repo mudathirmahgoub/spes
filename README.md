@@ -11,12 +11,20 @@ Apache Calcite, translated into an SMT problem, and solved with cvc5.
 
 ## Setup
 
-You need a JDK and Maven. Nothing else — the solvers are downloaded for you.
+You need a JDK, Maven, git and cmake with a C++ toolchain.
 
 ```bash
-mvn initialize      # one-time, fetches z3
+mvn initialize      # one-time: fetches z3, then clones and builds cvc5
 mvn test            # build and run the tests
 ```
+
+`initialize` builds cvc5 from the `bags-map-up-pair` branch of
+[mudathirmahgoub/cvc5](https://github.com/mudathirmahgoub/cvc5) into
+`~/.cache/cvc5/bags-map-up-pair`, because the primary-key constraints below need a rule that
+is not in a released cvc5 yet. Expect it to take a while the first time; afterwards the step
+sees the jar and does nothing. Delete that directory to rebuild, change `cvc5.git.branch` in
+the pom to track a different branch, or pass `-Dcvc5.home=<install dir>` to use a build of
+your own and skip this entirely.
 
 ## Compare two queries
 
@@ -185,7 +193,7 @@ All options are passed as `-Dname=value`.
 | `out` | where to write the generated SMT-LIB | `single.smt2` |
 | `schema` | schema file, classpath resource, or DDL text | `schemas/calcite.sql` |
 | `dialect` | which SQL the schema and queries are written in | `calcite` |
-| `cvc5.home` | use a local cvc5 build instead of the released one | — |
+| `cvc5.home` | use a cvc5 build of your own instead of the branch build | — |
 
 `sem=sets` is faster and proves more, but treats `UNION ALL` like `UNION`, so use it only
 when duplicate rows do not matter.

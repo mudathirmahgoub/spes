@@ -72,6 +72,13 @@ public abstract class Cvc5AbstractTranslator
   protected TermManager tm;
   protected Solver solver;
   protected int functionIndex = 0;
+  /**
+   * What to print above an assertion in the SMT-LIB output, for the assertions that are worth
+   * explaining. Only the key constraints use it: they come from the schema rather than from
+   * either query, so without a note they look unexplained in the generated file.
+   */
+  protected final Map<Term, String> assertionComments = new HashMap<>();
+
   protected Term zero;
   protected Term one;
   protected Term trueTerm;
@@ -93,6 +100,7 @@ public abstract class Cvc5AbstractTranslator
   {
     tables.clear();
     declaredFunctions.clear();
+    assertionComments.clear();
     functionIndex = 0;
     Context.deletePointers();
     tm = new TermManager();
@@ -380,6 +388,11 @@ public abstract class Cvc5AbstractTranslator
     }
     for (Term term : solver.getAssertions())
     {
+      String comment = assertionComments.get(term);
+      if (comment != null)
+      {
+        println("; " + comment);
+      }
       print("(assert ");
       print(term);
       println(")");
@@ -1337,7 +1350,76 @@ public abstract class Cvc5AbstractTranslator
     Sort tableSort = mkTableSort(tupleSort);
     Term cvc5Table = tm.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
+    assertKeys(cvc5Table, table.getTable().unwrap(TableDef.class));
     return cvc5Table;
+  }
+
+  /**
+   * States a table's declared keys as constraints on its bag, without quantifiers.
+   *
+   * <p>Two facts per key. {@code setof(project_K(T)) = project_K(T)} says the bag of key values
+   * has no repeats, which is uniqueness of the key and duplicate-freedom of the row in one
+   * breath. {@code count(null, project_i(T)) = 0} on each key column is what makes that reading
+   * the right one: SQL's {@code UNIQUE} admits several nulls, a {@code PRIMARY KEY} none, so
+   * without the null exclusion the first fact would say something stronger than SQL does.
+   *
+   * <p>Without these the tables are unconstrained bags, and the solver answers {@code sat} on
+   * databases the schema forbids -- two {@code DEPT} rows sharing a {@code deptno} is enough to
+   * make an {@code IN} and its join rewrite differ. Each assertion is annotated in the
+   * generated SMT-LIB, since it comes from the schema rather than from either query.
+   */
+  private void assertKeys(Term table, TableDef definition)
+  {
+    // Only bags. Under set semantics a table cannot hold a duplicate row in the first place,
+    // and the rest of the constraint would need relation cardinalities rather than setof.
+    if (definition == null || !table.getSort().isBag())
+    {
+      return;
+    }
+    Sort[] columnSorts = table.getSort().getBagElementSort().getTupleSorts();
+    try
+    {
+      for (List<String> key : definition.keys())
+      {
+        int[] ordinals = new int[key.size()];
+        boolean known = true;
+        for (int i = 0; i < key.size(); i++)
+        {
+          ordinals[i] = definition.indexOf(key.get(i));
+          known &= ordinals[i] >= 0;
+        }
+        if (!known)
+        {
+          continue;
+        }
+        String columns = String.join(", ", key);
+        for (int i = 0; i < ordinals.length; i++)
+        {
+          int ordinal = ordinals[i];
+          if (!columnSorts[ordinal].isNullable())
+          {
+            continue; // the column has no null to exclude
+          }
+          Term column = tm.mkTerm(tm.mkOp(Kind.TABLE_PROJECT, new int[] {ordinal}), table);
+          Term nullValue = tm.mkTuple(new Term[] {tm.mkNullableNull(columnSorts[ordinal])});
+          Term noNull = tm.mkTerm(Kind.BAG_COUNT, nullValue, column).eqTerm(zero);
+          assertionComments.put(noNull,
+              "key " + definition.qualifiedName() + " (" + columns + "): column "
+                  + key.get(i) + " holds no null");
+          solver.assertFormula(noNull);
+        }
+        Term projection = tm.mkTerm(tm.mkOp(Kind.TABLE_PROJECT, ordinals), table);
+        Term distinct = tm.mkTerm(Kind.BAG_SETOF, projection).eqTerm(projection);
+        assertionComments.put(distinct,
+            "key " + definition.qualifiedName() + " (" + columns
+                + "): no two rows agree on it, so its values form a set");
+        solver.assertFormula(distinct);
+      }
+    }
+    catch (CVC5ApiException e)
+    {
+      throw new RuntimeException("could not state the keys of " + definition.qualifiedName(), e);
+    }
   }
 
   /**

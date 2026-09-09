@@ -141,11 +141,28 @@ triggers, `SET`, non-unique indexes, `/*!40101 ... */` blocks — is skipped, so
 
 Three things are worth knowing before trusting a verdict:
 
-- **A declared key is an assumption the planner acts on and the solver never hears about.**
-  Calcite will drop a `DISTINCT` or an aggregate that the key makes redundant, but the table
-  is encoded as an unconstrained bag, so a reported counterexample may be a database the key
-  forbids — the `IN`-versus-join rewrites over `DEPT (deptno PRIMARY KEY)` are exactly this
-  case. Drop the `PRIMARY KEY` lines for the weaker reading in which neither happens.
+- **Declared keys are enforced.** Every `PRIMARY KEY` and `UNIQUE` becomes two quantifier-free
+  facts about the table's bag: the key columns hold no null, and
+  `setof(project_K(T)) = project_K(T)`, so the bag of key values has no repeats. Both are
+  annotated in the generated SMT-LIB, since they come from the schema rather than from either
+  query:
+
+  ```smtlib
+  ; key DEPT (DEPTNO): column DEPTNO holds no null
+  (assert (= (bag.count (tuple (as nullable.null (Nullable Int))) ((_ table.project 0) DEPT)) 0))
+  ; key DEPT (DEPTNO): no two rows agree on it, so its values form a set
+  (assert (= (bag.setof ((_ table.project 0) DEPT)) ((_ table.project 0) DEPT)))
+  ```
+
+  Without them a table is an unconstrained bag and a counterexample can be a database the
+  schema forbids — `testWhereInCorrelated` was called inequivalent on a `DEPT` holding two
+  copies of `(deptno=0, name='')`. Calcite is not told about keys either: this pipeline
+  converts SQL to relational algebra without an optimizer pass, and every query in `testData/`
+  parses to the same plan with and without them, so the constraints act on the solver alone.
+
+  A `UNIQUE` key is treated like a `PRIMARY KEY`, which is too strong when its column is
+  nullable, since SQL admits repeated nulls there. Drop the constraint from the schema file if
+  that matters for your tables.
 - **`PRIMARY KEY` is not read as `NOT NULL`.** Only an explicit `NOT NULL` makes a column
   non-null, because leaving a column nullable only widens the set of databases a proof has to
   cover.

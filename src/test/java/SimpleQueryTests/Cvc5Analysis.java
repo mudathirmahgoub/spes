@@ -103,10 +103,12 @@ public class Cvc5Analysis
         report(writer, "; skipped " + name + ": " + e.getMessage());
         System.out.println("; RESULT " + name + " skipped");
       }
-      catch (Exception e)
+      catch (Throwable e)
       {
         // A genuine translation failure. Recorded rather than fatal so one bad query
-        // cannot hide the results of the other 200.
+        // cannot hide the results of the other 200 -- Throwable, not Exception, because
+        // Calcite reports some conversion failures as a bare AssertionError, and one of
+        // those used to end the run at whichever query hit it.
         errors++;
         report(writer, "; error " + name + ": " + e);
         System.out.println("; RESULT " + name + " error");
@@ -277,9 +279,12 @@ public class Cvc5Analysis
       logicPlan2 = parser2.getRelNode(sql2);
       compile = true;
     }
-    catch (Exception e)
+    catch (Exception | AssertionError e)
     {
-      throw new UnsupportedOperationException("could not parse " + name + ": " + e.getMessage());
+      // Calcite throws a bare AssertionError out of SqlToRelConverter for some queries, and
+      // its message is null, so fall back to the class name rather than printing "null".
+      String reason = e.getMessage() == null ? e.toString() : e.getMessage();
+      throw new UnsupportedOperationException("could not parse " + name + ": " + reason);
     }
     if (compile)
     {

@@ -68,6 +68,8 @@ public abstract class Cvc5AbstractTranslator
   private StringBuilder prologue = new StringBuilder();
   protected final boolean isNullable;
   public HashMap<EnumerableTableScan, Term> tables = new HashMap<>();
+  /** The same scans as {@link #tables}, as the encoding uses them: lifted where a column was NOT NULL. */
+  public HashMap<EnumerableTableScan, Term> tableTerms = new HashMap<>();
   public HashMap<String, Term> declaredFunctions = new HashMap<>();
   protected TermManager tm;
   protected Solver solver;
@@ -99,6 +101,7 @@ public abstract class Cvc5AbstractTranslator
   public void reset() throws CVC5ApiException
   {
     tables.clear();
+    tableTerms.clear();
     declaredFunctions.clear();
     assertionComments.clear();
     functionIndex = 0;
@@ -1342,17 +1345,59 @@ public abstract class Cvc5AbstractTranslator
 
   protected Term translate(EnumerableTableScan table)
   {
-    if (tables.containsKey(table))
+    if (tableTerms.containsKey(table))
     {
-      return tables.get(table);
+      return tableTerms.get(table);
     }
     String tableName = getTableName(table);
-    Sort tupleSort = getSort(table.getRowType());
+    Sort tupleSort = getDeclaredSort(table.getRowType());
     Sort tableSort = mkTableSort(tupleSort);
     Term cvc5Table = tm.mkConst(tableSort, tableName);
     tables.put(table, cvc5Table);
     assertKeys(cvc5Table, table.getTable().unwrap(TableDef.class));
-    return cvc5Table;
+    Term lifted = liftToNullable(cvc5Table, tupleSort);
+    tableTerms.put(table, lifted);
+    return lifted;
+  }
+
+  /**
+   * Wraps the columns a schema declared {@code NOT NULL} back into nullable form.
+   *
+   * <p>The constant itself keeps the declared sorts, which is the point: a column with no null
+   * in its sort is one the solver cannot put a null in, so a counterexample cannot be a
+   * database the schema forbids. Everything downstream of a scan expects nullable columns
+   * though, so the rest of the encoding sees {@code map(t -> (some t.0, ...), T)} rather than
+   * {@code T}. Where every column is nullable -- the built-in schema, for one -- that map
+   * would be the identity and the table is handed on untouched, so a schema that declares no
+   * NOT NULL is encoded exactly as before.
+   */
+  private Term liftToNullable(Term table, Sort tupleSort) throws CVC5ApiException
+  {
+    Sort[] declared = tupleSort.getTupleSorts();
+    boolean anyDeclaredNotNull = false;
+    for (Sort sort : declared)
+    {
+      anyDeclaredNotNull |= !sort.isNullable();
+    }
+    if (!anyDeclaredNotNull)
+    {
+      return table;
+    }
+    DatatypeConstructor constructor = tupleSort.getDatatype().getConstructor(0);
+    Term t = tm.mkVar(tupleSort, "t");
+    Term[] elements = new Term[declared.length];
+    Sort[] liftedSorts = new Sort[declared.length];
+    for (int i = 0; i < declared.length; i++)
+    {
+      Term selected =
+          tm.mkTerm(Kind.APPLY_SELECTOR, new Term[] {constructor.getSelector(i).getTerm(), t});
+      boolean nullable = declared[i].isNullable();
+      elements[i] = nullable ? selected : tm.mkNullableSome(selected);
+      liftedSorts[i] = nullable ? declared[i] : tm.mkNullableSort(declared[i]);
+    }
+    Sort liftedTupleSort = tm.mkTupleSort(liftedSorts);
+    Term f = defineFun(new Term[] {t}, liftedTupleSort, tm.mkTuple(elements), "notNull", true);
+    return tm.mkTerm(getMapKind(), f, table);
   }
 
   /**
@@ -1521,9 +1566,41 @@ public abstract class Cvc5AbstractTranslator
     return getFieldSort(relDataType);
   }
 
+  /**
+   * The sort of an expression of this type. Uniformly nullable, whatever the type says: the
+   * encoding builds nulls into intermediate results everywhere -- an outer join pads with
+   * them, an aggregate over no rows is one -- so an expression sort that tracked a column's
+   * declared nullability would not match the terms flowing through it. Only a table's own
+   * columns are declared honestly, by {@link #getDeclaredSort}.
+   */
   protected Sort getFieldSort(RelDataType type)
   {
-    boolean isNullableType = isNullable ? type.isNullable() : false;
+    return getFieldSort(type, isNullable);
+  }
+
+  /**
+   * The sort of a column as the schema declares it: {@code NOT NULL} means a sort with no
+   * null in it, so the solver cannot answer with a database the schema forbids. Used for the
+   * table constant alone; {@link #liftToNullable} puts the columns back into nullable form
+   * for everything downstream.
+   */
+  protected Sort getDeclaredSort(RelDataType relDataType)
+  {
+    if (!relDataType.isStruct())
+    {
+      return getFieldSort(relDataType, isNullable && relDataType.isNullable());
+    }
+    List<Sort> columnSorts = new ArrayList<>();
+    for (RelDataTypeField field : relDataType.getFieldList())
+    {
+      RelDataType type = field.getType();
+      columnSorts.add(getFieldSort(type, isNullable && type.isNullable()));
+    }
+    return tm.mkTupleSort(columnSorts.toArray(new Sort[0]));
+  }
+
+  private Sort getFieldSort(RelDataType type, boolean isNullableType)
+  {
     if (type instanceof RelDataTypeFactoryImpl.JavaType)
     {
       RelDataTypeFactoryImpl.JavaType javaType = (RelDataTypeFactoryImpl.JavaType) type;
@@ -1575,7 +1652,7 @@ public abstract class Cvc5AbstractTranslator
   private Sort getIntFieldSort(boolean isNullableType)
   {
     Sort sort = tm.getIntegerSort();
-    if (isNullable)
+    if (isNullableType)
     {
       sort = tm.mkNullableSort(sort);
     }
@@ -1584,7 +1661,7 @@ public abstract class Cvc5AbstractTranslator
   private Sort getStringFieldSort(boolean isNullableType)
   {
     Sort sort = tm.getStringSort();
-    if (isNullable)
+    if (isNullableType)
     {
       sort = tm.mkNullableSort(sort);
     }
@@ -1593,7 +1670,7 @@ public abstract class Cvc5AbstractTranslator
   private Sort getBooleanFieldSort(boolean isNullableType)
   {
     Sort sort = tm.getBooleanSort();
-    if (isNullable)
+    if (isNullableType)
     {
       sort = tm.mkNullableSort(sort);
     }

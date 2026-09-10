@@ -559,7 +559,25 @@ public abstract class Cvc5AbstractTranslator
     Term initialValue = tm.mkTuple(initialValues);
     Term f = defineFun(new Term[] {x, y}, yTupleSort, body, name, true);
     Op op = tm.mkOp(getAggregateKind(), indices);
-    return tm.mkTerm(op, new Term[] {f, initialValue, child});
+    Term aggregated = tm.mkTerm(op, new Term[] {f, initialValue, child});
+    if (indices.length == 0)
+    {
+      // No GROUP BY: SQL asks for exactly one row even when there is nothing to aggregate --
+      // SELECT COUNT(*) FROM empty is 0, not no rows -- which is what the fold of a single
+      // empty group gives.
+      return aggregated;
+    }
+    // GROUP BY over an empty table has no groups, so SQL answers with no rows. table.aggr
+    // does not: it reduces to a fold over (table.group A), and cvc5 gives the empty table a
+    // partition holding one empty part rather than no parts at all --
+    //     if (parts.empty()) { ... add an empty part ... }   in BagsUtils::evaluateGroup
+    // -- and folding that one part yields a row built out of the initial value. That phantom
+    // row is a whole counterexample on its own: it made queries that agree on every database
+    // look different on the empty one. Nothing else in the operator misbehaves, and a part
+    // can only be missing when the input has no rows, so guarding that one case is enough.
+    Term empty = mkEmptyTable(child.getSort());
+    Term emptyResult = mkEmptyTable(mkTableSort(yTupleSort));
+    return tm.mkTerm(Kind.ITE, child.eqTerm(empty), emptyResult, aggregated);
   }
 
   private void checkSupported(AggregateCall call)

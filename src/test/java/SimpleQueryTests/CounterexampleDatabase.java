@@ -1,6 +1,7 @@
 package SimpleQueryTests;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -282,7 +283,10 @@ public final class CounterexampleDatabase
         }
         if (file != null)
         {
-          lines.add("try it: sqlite3 " + file + " 'SELECT * FROM difference'");
+          // The driver-backed reader first: it needs nothing that is not already here, and
+          // the command line client is named sqlite3 rather than sqlite where it exists at all.
+          lines.add("try it: mvn exec:exec -Dcex.show=" + file + "   (or sqlite3 " + file
+              + " 'SELECT * FROM difference')");
         }
         return new Report(differing > 0, true, lines);
       }
@@ -303,43 +307,13 @@ public final class CounterexampleDatabase
   private static int report(Statement statement, List<String> lines, boolean isSetSemantics,
       Backend backend) throws SQLException
   {
-    int rowCount = 0;
     lines.add("SELECT * FROM difference");
-    try (ResultSet rs = statement.executeQuery("SELECT * FROM difference"))
-    {
-      ResultSetMetaData meta = rs.getMetaData();
-      StringBuilder header = new StringBuilder();
-      for (int i = 1; i <= meta.getColumnCount(); i++)
-      {
-        header.append(i > 1 ? " | " : "").append(meta.getColumnName(i));
-      }
-      while (rs.next())
-      {
-        if (rowCount == 0)
-        {
-          lines.add(header.toString());
-        }
-        rowCount++;
-        if (rowCount <= MAX_PRINTED_ROWS)
-        {
-          StringBuilder row = new StringBuilder();
-          for (int i = 1; i <= meta.getColumnCount(); i++)
-          {
-            Object value = rs.getObject(i);
-            row.append(i > 1 ? " | " : "").append(value == null ? "NULL" : value.toString());
-          }
-          lines.add(row.toString());
-        }
-      }
-      if (rowCount > MAX_PRINTED_ROWS)
-      {
-        lines.add("... and " + (rowCount - MAX_PRINTED_ROWS) + " more rows");
-      }
-    }
-    if (rowCount > 0)
+    Rows rows = read(statement, "SELECT * FROM difference", MAX_PRINTED_ROWS);
+    lines.addAll(rows.lines);
+    if (rows.count > 0)
     {
       lines.add("counterexample confirmed: " + backendName(backend) + " has q1 and q2 disagreeing"
-          + " on " + rowCount + (rowCount == 1 ? " row" : " rows") + " of this database");
+          + " on " + rows.count + (rows.count == 1 ? " row" : " rows") + " of this database");
     }
     else
     {
@@ -349,7 +323,155 @@ public final class CounterexampleDatabase
           + (isSetSemantics ? " rows" : " rows with the same multiplicities")
           + " for q1 and q2 on this database, so an encoding is suspect");
     }
-    return rowCount;
+    return rows.count;
+  }
+
+  /** A query's result as text: a header line, then a line per row, and how many rows there were. */
+  private static final class Rows
+  {
+    final List<String> lines = new ArrayList<>();
+    int count;
+  }
+
+  /** Runs a query and lays its result out as text, writing at most {@code maxRows} of them. */
+  private static Rows read(Statement statement, String sql, int maxRows) throws SQLException
+  {
+    Rows rows = new Rows();
+    try (ResultSet rs = statement.executeQuery(sql))
+    {
+      ResultSetMetaData meta = rs.getMetaData();
+      StringBuilder header = new StringBuilder();
+      for (int i = 1; i <= meta.getColumnCount(); i++)
+      {
+        header.append(i > 1 ? " | " : "").append(meta.getColumnName(i));
+      }
+      rows.lines.add(header.toString());
+      while (rs.next())
+      {
+        rows.count++;
+        if (rows.count <= maxRows)
+        {
+          StringBuilder row = new StringBuilder();
+          for (int i = 1; i <= meta.getColumnCount(); i++)
+          {
+            Object value = rs.getObject(i);
+            row.append(i > 1 ? " | " : "").append(value == null ? "NULL" : value.toString());
+          }
+          rows.lines.add(row.toString());
+        }
+      }
+      if (rows.count > maxRows)
+      {
+        rows.lines.add("... and " + (rows.count - maxRows) + " more rows");
+      }
+    }
+    return rows;
+  }
+
+  // ------------------------------------------------------------------
+  // reading a file back
+  // ------------------------------------------------------------------
+
+  /** Rows of a counterexample table to print when a file is read back. */
+  private static final int MAX_SHOWN_ROWS = 100;
+
+  /**
+   * Prints what one counterexample file holds: what it is, the data, and what each query
+   * returns on it.
+   *
+   * <p>The file is a plain SQLite database and the {@code sqlite3} command line is the better
+   * way to explore one. This is here because that command is not everywhere -- it is named
+   * {@code sqlite3} rather than {@code sqlite}, and some machines have neither -- while the
+   * driver that wrote the file is already a dependency of this project. So one option reads it
+   * back without asking for anything else:
+   *
+   * <pre>
+   *   mvn exec:exec -Dcex.show=counterexamples/testEmptyMinus.db
+   * </pre>
+   */
+  public static void show(File file, PrintStream out)
+  {
+    if (!file.isFile())
+    {
+      // Opening a missing file would create an empty one and print nothing at all.
+      out.println("no such counterexample file: " + file);
+      return;
+    }
+    out.println("counterexample: " + file);
+    try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + file.getPath()))
+    {
+      try (Statement statement = connection.createStatement())
+      {
+        for (String name : names(statement, "table"))
+        {
+          if (name.equals("spes_info"))
+          {
+            continue;
+          }
+          print(out, statement, name, "SELECT * FROM " + identifier(name, Backend.SQLITE));
+        }
+        for (String name : names(statement, "view"))
+        {
+          print(out, statement, name, "SELECT * FROM " + identifier(name, Backend.SQLITE));
+        }
+        info(out, statement);
+      }
+    }
+    catch (SQLException e)
+    {
+      out.println("could not read " + file + ": " + reason(e));
+    }
+  }
+
+  /** The tables or the views this file holds, in the order they were created. */
+  private static List<String> names(Statement statement, String type) throws SQLException
+  {
+    List<String> names = new ArrayList<>();
+    try (ResultSet rs = statement.executeQuery(
+             "SELECT name FROM sqlite_master WHERE type = '" + type + "' ORDER BY rowid"))
+    {
+      while (rs.next())
+      {
+        names.add(rs.getString(1));
+      }
+    }
+    return names;
+  }
+
+  /** One table or view, under a heading saying how many rows it has. */
+  private static void print(PrintStream out, Statement statement, String name, String sql)
+  {
+    out.println();
+    Rows rows;
+    try
+    {
+      rows = read(statement, sql, MAX_SHOWN_ROWS);
+    }
+    catch (SQLException e)
+    {
+      // A query SQLite cannot run is why a file has no `difference` to read; the file says
+      // which query it was, so naming the failure here is enough.
+      out.println(name + ": " + reason(e));
+      return;
+    }
+    out.println(name + " (" + rows.count + (rows.count == 1 ? " row)" : " rows)"));
+    for (String line : rows.lines)
+    {
+      out.println("  " + line);
+    }
+  }
+
+  /** What {@code spes_info} says, which is what the file is a counterexample to. */
+  private static void info(PrintStream out, Statement statement) throws SQLException
+  {
+    out.println();
+    try (ResultSet rs = statement.executeQuery("SELECT key, value FROM spes_info ORDER BY rowid"))
+    {
+      while (rs.next())
+      {
+        out.println(rs.getString(1) + ": " + rs.getString(2));
+      }
+    }
   }
 
   // ------------------------------------------------------------------

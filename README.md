@@ -11,10 +11,10 @@ Apache Calcite, translated into an SMT problem, and solved with cvc5.
 
 ## Setup
 
-You need a JDK, Maven, git and cmake with a C++ toolchain. No database server: a
-[counterexample](#look-at-a-counterexample) is replayed in SQLite, which comes with its JDBC
-driver as a library, and the `sqlite3` command line is only wanted if you go on to open one of
-the files by hand.
+You need a JDK, Maven, git and cmake with a C++ toolchain. No database server and no client
+either: a [counterexample](#look-at-a-counterexample) is replayed in SQLite, which comes with
+its JDBC driver as a library, and `-Dcex.show` reads one of the files back through that same
+driver.
 
 ```bash
 mvn initialize      # one-time: fetches z3, then clones and builds cvc5
@@ -105,6 +105,41 @@ sqlite3 counterexamples/commandLine.db 'SELECT * FROM difference'
 sqlite3 counterexamples/commandLine.db 'SELECT * FROM spes_info'   # what this file is
 sqlite3 counterexamples/commandLine.db .schema
 ```
+
+That command is spelled `sqlite3`, not `sqlite`, and some machines have neither -- so the whole
+file can also be printed through the driver that wrote it, which is already a dependency here:
+
+```bash
+mvn exec:exec -Dcex.show=counterexamples/commandLine.db
+```
+
+```
+counterexample: counterexamples/commandLine.db
+
+DEPT (1 row)
+  DEPTNO | NAME
+  3 |
+
+q1 (1 row)
+  c1 | c2
+  3 |
+
+q2 (0 rows)
+  c1 | c2
+
+difference (1 row)
+  c1 | c2 | in_q1 | in_q2
+  3 |  | 1 | 0
+
+test: commandLine
+semantics: bags
+q1: SELECT deptno, name FROM dept
+q2: SELECT deptno, name FROM dept WHERE deptno > 3
+keys of DEPT: (DEPTNO) -- declared unique, asserted to the solver, not enforced here
+how to use: SELECT * FROM q1; SELECT * FROM q2; SELECT * FROM difference -- the rows they disagree on, with how many copies each query returns
+```
+
+That solves nothing and needs no schema; it only reads the file.
 
 | object | what it holds |
 | --- | --- |
@@ -274,6 +309,7 @@ All options are passed as `-Dname=value`.
 | `cex` | where a counterexample is replayed: `sqlite`, `postgres`, `none` | `sqlite` |
 | `cex.dir` | directory the SQLite counterexample files are written to | `counterexamples` |
 | `cex.url` | JDBC URL for `-Dcex=postgres` | `jdbc:postgresql://localhost/template1?user=postgres&password=abc` |
+| `cex.show` | print this counterexample file and do nothing else | — |
 | `cvc5.home` | use a cvc5 build of your own instead of the branch build | — |
 
 `sem=sets` is faster and proves more, but treats `UNION ALL` like `UNION`, so use it only

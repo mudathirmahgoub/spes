@@ -34,7 +34,8 @@ import org.apache.calcite.rel.RelNode;
  *
  * <p>Every inequivalent pair also leaves behind the counterexample as a SQLite file holding
  * the model's rows and both queries, which {@code -Dcex} and {@code -Dcex.dir} control; see
- * {@link CounterexampleDatabase}.
+ * {@link CounterexampleDatabase}. {@code -Dcex.show=<file>} prints one of those files back and
+ * does nothing else, for a machine with no {@code sqlite3} command.
  */
 public class Cvc5Analysis
 {
@@ -57,6 +58,13 @@ public class Cvc5Analysis
       {
         positional.add(arg);
       }
+    }
+    // Reading a counterexample file back, which solves nothing and needs no schema.
+    String show = option(options, "cex.show");
+    if (!isBlank(show))
+    {
+      CounterexampleDatabase.show(new File(show), System.out);
+      return;
     }
     DatabaseSchema schema = schema(option(options, "schema"), option(options, "dialect"));
     // The counterexample replay reads its own options as properties, which is how exec:exec

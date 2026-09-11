@@ -29,6 +29,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected boolean isSetSemantics()
+  {
+    return true;
+  }
+
+  @Override
   protected Sort getElementSort(Sort sort)
   {
     return sort.getSetElementSort();

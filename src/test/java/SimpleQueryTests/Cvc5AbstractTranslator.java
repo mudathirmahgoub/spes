@@ -3,13 +3,6 @@ import DbSchema.TableDef;
 import com.google.common.collect.ImmutableList;
 import io.github.cvc5.*;
 import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,6 +83,9 @@ public abstract class Cvc5AbstractTranslator
   public static int unsatAnswers = 0;
   public static int satAnswers = 0;
   public static int unknownAnswers = 0;
+  /** Counterexamples a real engine ran both queries on, and how many of those it confirmed. */
+  public static int replayedCounterexamples = 0;
+  public static int confirmedCounterexamples = 0;
 
   public Cvc5AbstractTranslator(boolean isNullable, PrintWriter writer)
   {
@@ -134,8 +130,8 @@ public abstract class Cvc5AbstractTranslator
    * Asks whether two queries are equivalent.
    *
    * <p>Encodes both, asserts they differ, and checks satisfiability. On {@code sat} the model is
-   * turned into a concrete database and, if a PostgreSQL server is reachable on localhost, both
-   * queries are run against it to confirm the counterexample independently.
+   * turned into a concrete database and both queries are run against it -- see {@link
+   * CounterexampleDatabase} -- to confirm the counterexample independently.
    *
    * @return {@code unsat} if the queries are equivalent, {@code sat} if a database distinguishes
    *     them, {@code unknown} on timeout
@@ -178,77 +174,7 @@ public abstract class Cvc5AbstractTranslator
       println("(get-value (" + q2 + "))");
       println("; " + solver.getValue(q2));
 
-      String url = "jdbc:postgresql://localhost/template1?user=postgres&password=abc";
-      try (Connection connection = DriverManager.getConnection(url))
-      {
-        Statement statement = connection.createStatement();
-        String query1 = postgres(sql1);
-        String query2 = postgres(sql2);
-        if (!tables.isEmpty())
-        {
-          statement.execute("TRUNCATE TABLE EMP");
-          statement.execute("TRUNCATE TABLE DEPT");
-          statement.execute("TRUNCATE TABLE ACCOUNT");
-          for (Map.Entry<EnumerableTableScan, Term> entry : tables.entrySet())
-          {
-            String table = getTableName(entry.getKey());
-            Term tableValue = solver.getValue(entry.getValue());
-            List<List<Object>> rows = getTableRows(tableValue);
-            if (!rows.isEmpty())
-            {
-              String insertStatement = "insert into " + table + " values";
-              for (int i = 0; i < rows.size(); i++)
-              {
-                insertStatement += "(";
-                List<Object> row = rows.get(i);
-                for (int j = 0; j < row.size(); j++)
-                {
-                  Object fieldValue = row.get(j);
-                  if (fieldValue == null)
-                  {
-                    insertStatement += "NULL";
-                  }
-                  else if (fieldValue instanceof BigInteger)
-                  {
-                    insertStatement += fieldValue;
-                  }
-                  else if (fieldValue instanceof String)
-                  {
-                    insertStatement += "'" + fieldValue + "'";
-                  }
-                  if (j < row.size() - 1)
-                  {
-                    insertStatement += ",";
-                  }
-                }
-                insertStatement += ")";
-                if (i < rows.size() - 1)
-                {
-                  insertStatement += ",";
-                }
-              }
-              println("; " + insertStatement);
-              statement.execute(insertStatement);
-            }
-          }
-        }
-        String query1MinusQuery2 =
-            "SELECT * FROM (" + query1 + ") AS q1 EXCEPT ALL SELECT * FROM (" + query2 + ") AS q2;";
-        ResultSet rs1 = statement.executeQuery(query1MinusQuery2);
-        boolean isModelSound = checkModelSoundness(rs1, query1MinusQuery2);
-
-        String query2MinusQuery1 =
-            "SELECT * FROM (" + query2 + ") AS q2 EXCEPT ALL SELECT * FROM (" + query1 + ") AS q1;";
-        ResultSet rs2 = statement.executeQuery(query2MinusQuery1);
-        isModelSound |= checkModelSoundness(rs2, query2MinusQuery1);
-
-        println(";Model soundness: " + isModelSound);
-        connection.close();
-      }
-      catch (SQLException e)
-      {
-        e.printStackTrace();
-      }
+      replayCounterexample(name, n1, sql1, sql2);
     }
     if (result.isUnsat())
     {
@@ -263,6 +189,12 @@ public abstract class Cvc5AbstractTranslator
     print("(reset)\n");
     return result;
   }
+
+  /**
+   * Whether this translator encodes set semantics. The counterexample replay needs it: under
+   * sets a row is present or absent, under bags the number of copies is part of the answer.
+   */
+  protected abstract boolean isSetSemantics();
 
   /** Expands a collection value from a model into the rows of a counterexample table. */
   protected abstract List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException;
@@ -312,52 +244,46 @@ public abstract class Cvc5AbstractTranslator
     throw new RuntimeException("Unsupported type: " + field.getSort());
   }
 
-  private String postgres(String sql1)
+  /**
+   * Hands the model to a real SQL engine and prints what it says.
+   *
+   * <p>The model is a database, so the queries can simply be run on it. Anything the check
+   * says is a comment in the output -- it never changes the answer -- but a counterexample the
+   * engine cannot reproduce is the one thing a {@code sat} answer cannot catch by itself: it
+   * means an encoding does not mean what its query means.
+   *
+   * @param n1 either plan, read only for how many columns the queries return
+   */
+  private void replayCounterexample(String name, RelNode n1, String sql1, String sql2)
+      throws CVC5ApiException
   {
-    String query = sql1.replaceAll("EXPR\\$0", "column1")
-                       .replaceAll("EXPR\\$1", "column2")
-                       .replaceAll("EXPR\\$2", "column3")
-                       .replaceAll("EXPR\\$3", "column4")
-                       .replaceAll("EXPR\\$4", "column5")
-                       .replaceAll("EXPR\\$5", "column6")
-                       .replaceAll("EXPR\\$6", "column7")
-                       .replaceAll("EXPR\\$7", "column8")
-                       .replaceAll("EXPR\\$8", "column9")
-                       .replaceAll("EXPR\\$9", "column10");
-    return query;
-  }
-
-  private boolean checkModelSoundness(ResultSet rs, String query) throws SQLException
-  {
-    ResultSetMetaData rsMeta = rs.getMetaData();
-    int count = rsMeta.getColumnCount();
-    StringBuilder builder = new StringBuilder();
-    boolean isSound = false;
-    while (rs.next())
+    List<CounterexampleDatabase.Table> counterexample = new ArrayList<>();
+    for (Map.Entry<EnumerableTableScan, Term> entry : tables.entrySet())
     {
-      builder.append(";(");
-      for (int i = 1; i <= count; i++)
-      {
-        Object value = rs.getObject(i);
-        if (value == null)
-        {
-          builder.append("NULL");
-        }
-        else
-        {
-          builder.append(rs.getObject(i).toString());
-        }
-        if (i < count)
-        {
-          builder.append(",");
-        }
-      }
-      builder.append(")\n");
-      isSound = true;
+      EnumerableTableScan scan = entry.getKey();
+      TableDef definition = scan.getTable().unwrap(TableDef.class);
+      List<String> path = scan.getTable().getQualifiedName();
+      counterexample.add(new CounterexampleDatabase.Table(
+          definition != null ? definition.name() : path.get(path.size() - 1),
+          definition != null ? definition.schemaName() : null,
+          scan.getRowType(),
+          definition != null ? definition.keys() : null,
+          getTableRows(solver.getValue(entry.getValue()))));
     }
-    println("; " + query);
-    println(builder.toString());
-    return isSound;
+    CounterexampleDatabase.Report report = CounterexampleDatabase.verify(
+        name, sql1, sql2, n1.getRowType().getFieldCount(), isSetSemantics(), counterexample);
+    for (String line : report.lines())
+    {
+      println("; " + line);
+    }
+    if (report.isChecked())
+    {
+      replayedCounterexamples++;
+      if (report.isConfirmed())
+      {
+        confirmedCounterexamples++;
+      }
+    }
   }
 
   protected void println(Object object)
@@ -1433,7 +1359,7 @@ public abstract class Cvc5AbstractTranslator
   private void enableKeyReasoning(RelNode... plans)
   {
     // Under set semantics no key constraint is asserted, so there is nothing for it to do.
-    if (!mkTableSort(tm.mkTupleSort(new Sort[] {tm.getIntegerSort()})).isBag())
+    if (isSetSemantics())
     {
       return;
     }

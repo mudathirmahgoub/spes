@@ -31,6 +31,10 @@ import org.apache.calcite.rel.RelNode;
  * they and the queries are written in from {@code -dialect=<name>}; both also work as
  * {@code -Dschema=} / {@code -Ddialect=} system properties, which is how Maven passes them.
  * Without them the queries are checked against the built-in {@code EMP}/{@code DEPT} schema.
+ *
+ * <p>Every inequivalent pair also leaves behind the counterexample as a SQLite file holding
+ * the model's rows and both queries, which {@code -Dcex} and {@code -Dcex.dir} control; see
+ * {@link CounterexampleDatabase}.
  */
 public class Cvc5Analysis
 {
@@ -55,6 +59,18 @@ public class Cvc5Analysis
       }
     }
     DatabaseSchema schema = schema(option(options, "schema"), option(options, "dialect"));
+    // The counterexample replay reads its own options as properties, which is how exec:exec
+    // passes them; the argument form is accepted too, for symmetry with -schema.
+    for (String name : new String[] {"cex", "cex.dir", "cex.url"})
+    {
+      String value = options.get(name);
+      if (!isBlank(value))
+      {
+        System.setProperty(name, value);
+      }
+    }
+    // Resolved here so a mistyped backend stops the run now rather than at its first sat.
+    System.out.println("; counterexamples : " + CounterexampleDatabase.describe());
 
     // Maven's exec:exec always passes the -Dq1/-Dq2/-Dsem/-Dout placeholders, so unset
     // ones arrive as empty strings. Only q1 and q2 decide the mode; blanks in the later
@@ -121,6 +137,12 @@ public class Cvc5Analysis
     writer.println("; sat answers    : " + Cvc5AbstractTranslator.satAnswers);
     writer.println("; unsat answers  : " + Cvc5AbstractTranslator.unsatAnswers);
     writer.println("; unknown answers: " + Cvc5AbstractTranslator.unknownAnswers);
+    // On stdout as well as in the file: an unconfirmed counterexample means an encoding is
+    // wrong, and that is not something to find only by reading a 500 MB SMT-LIB file later.
+    report(writer,
+        "; counterexamples : " + Cvc5AbstractTranslator.confirmedCounterexamples + " confirmed of "
+            + Cvc5AbstractTranslator.replayedCounterexamples + " replayed, in "
+            + CounterexampleDatabase.describe());
     writer.close();
     // System.out.println("Proved by spes and not cvc5:");
     // for (String test : spesProvenTests)

@@ -25,3 +25,4 @@ target/
 .venv/
 cp.txt
 single.smt2
+.DS_Store

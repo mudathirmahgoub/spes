@@ -33,6 +33,12 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected boolean isSetSemantics()
+  {
+    return false;
+  }
+
+  @Override
   protected Sort getElementSort(Sort sort)
   {
     return sort.getBagElementSort();

@@ -6,12 +6,15 @@ Apache Calcite, translated into an SMT problem, and solved with cvc5.
 | result | meaning |
 | --- | --- |
 | `unsat` | the queries are **equivalent** |
-| `sat` | the queries **differ**, and the model is a database that shows how |
+| `sat` | the queries **differ**, and the model is a database that shows how -- written out as a [SQLite file](#look-at-a-counterexample) |
 | `unknown` | the solver ran out of time (10 s per query) |
 
 ## Setup
 
-You need a JDK, Maven, git and cmake with a C++ toolchain.
+You need a JDK, Maven, git and cmake with a C++ toolchain. No database server: a
+[counterexample](#look-at-a-counterexample) is replayed in SQLite, which comes with its JDBC
+driver as a library, and the `sqlite3` command line is only wanted if you go on to open one of
+the files by hand.
 
 ```bash
 mvn initialize      # one-time: fetches z3, then clones and builds cvc5
@@ -60,7 +63,7 @@ One line is printed per query pair:
 | verdict | meaning |
 | --- | --- |
 | `equivalent` | proved equivalent |
-| `inequivalent` | a counterexample database was found |
+| `inequivalent` | a counterexample database was found, and written to `counterexamples/<name>.db` |
 | `unknown` | timed out |
 | `skipped` | uses a construct the translator does not support |
 | `error` | translation failed |
@@ -70,6 +73,81 @@ Expect around 25 minutes per file: most queries over `EMP`/`DEPT` reach the 10 s
 
 The pairs in `testData/*.json` are written against the default schema; give `-Dschema` a file
 of your own to run them, or your own pairs, against other tables.
+
+## Look at a counterexample
+
+`sat` means some database makes the two queries return different tables, and the solver's model
+is that database. Every `sat` writes that database out as a SQLite file -- one per inequivalent
+pair, named after the pair -- holding the rows, both queries, and the rows they disagree on:
+
+```bash
+mvn exec:exec -Dq1='SELECT deptno, name FROM dept' \
+              -Dq2='SELECT deptno, name FROM dept WHERE deptno > 3'
+```
+
+```
+; CREATE TABLE "DEPT" ("DEPTNO" INTEGER, "NAME" TEXT)
+; INSERT INTO "DEPT" ("DEPTNO", "NAME") VALUES (3, '')
+; counterexample database: counterexamples/commandLine.db
+; SELECT * FROM difference
+; c1 | c2 | in_q1 | in_q2
+; 3 |  | 1 | 0
+; counterexample confirmed: sqlite has q1 and q2 disagreeing on 1 row of this database
+```
+
+Nothing needs to be set up to look at it afterwards, because the data and the queries are both
+in the file:
+
+```bash
+sqlite3 counterexamples/commandLine.db 'SELECT * FROM q1'          # 3|
+sqlite3 counterexamples/commandLine.db 'SELECT * FROM q2'          # no rows
+sqlite3 counterexamples/commandLine.db 'SELECT * FROM difference'
+sqlite3 counterexamples/commandLine.db 'SELECT * FROM spes_info'   # what this file is
+sqlite3 counterexamples/commandLine.db .schema
+```
+
+| object | what it holds |
+| --- | --- |
+| one table per table the queries read | the counterexample, as the model gave it |
+| `q1`, `q2` | the two queries, as views, columns renamed `c1 ... cn` |
+| `difference` | the rows they disagree on, and how many copies each query returns there |
+| `spes_info` | the pair's name, the semantics, both queries as written, the declared keys |
+
+`difference` counts copies rather than saying `EXCEPT ALL`, which SQLite does not have: under
+bag semantics one copy of `(1)` and two copies of `(1)` is a difference, and the
+duplicate-eliminating `EXCEPT` would report those two queries as agreeing. Under `-Dsem=sets`
+it compares presence instead, since that is what the model was found under.
+
+The queries are the ones you gave, with two adjustments -- both visible in `spes_info` when
+they apply. Calcite calls an unaliased expression `EXPR$0` and SQLite calls that column of a
+`VALUES` table `column1`, so the name is rewritten; and a table the schema qualified
+(`public.emp`) is created unqualified, since SQLite has no schemas. Declared keys are recorded
+in `spes_info` rather than put in the DDL: `PRIMARY KEY` in a schema file here does not imply
+`NOT NULL` (see [what is read out of a schema file](#what-is-read-out-of-a-schema-file)),
+while SQLite's `INTEGER PRIMARY KEY` refuses a null and invents a value in its place, which
+would silently replace the counterexample being looked at.
+
+### What the replay tells you
+
+Running the queries checks the translation, not the solver -- the verdict is already decided,
+and the replay only says whether a real engine agrees with it. The lines to read are these.
+
+- **`counterexample confirmed`** -- SQLite returns different results for `q1` and `q2` on this
+  database. The model is a genuine counterexample.
+- **`counterexample NOT confirmed`** -- SQLite returns the same results, so one of the two
+  encodings does not mean what its query means. This is the failure a `sat` answer cannot show
+  on its own, and it is worth chasing. Under `-Dsem=sets` it can be the approximation instead of
+  a bug: that encoding drops multiplicities, reading `EXCEPT ALL` and its relatives as their
+  duplicate-eliminating forms, so a model can distinguish two queries that SQL does not.
+- **`could not run the queries`** -- SQLite refused one of them, usually a function it does not
+  have. The file still holds the data and `spes_info`, and the verdict is unaffected; only the
+  second opinion is missing. Two of the 47 pairs `no_aggregation_sat.json` decides land here,
+  one writing `SUBSTRING(x FROM 1 FOR 3)` and one `ROW(7 + 8)`; the other 45 are confirmed.
+
+`-Dcex=postgres` runs the same check against a PostgreSQL server on localhost instead, in
+temporary tables that go away with the connection and with no file left behind;
+`-Dcex=postgres -Dcex.url=<jdbc url>` points it at a server of your own. `-Dcex=none` skips the
+replay altogether.
 
 ## Choose a schema
 
@@ -193,6 +271,9 @@ All options are passed as `-Dname=value`.
 | `out` | where to write the generated SMT-LIB | `single.smt2` |
 | `schema` | schema file, classpath resource, or DDL text | `schemas/calcite.sql` |
 | `dialect` | which SQL the schema and queries are written in | `calcite` |
+| `cex` | where a counterexample is replayed: `sqlite`, `postgres`, `none` | `sqlite` |
+| `cex.dir` | directory the SQLite counterexample files are written to | `counterexamples` |
+| `cex.url` | JDBC URL for `-Dcex=postgres` | `jdbc:postgresql://localhost/template1?user=postgres&password=abc` |
 | `cvc5.home` | use a cvc5 build of your own instead of the branch build | — |
 
 `sem=sets` is faster and proves more, but treats `UNION ALL` like `UNION`, so use it only

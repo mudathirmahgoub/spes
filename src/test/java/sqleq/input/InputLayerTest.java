@@ -143,6 +143,17 @@ public class InputLayerTest {
   @Test
   public void shapesCalciteDropsAreRefused() throws Unsupported {
     assertTrue(refusal(DDL + "SELECT id FROM t TABLESAMPLE BERNOULLI (0);\nSELECT id FROM t;\n").contains("TABLESAMPLE"));
+    assertTrue(refusal(DDL + "SELECT array_agg(a) FROM (SELECT a FROM t ORDER BY id) AS s;\nSELECT array_agg(a) FROM t;\n").contains("ORDER BY inside a subquery"));
+    assertTrue(refusal(DDL + "SELECT a FROM (SELECT a FROM t ORDER BY id) AS s LIMIT 1;\nSELECT a FROM t LIMIT 1;\n").contains("ORDER BY inside a subquery"));
+    String fl = "create table \"f\" (\"x\" DOUBLE PRECISION, \"y\" INTEGER);\n";
+    assertTrue(refusal(fl + "SELECT sum(x) FROM (SELECT x FROM f ORDER BY y) AS s;\nSELECT sum(x) FROM f;\n").contains("ORDER BY inside a subquery"));
+    assertTrue(refusal(fl + "SELECT DISTINCT x FROM (SELECT x FROM f ORDER BY y) AS s;\nSELECT DISTINCT x FROM f;\n").contains("ORDER BY inside a subquery"));
+    // integer columns only and a sum, a join or a UNION ALL downstream: nothing can see the order, as in Calcite's test pairs
+    String ints = "create table \"t\" (\"id\" INTEGER PRIMARY KEY, \"a\" INTEGER, \"b\" INTEGER NOT NULL);\n";
+    prepare(ints + "SELECT sum(a) FROM (SELECT a FROM t ORDER BY id) AS s;\nSELECT sum(a) FROM t;\n");
+    prepare(ints + "SELECT * FROM t AS e RIGHT JOIN (SELECT * FROM t ORDER BY b) AS d ON e.id = d.id;\nSELECT * FROM t AS e RIGHT JOIN t AS d ON e.id = d.id;\n");
+    prepare(ints + "SELECT * FROM ((SELECT a FROM t ORDER BY a) UNION ALL (SELECT a FROM t ORDER BY a)) AS u;\nSELECT * FROM (SELECT a FROM t UNION ALL SELECT a FROM t) AS u;\n");
+    // the interval column of DDL makes a sum pick one spelling among equal values: refused there
     assertTrue(refusal(DDL + "SELECT sum(a) FROM (SELECT a FROM t ORDER BY id) AS s;\nSELECT sum(a) FROM t;\n").contains("ORDER BY inside a subquery"));
     prepare(DDL + "SELECT sum(a) FROM (SELECT a FROM t ORDER BY id LIMIT 2) AS s;\nSELECT sum(a) FROM t;\n");
     assertTrue(refusal(DDL + "SELECT 1 FROM t LEFT JOIN t AS u USING (id);\nSELECT 1 FROM t LEFT JOIN t AS u ON t.id = u.id;\n").contains("USING"));

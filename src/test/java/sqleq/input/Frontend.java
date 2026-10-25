@@ -41,8 +41,8 @@ public final class Frontend {
     Dml.Reduced red = Dml.reduceWith(cat, pf.statements.get(0), pf.statements.get(1));
     String q0 = Rewrites.rewrite(red.q0);
     String q1 = Rewrites.rewrite(red.q1);
-    Guards.check(q0);
-    Guards.check(q1);
+    Guards.check(q0, cat);
+    Guards.check(q1, cat);
     List<Declares.Decl> decls = new ArrayList<Declares.Decl>();
     for (String line : pf.declares) {
       Declares.Decl d = Declares.parse(line);

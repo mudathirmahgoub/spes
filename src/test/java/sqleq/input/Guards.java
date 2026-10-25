@@ -13,10 +13,54 @@ import sqleq.input.PgLexer.Token;
 public final class Guards {
   private Guards() {}
 
+  private static final java.util.Set<String> ORDER_SENSITIVE = new java.util.HashSet<String>(java.util.Arrays.asList(
+      "ARRAY_AGG", "STRING_AGG", "JSON_AGG", "JSONB_AGG", "JSON_OBJECT_AGG", "JSONB_OBJECT_AGG", "XMLAGG", "OVER",
+      "LIMIT", "FETCH", "OFFSET", "FIRST_VALUE", "LAST_VALUE", "NTH_VALUE", "LAG", "LEAD", "ROW_NUMBER", "RANK",
+      "DENSE_RANK", "NTILE", "PERCENTILE_CONT", "PERCENTILE_DISC", "MODE"));
+  private static final java.util.Set<String> REPRESENTATIVE = new java.util.HashSet<String>(java.util.Arrays.asList(
+      "DISTINCT", "GROUP", "UNION", "INTERSECT", "EXCEPT", "MIN", "MAX", "SUM", "AVG"));
+
   public static void check(String sql) throws Unsupported {
+    check(sql, null);
+  }
+
+  /**
+   * @param cat the catalog, which decides whether a value's spelling can be seen: with a numeric,
+   *     float, interval or opaque column, or a collation, DISTINCT, GROUP BY, a set operation and
+   *     MIN/MAX/SUM/AVG pick one spelling among equal values, and so see the order they arrive in
+   */
+  public static void check(String sql, Catalog cat) throws Unsupported {
     List<Token> t = PgLexer.lex(sql);
     boolean outerJoin = false;
     boolean using = false;
+    boolean orderSensitive = false;
+    boolean representative = false;
+    boolean spellings = false;
+    if (cat != null) {
+      for (Catalog.Table table : cat.tables()) {
+        for (Catalog.Column c : table.columns) {
+          if (c.type == Catalog.Type.DECIMAL || c.type == Catalog.Type.DOUBLE || c.type == Catalog.Type.INTERVAL
+              || c.type == Catalog.Type.OPAQUE || c.type == Catalog.Type.BINARY) {
+            spellings = true;
+          }
+        }
+      }
+    }
+    for (Token k : t) {
+      if (k.kind == Kind.WORD) {
+        String w = k.upper();
+        if (ORDER_SENSITIVE.contains(w)) {
+          orderSensitive = true;
+        }
+        if (REPRESENTATIVE.contains(w)) {
+          representative = true;
+        }
+        if (w.equals("COLLATE")) {
+          spellings = true;
+        }
+      }
+    }
+    boolean seesOrder = orderSensitive || (representative && spellings) || cat == null;
     for (int i = 0; i < t.size(); i++) {
       Token k = t.get(i);
       if (k.isWord("TABLESAMPLE")) {
@@ -37,7 +81,7 @@ public final class Guards {
       if (k.kind == Kind.LPAREN && i + 1 < t.size()
           && (t.get(i + 1).isWord("SELECT") || t.get(i + 1).isWord("WITH") || t.get(i + 1).isWord("VALUES") || t.get(i + 1).isWord("TABLE"))) {
         int close = PgLexer.matching(t, i);
-        if (close > 0) {
+        if (close > 0 && seesOrder) {
           subquery(t, i + 1, close);
         }
       }
@@ -100,7 +144,7 @@ public final class Guards {
       }
     }
     if (orderBy && !slice) {
-      throw new Unsupported("ORDER BY inside a subquery without LIMIT, which Calcite drops");
+      throw new Unsupported("ORDER BY inside a subquery without LIMIT, which Calcite drops, under a construct that can see the order");
     }
   }
 }

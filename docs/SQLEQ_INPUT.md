@@ -84,8 +84,11 @@ about a different pair than the one in the file. The note column names the reaso
   `char(n)`, whose Postgres equality ignores trailing blanks. Columns of type `char(n)` and
   `citext` are opaque for the same reason: their `=` is not plain string equality.
 * Shapes Calcite plans without the meaning Postgres gives them: `ORDER BY` inside a subquery that
-  has no `LIMIT`, `OFFSET` or `FETCH` (Calcite drops the sort, and `array_agg`, `string_agg` or a
-  float `SUM` over it depend on the order), `TABLESAMPLE` (dropped by the planner),
+  has no `LIMIT`, `OFFSET` or `FETCH`, when something downstream can see the order (Calcite drops
+  the sort; `array_agg`, `string_agg`, a window function or an outer `LIMIT` see it, and so do
+  `DISTINCT`, `GROUP BY`, a set operation or `MIN`/`MAX`/`SUM`/`AVG` over a numeric, float,
+  interval, opaque or collated column, which pick one spelling among equal values; a join or a
+  `UNION ALL` over integers does not), `TABLESAMPLE` (dropped by the planner),
   `JOIN … USING` under an outer join (Calcite's merged column is not Postgres's), a `FROM` list
   that mixes comma-separated items with `JOIN` (grouped differently), and Postgres's numeric
   literal forms `0b101`, `0x1f`, `1_000` (read as a number followed by an alias).

@@ -466,6 +466,28 @@ public final class Catalog {
           t.columns.add(copy(pc));
         }
       }
+      while (e.has()) {
+        boolean including = e.tryWord("INCLUDING");
+        if (!including && !e.tryWord("EXCLUDING")) {
+          break;
+        }
+        Token what = e.has() ? e.next() : null;
+        if (what == null) {
+          break;
+        }
+        if (including && (what.isWord("INDEXES") || what.isWord("CONSTRAINTS") || what.isWord("ALL"))) {
+          if (source.primaryKey != null && t.primaryKey == null) {
+            t.primaryKey = new ArrayList<String>(source.primaryKey);
+            t.primaryKeyName = t.name + "_pkey";
+            t.primaryKeyEnforced = source.primaryKeyEnforced;
+          }
+          for (Unique u : source.uniques) {
+            Unique v = new Unique(null, u.columns, u.nullsNotDistinct);
+            v.enforced = u.enforced;
+            t.uniques.add(v);
+          }
+        }
+      }
       return;
     }
     if (p.isWord("CHECK") || p.isWord("EXCLUDE")) {

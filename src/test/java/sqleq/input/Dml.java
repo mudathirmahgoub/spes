@@ -515,6 +515,9 @@ public final class Dml {
         }
       }
     }
+    for (Head h : new Head[] {a, b}) {
+      h.sourceText = typedParams(h, t);
+    }
     if (a.columns.equals(b.columns)) {
       return new String[] {a.sourceText, b.sourceText};
     }
@@ -657,6 +660,40 @@ public final class Dml {
       return;
     }
     throw new Unsupported("INSERT stores into " + into.name + " (" + into.rawType + ") from a source whose values this reader does not type");
+  }
+
+  /**
+   * In a {@code VALUES} source, a bare {@code $N} is spelled {@code $N::<column type>}: Postgres
+   * types it from the target column, and Calcite's inference has nothing else to go on there.
+   */
+  private static String typedParams(Head h, Catalog.Table t) {
+    List<Token> src = h.toks.subList(h.sourceFrom, h.sourceTo);
+    if (src.isEmpty() || !src.get(0).isWord("VALUES")) {
+      return h.sourceText;
+    }
+    StringBuilder out = new StringBuilder();
+    int at = h.toks.get(h.sourceFrom).start;
+    for (int[] row : PgLexer.splitTopLevel(src, 1, src.size())) {
+      if (row[1] - row[0] < 2 || src.get(row[0]).kind != PgLexer.Kind.LPAREN) {
+        return h.sourceText;
+      }
+      int close = PgLexer.matching(src, row[0]);
+      List<int[]> items = PgLexer.splitTopLevel(src, row[0] + 1, close);
+      for (int k = 0; k < items.size() && k < h.columns.size(); k++) {
+        int[] it = items.get(k);
+        if (it[1] - it[0] == 1 && src.get(it[0]).kind == PgLexer.Kind.PARAM) {
+          Catalog.Column col = t.column(h.columns.get(k));
+          if (col == null || col.type == Catalog.Type.OPAQUE) {
+            continue;
+          }
+          Token param = src.get(it[0]);
+          out.append(h.source, at, param.end).append("::").append(col.rawType);
+          at = param.end;
+        }
+      }
+    }
+    out.append(h.source, at, h.toks.get(h.sourceTo - 1).end);
+    return out.toString();
   }
 
   private static Catalog.Table emptyTable() {

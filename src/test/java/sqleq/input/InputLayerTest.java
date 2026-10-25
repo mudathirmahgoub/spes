@@ -122,6 +122,11 @@ public class InputLayerTest {
     assertTrue(g.table("t").column("d").generated);
     assertFalse(g.table("t").column("d").notNull);
     assertTrue(c.table("u").proverKeys().isEmpty());
+    Catalog l = Catalog.build(Arrays.asList("create table \"o\" (\"id\" INTEGER PRIMARY KEY, \"k\" INTEGER NOT NULL UNIQUE)",
+        "create table \"u\" (like \"o\" including indexes)", "create table \"s\".\"z\" (\"id\" INTEGER PRIMARY KEY)"));
+    assertEquals(2, l.table("u").proverKeys().size());
+    assertFalse(DdlOut.postgres(l).contains("\"z\""));
+    assertFalse(DdlOut.mysql(l).contains("`z`"));
     assertEquals(1, c.table("s.u").proverKeys().size());
     assertNull(c.table("o"));
     assertEquals(Collections.singletonList("id"), names(c.table("o2")));
@@ -165,6 +170,9 @@ public class InputLayerTest {
     Frontend.Prepared p = prepare(DDL + "INSERT INTO t (id, a) VALUES (1, 2), (3, 4);\nINSERT INTO t (id, a) SELECT id, a FROM t WHERE a > 0;\n");
     assertEquals("VALUES (1, 2), (3, 4)", p.q0);
     assertEquals("SELECT id, a FROM t WHERE a > 0", p.q1);
+    Frontend.Prepared v = prepare(DDL + "INSERT INTO t (id, a) VALUES ($1, $2);\nINSERT INTO t (id, a) VALUES ($1, $2 + 0);\n");
+    assertEquals("VALUES (CAST($1 AS INTEGER), CAST($2 AS INTEGER))", v.q0);
+    assertEquals("VALUES (CAST($1 AS INTEGER), $2 + 0)", v.q1);
     Frontend.Prepared r = prepare(DDL + "INSERT INTO t (id, a) VALUES (1, 2);\nINSERT INTO t (a, id) VALUES (1, 2);\n");
     assertEquals("SELECT \"id\", \"a\" FROM (VALUES (1, 2)) AS q_src(\"id\", \"a\")", r.q0);
     assertEquals("SELECT \"id\", \"a\" FROM (VALUES (1, 2)) AS q_src(\"a\", \"id\")", r.q1);

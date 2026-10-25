@@ -15,6 +15,7 @@ public final class Guards {
 
   private static final java.util.Set<String> ORDER_SENSITIVE = new java.util.HashSet<String>(java.util.Arrays.asList(
       "ARRAY_AGG", "STRING_AGG", "JSON_AGG", "JSONB_AGG", "JSON_OBJECT_AGG", "JSONB_OBJECT_AGG", "XMLAGG", "OVER",
+      "ARRAY", "RANGE_AGG", "RANGE_INTERSECT_AGG", "JSON_ARRAYAGG", "JSON_OBJECTAGG",
       "LIMIT", "FETCH", "OFFSET", "FIRST_VALUE", "LAST_VALUE", "NTH_VALUE", "LAG", "LEAD", "ROW_NUMBER", "RANK",
       "DENSE_RANK", "NTILE", "PERCENTILE_CONT", "PERCENTILE_DISC", "MODE"));
   private static final java.util.Set<String> REPRESENTATIVE = new java.util.HashSet<String>(java.util.Arrays.asList(
@@ -37,6 +38,7 @@ public final class Guards {
     boolean representative = false;
     boolean spellings = false;
     if (cat != null) {
+      spellings = cat.hasCollations();
       for (Catalog.Table table : cat.tables()) {
         for (Catalog.Column c : table.columns) {
           if (c.type == Catalog.Type.DECIMAL || c.type == Catalog.Type.DOUBLE || c.type == Catalog.Type.INTERVAL
@@ -63,6 +65,11 @@ public final class Guards {
     boolean seesOrder = orderSensitive || (representative && spellings) || cat == null;
     for (int i = 0; i < t.size(); i++) {
       Token k = t.get(i);
+      if (k.kind == Kind.WORD && i + 1 < t.size() && t.get(i + 1).kind == Kind.LPAREN
+          && Volatile.NAMES.contains(k.text.toLowerCase(java.util.Locale.ROOT))
+          && !(i > 0 && t.get(i - 1).kind == Kind.DOT)) {
+        throw new Unsupported("volatile function " + k.text + "(): two evaluations may differ");
+      }
       if (k.isWord("TABLESAMPLE")) {
         throw new Unsupported("TABLESAMPLE, which Calcite's planner drops");
       }

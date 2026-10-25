@@ -80,12 +80,16 @@ about a different pair than the one in the file. The note column names the reaso
   statement fixes its spelling: a string literal, `NULL`, a parameter, or a column of such a type.
   `2.0` and `2.00` are one numeric and two strings. A store into an interval column with a
   modifier (`interval day`, `interval(0)`) is always refused: the modifier truncates.
+* A call of a volatile function (`random()`, `gen_random_uuid()`, `nextval()`, `clock_timestamp()`,
+  …: sqleq's frontend's list): two evaluations may differ, and a prover reading it as a function of
+  its arguments would prove `random() = random()`.
 * A cast to a type Calcite has no name for: uuid, json, an array, an interval; and a cast to
   `char(n)`, whose Postgres equality ignores trailing blanks. Columns of type `char(n)` and
   `citext` are opaque for the same reason: their `=` is not plain string equality.
 * Shapes Calcite plans without the meaning Postgres gives them: `ORDER BY` inside a subquery that
   has no `LIMIT`, `OFFSET` or `FETCH`, when something downstream can see the order (Calcite drops
-  the sort; `array_agg`, `string_agg`, a window function or an outer `LIMIT` see it, and so do
+  the sort; `array_agg`, `string_agg`, `range_agg`, an `ARRAY(…)` subquery, a window function or an
+  outer `LIMIT` see it, and so do
   `DISTINCT`, `GROUP BY`, a set operation or `MIN`/`MAX`/`SUM`/`AVG` over a numeric, float,
   interval, opaque or collated column, which pick one spelling among equal values; a join or a
   `UNION ALL` over integers does not), `TABLESAMPLE` (dropped by the planner),

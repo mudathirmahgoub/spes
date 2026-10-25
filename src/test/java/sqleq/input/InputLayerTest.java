@@ -158,6 +158,11 @@ public class InputLayerTest {
     prepare(DDL + "SELECT sum(a) FROM (SELECT a FROM t ORDER BY id LIMIT 2) AS s;\nSELECT sum(a) FROM t;\n");
     assertTrue(refusal(DDL + "SELECT 1 FROM t LEFT JOIN t AS u USING (id);\nSELECT 1 FROM t LEFT JOIN t AS u ON t.id = u.id;\n").contains("USING"));
     assertTrue(refusal(DDL + "SELECT 0b101 FROM t;\nSELECT 0 FROM t;\n").contains("numeric literal"));
+    assertTrue(refusal(DDL + "SELECT random() FROM t;\nSELECT random() FROM t;\n").contains("volatile"));
+    assertTrue(refusal(DDL + "WITH c AS (SELECT gen_random_uuid() AS u) SELECT u FROM c;\nSELECT gen_random_uuid();\n").contains("volatile"));
+    assertTrue(refusal(DDL + "SELECT ARRAY(SELECT a FROM t ORDER BY a);\nSELECT ARRAY(SELECT a FROM t ORDER BY a DESC);\n").contains("ORDER BY inside a subquery"));
+    String coll = "create collation \"ci\" (provider = icu, locale = 'und', deterministic = false);\ncreate table \"u\" (\"k\" INTEGER, \"n\" TEXT COLLATE \"ci\");\n";
+    assertTrue(refusal(coll + "SELECT DISTINCT n FROM (SELECT n FROM u ORDER BY k) s;\nSELECT DISTINCT n FROM (SELECT n FROM u ORDER BY k DESC) s;\n").contains("ORDER BY inside a subquery"));
     assertTrue(refusal(DDL + "SELECT 1 FROM t, t AS u FULL JOIN t AS v ON u.id = v.id;\nSELECT 1 FROM t;\n").contains("FROM list"));
     List<PgLexer.Token> toks = PgLexer.lex("SELECT 0b101, 1_000, 0x1F FROM t");
     assertEquals("0b101", toks.get(1).text);

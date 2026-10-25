@@ -181,6 +181,7 @@ public final class Catalog {
   private final Map<String, Table> tables = new LinkedHashMap<String, Table>();
   private final Map<String, Domain> domains = new LinkedHashMap<String, Domain>();
   /** Every index by name, unique or not: {@code CREATE INDEX IF NOT EXISTS} on a taken name is a no-op. */
+  private boolean collations;
   private final Set<String> publicNames = new HashSet<String>();
   private final Set<String> ambiguous = new HashSet<String>();
   private final Map<String, Unique> indexes = new LinkedHashMap<String, Unique>();
@@ -220,6 +221,11 @@ public final class Catalog {
       }
     }
     return out;
+  }
+
+  /** Whether the DDL declares a collation or collates a column: string equality may then not be identity. */
+  public boolean hasCollations() {
+    return collations;
   }
 
   /** Whether a query reaches this table by its bare name; the provers' schemas hold exactly those. */
@@ -273,6 +279,8 @@ public final class Catalog {
         markAfter(c, "TO");
       } else if (c.tryWord("DOMAIN")) {
         createDomain(c);
+      } else if (c.peekWord("COLLATION")) {
+        collations = true;
       } else {
         while (c.has() && (c.peek().isWord("TEMP") || c.peek().isWord("TEMPORARY") || c.peek().isWord("RECURSIVE")
             || c.peek().isWord("MATERIALIZED"))) {
@@ -610,6 +618,7 @@ public final class Catalog {
         e.skipGroup();
       } else if (w.equals("COLLATE")) {
         e.ident();
+        collations = true;
       }
       columnConstraintName = null;
     }

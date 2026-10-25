@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +29,8 @@ import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.sql.SqlFunction;
+import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.type.BasicSqlType;
 
@@ -64,6 +67,8 @@ public abstract class Cvc5AbstractTranslator
   /** The same scans as {@link #tables}, as the encoding uses them: lifted where a column was NOT NULL. */
   public HashMap<EnumerableTableScan, Term> tableTerms = new HashMap<>();
   public HashMap<String, Term> declaredFunctions = new HashMap<>();
+  /** Uninterpreted functions by name: a declared function of the pair, or a parameter {@code qp_N()}. */
+  private final HashMap<String, Term> uninterpreted = new HashMap<>();
   protected TermManager tm;
   protected Solver solver;
   protected int functionIndex = 0;
@@ -99,6 +104,7 @@ public abstract class Cvc5AbstractTranslator
     tables.clear();
     tableTerms.clear();
     declaredFunctions.clear();
+    uninterpreted.clear();
     assertionComments.clear();
     functionIndex = 0;
     Context.deletePointers();
@@ -111,7 +117,9 @@ public abstract class Cvc5AbstractTranslator
     setOption("dag-thresh", "0");
     setOption("uf-lazy-ll", "true");
     setOption("fmf-bound", "true");
-    setOption("tlimit-per", "10000");
+    // -Dtlimit=<millis> overrides the per-query limit, e.g. to generate the
+    // SMT-LIB files of a batch without waiting for the solver
+    setOption("tlimit-per", System.getProperty("tlimit", "10000"));
     setOption("strings-exp", "true");
     // setOption("simplification", "none");
     zero = tm.mkInteger(0);
@@ -960,6 +968,11 @@ public abstract class Cvc5AbstractTranslator
         Term ret = translateRowExpr(call.getOperands().get(0), constructor, t, "");
         return ret;
       }
+      if (call.op instanceof SqlFunction && call.op.getKind() == SqlKind.OTHER_FUNCTION
+          && ((SqlFunction) call.op).getFunctionType() == SqlFunctionCategory.USER_DEFINED_FUNCTION)
+      {
+        return applyUninterpreted(call, constructor, t);
+      }
       Term[] argTerms = getArgTerms(constructor, t, call);
       boolean needsLifting =
           Arrays.asList(argTerms).stream().anyMatch(a -> a.getSort().isNullable());
@@ -1221,6 +1234,38 @@ public abstract class Cvc5AbstractTranslator
     Term temp = argTerms[i];
     argTerms[i] = argTerms[j];
     argTerms[j] = temp;
+  }
+
+  /**
+   * A call of a function the pair declares and the DDL does not define, or of a sqleq parameter
+   * {@code qp_N()}: an uninterpreted function over nullable sorts, declared once per name so that
+   * both queries apply the same symbol. A nullary one is a constant: the parameter's value.
+   */
+  private Term applyUninterpreted(RexCall call, DatatypeConstructor constructor, Term t)
+  {
+    Term[] args = getArgTerms(constructor, t, call);
+    args = getNullableTerms(true, args);
+    Sort[] argSorts = new Sort[args.length];
+    for (int i = 0; i < args.length; i++)
+    {
+      argSorts[i] = args[i].getSort();
+    }
+    Sort returnSort = getFieldSort(call.getType());
+    String name = call.op.getName().toLowerCase(Locale.ROOT);
+    Term f = uninterpreted.get(name);
+    if (f == null)
+    {
+      f = declareFun(argSorts, returnSort, name, false);
+      uninterpreted.put(name, f);
+    }
+    if (args.length == 0)
+    {
+      return f;
+    }
+    Term[] application = new Term[args.length + 1];
+    application[0] = f;
+    System.arraycopy(args, 0, application, 1, args.length);
+    return tm.mkTerm(Kind.APPLY_UF, application);
   }
 
   protected Term[] getArgTerms(DatatypeConstructor constructor, Term t, RexCall call)

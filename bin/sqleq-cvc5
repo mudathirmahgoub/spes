@@ -1,0 +1,15 @@
+#!/bin/sh
+# The cvc5 translator on sqleq pair files.
+#   bin/sqleq-cvc5 [--semantics=bags|sets] [--timeout=SECONDS] [--out=FILE.csv] [--smt=DIR] [--log=DIR] [--no-fork] PATH...
+# Needs `mvn test-compile` and the cvc5 Java bindings the pom builds ($CVC5_LIB overrides their lib/ directory).
+HERE=$(cd "$(dirname "$0")/.." && pwd)
+CP_FILE="$HERE/target/sqleq-classpath.txt"
+if [ ! -f "$CP_FILE" ]; then
+  mvn -q -o -f "$HERE/pom.xml" dependency:build-classpath -Dmdep.outputFile="$CP_FILE" >/dev/null || exit 2
+fi
+CVC5_LIB=${CVC5_LIB:-$HOME/.cache/cvc5/bags-map-up-pair/build/install/lib}
+LIBS="$CVC5_LIB"
+if [ -n "$Z3_LIB" ]; then LIBS="$LIBS:$Z3_LIB"; fi
+if [ -n "$JAVA_HOME" ]; then JAVA="$JAVA_HOME/bin/java"; else JAVA=java; fi
+exec "$JAVA" -Djava.library.path="$LIBS" --enable-native-access=ALL-UNNAMED -Xss64m \
+  -cp "$HERE/target/test-classes:$HERE/target/classes:$(cat "$CP_FILE")" sqleq.SqleqCvc5 "$@"

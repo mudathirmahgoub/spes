@@ -364,3 +364,9 @@ mvn -Dcvc5.home=/path/to/cvc5/build/install exec:exec -Dq1='...' -Dq2='...'
 
 - [sql features.md](src/test/java/SimpleQueryTests/sql%20features.md) — which SQL
   constructs are supported, how they are encoded, and benchmark results.
+
+## sqleq input
+
+The cvc5 translator also reads [sqleq](https://github.com/DataDog/sqleq) pair files: PostgreSQL DDL,
+`$N` parameters, and `DELETE`/`UPDATE`/`INSERT` pairs reduced to the queries computing their effect.
+See [docs/SQLEQ_INPUT.md](docs/SQLEQ_INPUT.md); `bin/sqleq-cvc5 PATH...` runs it.

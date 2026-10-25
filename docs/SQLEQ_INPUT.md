@@ -96,8 +96,10 @@ about a different pair than the one in the file. The note column names the reaso
 
 A `-- catalog: inferred` pair declares no DDL for some of its tables; both tools need a schema,
 so such pairs are refused. `CREATE VIEW` is not read: a query over a view is a query over an
-undeclared table, and is refused by Calcite. A table in a schema other than `public` is reachable
-by its qualified name only, as under Postgres's default search path.
+undeclared relation, and is refused by Calcite. A bare table name reaches a `public` table, or the
+one table of that name in another schema when there is exactly one and no public table or view
+takes the name (sqleq's reading of a captured schema); two schemas declaring the same name make
+the bare name reach neither, and only bare-reachable tables are handed to the prover.
 
 ## What this layer does not catch
 

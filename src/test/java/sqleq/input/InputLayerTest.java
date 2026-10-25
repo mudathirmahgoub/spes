@@ -125,8 +125,16 @@ public class InputLayerTest {
     Catalog l = Catalog.build(Arrays.asList("create table \"o\" (\"id\" INTEGER PRIMARY KEY, \"k\" INTEGER NOT NULL UNIQUE)",
         "create table \"u\" (like \"o\" including indexes)", "create table \"s\".\"z\" (\"id\" INTEGER PRIMARY KEY)"));
     assertEquals(2, l.table("u").proverKeys().size());
-    assertFalse(DdlOut.postgres(l).contains("\"z\""));
-    assertFalse(DdlOut.mysql(l).contains("`z`"));
+    assertTrue(DdlOut.postgres(l).contains("\"z\"")); // alone in its schema: the bare name reaches it
+    Catalog sh = Catalog.build(Arrays.asList("create table \"s\".\"z\" (\"id\" INTEGER PRIMARY KEY)",
+        "create table \"z\" (\"id\" INTEGER)", "create table \"s\".\"v\" (\"id\" INTEGER)", "create view \"v\" as select 1 as \"id\"",
+        "create table \"s\".\"w\" (\"id\" INTEGER)", "create table \"r\".\"w\" (\"id\" INTEGER)"));
+    assertTrue(sh.table("z").proverKeys().isEmpty()); // the public table shadows the other schema's
+    assertNull(sh.table("v")); // the view shadows it, and views are not read
+    assertNull(sh.table("w")); // two schemas: ambiguous
+    assertEquals(1, sh.table("s.w").columns.size());
+    assertFalse(DdlOut.mysql(sh).contains("`v`"));
+    assertFalse(DdlOut.mysql(sh).contains("`w`"));
     assertEquals(1, c.table("s.u").proverKeys().size());
     assertNull(c.table("o"));
     assertEquals(Collections.singletonList("id"), names(c.table("o2")));

@@ -181,6 +181,8 @@ public final class Catalog {
   private final Map<String, Table> tables = new LinkedHashMap<String, Table>();
   private final Map<String, Domain> domains = new LinkedHashMap<String, Domain>();
   /** Every index by name, unique or not: {@code CREATE INDEX IF NOT EXISTS} on a taken name is a no-op. */
+  private final Set<String> publicNames = new HashSet<String>();
+  private final Set<String> ambiguous = new HashSet<String>();
   private final Map<String, Unique> indexes = new LinkedHashMap<String, Unique>();
   private final Map<String, Table> indexTables = new LinkedHashMap<String, Table>();
   private final Set<String> triggered = new HashSet<String>();
@@ -218,6 +220,11 @@ public final class Catalog {
       }
     }
     return out;
+  }
+
+  /** Whether a query reaches this table by its bare name; the provers' schemas hold exactly those. */
+  public boolean reachableBare(Table t) {
+    return tables.get(t.name) == t;
   }
 
   /** The table a folded name denotes, bare or schema-qualified; null when undeclared. */
@@ -266,6 +273,25 @@ public final class Catalog {
         markAfter(c, "TO");
       } else if (c.tryWord("DOMAIN")) {
         createDomain(c);
+      } else {
+        while (c.has() && (c.peek().isWord("TEMP") || c.peek().isWord("TEMPORARY") || c.peek().isWord("RECURSIVE")
+            || c.peek().isWord("MATERIALIZED"))) {
+          c.next();
+        }
+        if (c.tryWord("VIEW")) {
+          // a view is not read; a public one takes its bare name from any table of another schema,
+          // so a query over it is a query over an undeclared relation and is refused downstream
+          c.tryWords("IF", "NOT", "EXISTS");
+          List<String> vn = c.ident();
+          if (vn != null && (vn.size() == 1 || vn.get(vn.size() - 2).equals("public"))) {
+            String bare = vn.get(vn.size() - 1);
+            Table shadowed = tables.get(bare);
+            if (shadowed != null && !publicNames.contains(bare)) {
+              tables.remove(bare);
+            }
+            publicNames.add(bare);
+          }
+        }
       }
       return;
     }
@@ -387,16 +413,24 @@ public final class Catalog {
     if (t.primaryKey != null && t.primaryKeyName == null) {
       t.primaryKeyName = t.name + "_pkey";
     }
-    // The bare name reaches a table of the default search path (public); a table in another
-    // schema is addressed by its qualified name only, as Postgres has it.
-    if (t.schema == null || t.schema.equals("public")) {
+    // The bare name reaches a public table, or -- as sqleq's frontend reads a captured schema --
+    // the one table of that name in some other schema when there is exactly one and no public
+    // table or view takes the name. Two schemas declaring it make the bare name ambiguous.
+    boolean isPublic = t.schema == null || t.schema.equals("public");
+    if (isPublic) {
       tables.put(t.name, t);
+      publicNames.add(t.name);
+    } else if (!publicNames.contains(t.name) && !ambiguous.contains(t.name)) {
+      Table other = tables.get(t.name);
+      if (other != null && other != t) {
+        tables.remove(t.name);
+        ambiguous.add(t.name);
+        warnings.add("tables named " + t.name + " in two schemas; the bare name reaches neither");
+      } else {
+        tables.put(t.name, t);
+      }
     }
-    if (t.schema != null) {
-      tables.put(t.schema + "." + t.name, t);
-    } else {
-      tables.put("public." + t.name, t);
-    }
+    tables.put((isPublic ? "public" : t.schema) + "." + t.name, t);
   }
 
   /** One element of a {@code CREATE TABLE} list, or one {@code ALTER TABLE ... ADD} item. */
@@ -649,6 +683,9 @@ public final class Catalog {
             renamed.hasTrigger = t.hasTrigger;
             renamed.hasChildren = t.hasChildren;
             if (renamed.schema == null || renamed.schema.equals("public")) {
+              tables.put(renamed.name, renamed);
+              publicNames.add(renamed.name);
+            } else if (!publicNames.contains(renamed.name) && !tables.containsKey(renamed.name)) {
               tables.put(renamed.name, renamed);
             }
             tables.put((renamed.schema == null ? "public" : renamed.schema) + "." + renamed.name, renamed);

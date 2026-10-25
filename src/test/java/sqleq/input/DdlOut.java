@@ -15,8 +15,8 @@ public final class DdlOut {
     StringBuilder b = new StringBuilder();
     int n = 0;
     for (Catalog.Table t : cat.tables()) {
-      if (t.schema != null && !t.schema.equals("public")) {
-        continue; // reachable by its qualified name only; both schema readers would register it bare as well
+      if (!cat.reachableBare(t)) {
+        continue; // a query cannot name it bare, and both schema readers would register it bare
       }
       b.append("CREATE TABLE ").append(bq(t.name)).append(" (\n");
       boolean first = true;
@@ -72,8 +72,8 @@ public final class DdlOut {
   public static String postgres(Catalog cat) {
     StringBuilder b = new StringBuilder();
     for (Catalog.Table t : cat.tables()) {
-      if (t.schema != null && !t.schema.equals("public")) {
-        continue; // reachable by its qualified name only; both schema readers would register it bare as well
+      if (!cat.reachableBare(t)) {
+        continue; // a query cannot name it bare, and both schema readers would register it bare
       }
       b.append("create table ").append(dq(t.name)).append(" (\n");
       boolean first = true;

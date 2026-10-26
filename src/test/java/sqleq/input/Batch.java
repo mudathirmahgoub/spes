@@ -241,7 +241,7 @@ public final class Batch {
       }
     }
     for (Object k : System.getProperties().keySet()) {
-      if (k.toString().startsWith("sqleq.")) {
+      if (k.toString().startsWith("sqleq.") || k.toString().startsWith("sqlsolver.")) {
         cmd.add("-D" + k + "=" + System.getProperty(k.toString()));
       }
     }

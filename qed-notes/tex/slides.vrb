@@ -1,0 +1,20 @@
+\frametitle{Takeaways}
+\begin{enumerate}
+\item<1-> \textbf{A table is a counting function.} Filtering is multiplication, union is
+      addition, projection is an unbounded sum. Every system here is a different way of
+      comparing two such formulas.
+\vspace{2mm}
+\item<2-> \textbf{The two 2024 systems solve different halves.}\\
+      \QED{} $=$ better \emph{model} of SQL (NULLs, keys, unknown operators, context-sensitive
+      subquery checks).\\
+      \sqlsolver{} $=$ better \emph{arithmetic} (unbounded sums via \liastar{}, real
+      aggregates).
+\vspace{2mm}
+\item<3-> \textbf{Squash is the dividing line.} Under a squash, equivalence is a Boolean
+      question an SMT solver answers instantly. Without one, it is an arithmetic question
+      about sums --- and that is where the frontier is.
+\end{enumerate}
+\vspace{4mm}
+\onslide<4->{\centering\small
+Primary key $\to$ $\sq{S(a)}$ $\to$ \texttt{Inner Unique: true}. The optimiser and the prover
+are tracking the same fact for different reasons.}

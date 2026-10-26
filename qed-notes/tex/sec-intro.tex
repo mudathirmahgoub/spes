@@ -1,0 +1,104 @@
+\section{The problem, and why it is hard}
+\label{sec:intro}
+
+\subsection{What we are trying to decide}
+
+Given two SQL queries $Q_1$ and $Q_2$ over the same schema, decide whether they return
+the same answer \emph{on every possible database instance}. Not on your data --- on all data.
+
+This matters because every relational engine contains a rule-based rewriter. Calcite,
+Spark SQL, CockroachDB and PostgreSQL all transform your query into a different one before
+executing it. If a rewrite rule is wrong, the engine silently returns wrong answers.
+Historically these bugs have been found by users, years later~\cite{udp}.
+
+The general problem is undecidable. For queries with negation and arbitrary predicates you
+can encode first-order validity, so no algorithm decides all cases. Everything in this
+document is therefore a \emph{sound but incomplete} procedure: when it says
+``equivalent'' it is right; when it says ``unknown'' the queries may still be equivalent.
+
+\keybox{The three answers a prover may give}{%
+\textbf{EQUIVALENT} --- proved, trust it.\quad
+\textbf{NOT EQUIVALENT} --- a counterexample database exists.\quad
+\textbf{UNKNOWN} --- the procedure ran out of power.
+\\[3pt]
+All three systems here answer EQUIVALENT or UNKNOWN. None of them is a
+counterexample finder. Refutation is a different problem, usually attacked
+by bounded model finding.}
+
+\subsection{Bag semantics, and why it changes everything}
+
+SQL tables are \emph{bags} (multisets): duplicates are real and observable.
+\lstinline|SELECT x FROM R| does not deduplicate. Two queries that agree as sets may
+disagree as bags:
+
+\begin{lstlisting}[style=sql]
+SELECT x FROM R                 -- may return 1, 1, 2
+SELECT DISTINCT x FROM R        -- returns    1, 2
+\end{lstlisting}
+
+The classical theory of query equivalence (containment mappings, the chase, homomorphism
+checking) is set-based. Under bags the picture is harder: bag \emph{containment} of
+conjunctive queries is a long-standing open problem, while bag \emph{equivalence} of unions
+of conjunctive queries is decidable~\cite{cohen}. That decidability result is the
+theoretical anchor for all three systems.
+
+\subsection{The common architecture}
+
+All three systems share a pipeline:
+
+\begin{center}
+\begin{tikzpicture}[node distance=6mm,
+  box/.style={draw=cGrey,fill=cGreyBg,rounded corners=3pt,inner sep=5pt,
+              font=\footnotesize\sffamily,minimum height=9mm,align=center},
+  hi/.style ={draw=cBlue,fill=cBlueBg,rounded corners=3pt,inner sep=5pt,
+              font=\footnotesize\sffamily,minimum height=9mm,align=center},
+  ar/.style ={-{Stealth[length=2.4mm]},cGrey,thick}]
+\node[box] (sql) {SQL text};
+\node[box,right=of sql] (plan) {relational\\plan};
+\node[hi,right=of plan]  (alg) {algebraic form\\(U- or Q-expression)};
+\node[hi,right=of alg]  (norm) {normal form};
+\node[box,right=of norm] (dec) {decide};
+\draw[ar] (sql)--(plan); \draw[ar] (plan)--(alg);
+\draw[ar] (alg)--(norm); \draw[ar] (norm)--(dec);
+\end{tikzpicture}
+\end{center}
+
+They differ in exactly two places, and it is worth stating this up front because everything
+else follows from it:
+
+\begin{enumerate}
+\item \textbf{The algebraic form.} \udp{} and \sqlsolver{} use \emph{U-expressions},
+      defined \emph{axiomatically} over an abstract structure called a U-semiring.
+      \QED{} uses \emph{Q-expressions}, which are the same syntax pinned to a
+      \emph{concrete} semantic domain $\Nbar = \mathbb{N}\cup\{\infty\}$.
+\item \textbf{The decision step.} \udp{} compares normal forms \emph{syntactically}.
+      \QED{} encodes them into first-order logic and calls an SMT solver.
+      \sqlsolver{} encodes them into \liastar{}, a theory built for unbounded sums, and
+      reduces that to plain \lia{} for an SMT solver.
+\end{enumerate}
+
+\begin{table}[h]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}l l l X@{}}
+\toprule
+ & \textbf{algebra} & \textbf{decision step} & \textbf{one-line character} \\
+\midrule
+\udp{} 2018      & U-expression & syntactic isomorphism & the foundation; proves things by axiom-chasing \\
+\QED{} 2024      & Q-expression & SMT on FOL encoding   & better \emph{modelling}: NULLs, constraints, unknown operators \\
+\sqlsolver{} 2024& U-expression & \liastar{} $\to$ \lia{} $\to$ SMT & better \emph{arithmetic}: unbounded sums, real aggregates \\
+\bottomrule
+\end{tabularx}
+\caption{The three systems at a glance. \spes{}~\cite{spes}, a fourth system, uses a
+\emph{tree-structured} algebraic representation of relational operators rather than a
+U-expression, normalises it with hand-written rewrite rules, and calls an SMT solver only to
+compare predicates; we use it as a baseline throughout.}
+\end{table}
+
+\subsection{A warning about the published numbers}
+
+Every paper reports how many query pairs it proves on ``the Calcite test suite''. These
+numbers are \emph{not} comparable across papers, because each group extracted its own pairs
+from a different Calcite version with a different filter. The clearest evidence: \QED{} and
+\sqlsolver{} both report \spes{} on ``232 Calcite pairs'' and get \textbf{95} and
+\textbf{99} respectively. Treat cross-paper percentages as indicative only. We return to
+this in Section~\ref{sec:compare}.

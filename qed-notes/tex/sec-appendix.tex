@@ -1,0 +1,120 @@
+\section{All axioms and definitions on one page}
+\label{app:axioms}
+
+\subsection*{U-semiring (\udp{}) --- the complete axiom set}
+
+\noindent$(\Usemi,0,1,+,\times)$ is a commutative semiring:
+associativity and commutativity of $+$ and $\times$; $0$ is the unit of $+$; $1$ of
+$\times$; $\times$ distributes over $+$; $0\times x=0$.
+
+\begin{center}
+\begin{tabular}{@{}ll@{\qquad}ll@{}}
+\toprule
+\multicolumn{2}{@{}l}{\textbf{squash}} & \multicolumn{2}{l}{\textbf{negation}}\\
+$\sq{0}=0$ & $\sq{1+x}=1$ & \multicolumn{2}{l}{$\notu{0}=1$}\\
+\multicolumn{2}{@{}l}{$\sq{\sq{x}+y}=\sq{x+y}$} & \multicolumn{2}{l}{$\notu{x\times y}=\sq{\notu{x}+\notu{y}}$}\\
+\multicolumn{2}{@{}l}{$\sq{x}\times\sq{y}=\sq{x\times y}$} & \multicolumn{2}{l}{$\notu{x+y}=\notu{x}\times\notu{y}$}\\
+\multicolumn{2}{@{}l}{$\sq{x}\times\sq{x}=\sq{x}$} & \multicolumn{2}{l}{$\notu{\sq{x}}=\sq{\notu{x}}=\notu{x}$}\\
+\multicolumn{2}{@{}l}{$x\times\sq{x}=x$} & &\\
+\multicolumn{2}{@{}l}{$x^2=x\;\Rightarrow\;\sq{x}=x$} & &\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{unbounded summation}} & \multicolumn{2}{l}{\textbf{predicates \& equality}}\\
+\multicolumn{2}{@{}l}{$\usum{t}(f_1+f_2)=\usum{t}f_1+\usum{t}f_2$} & \multicolumn{2}{l}{$\ind{b}=\sq{\ind{b}}$}\\
+\multicolumn{2}{@{}l}{$\usum{t_1}\usum{t_2}f=\usum{t_2}\usum{t_1}f$} & \multicolumn{2}{l}{$\ind{e_1{=}e_2}+\ind{e_1{\neq}e_2}=1$}\\
+\multicolumn{2}{@{}l}{$x\times\usum{t}f=\usum{t}(x\times f)$} & \multicolumn{2}{l}{$f(e_1)\ind{e_1{=}e_2}=f(e_2)\ind{e_1{=}e_2}$}\\
+\multicolumn{2}{@{}l}{$\sq{\usum{t}f(t)}=\sq{\usum{t}\sq{f(t)}}$} & \multicolumn{2}{l}{$\usum{t}\ind{t{=}e}=1$}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{derived:}\quad $\usum{t}\ind{t{=}e}\times f(t)=f(e)$
+\qquad \textbf{(Lemma \ref{lem:15} --- the workhorse)}}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{KEY} $R.k$:\quad $\ind{t.k{=}t'.k}\times R(t)\times R(t')=\ind{t{=}t'}\times R(t)$}\\
+\multicolumn{4}{@{}l}{\textbf{FOREIGN KEY} $S.k'\to R.k$:\quad $S(t')=S(t')\times\usum{t}R(t)\times\ind{t.k{=}t'.k'}$}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Q-expressions (\QED{}) --- definitions, not axioms}
+
+\noindent Domain $\Nbar=\mathbb{N}\cup\{\infty\}$ with
+$\infty+a=\infty$, $0\times\infty=0$, $a\times\infty=\infty$ for $a\neq0$.
+\[
+\usum{s}f(s)=\begin{cases}f(s_1)+\cdots+f(s_n)&\mathrm{supp}(f)=\{s_1..s_n\}\text{ finite}\\ \infty&\text{else}\end{cases}
+\qquad
+\ind{P}=\begin{cases}1&P\\0&\neg P\end{cases}
+\qquad
+\sq{a}=\ind{a\neq0}
+\qquad
+\notu{a}=\ind{a=0}
+\]
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{primary key} (general) & $R\rightsquigarrow\lam{k,s}{\sq{R'(k)}\times\ind{s=f_R(k)}}$\\
+\textbf{primary key} (key = whole schema) & $R\rightsquigarrow\lam{k}{\sq{R(k)}}$\\
+\textbf{foreign key} & $\forall b,k.\ \sq{S(b,k)}\to\sq{R'(k)}$ (global assertion)\\
+\textbf{check} $C$ & $\forall s.\ \sq{R(s)}\to C(s)$\\
+\midrule
+\textbf{$\neq0$ encoding} & $\usum{s}U\rightsquigarrow\exists s.U$; \;
+$U_1{\times}U_2\rightsquigarrow U_1\wedge U_2$; \;
+$U_1{+}U_2\rightsquigarrow U_1\vee U_2$;\\
+& $\sq{U}\rightsquigarrow U$; \; $\ind{P}\rightsquigarrow P$\\
+\midrule
+\textbf{ambient assumption} & recursive checks run under $\Phi\wedge(L'_1\vee L'_2)$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{\liastar{} (\sqlsolver{})}
+
+\[
+S^*=\Bigl\{\vec v \;\Bigm|\; \vec v=\sum_{i=1}^{n}\lambda_i\vec v_i,\ \vec v_i\in S,\ \lambda_i\ge0\Bigr\}
+\qquad
+\liastar{}:\ \exists\vec u,\vec v.\ F_1(\vec u,\vec v)\wedge\vec v\in\{\vec x\mid F_2(\vec x)\}^*
+\]
+Reduction to \lia{} (Thm.~\ref{thm:liastar}): replace the closure by
+$\vec v=\sum_{i=1}^{k}\lambda_i\vec x_i\wedge\bigwedge_i F_2(\vec x_i)$, where the $\vec x_i$
+are generators of $F_2$. Encoding of U-terms into \lia{}:
+$\ind{b}\mapsto\mathrm{ite}(b,1,0)$, $\sq{E}\mapsto\mathrm{ite}(E{=}0,0,1)$,
+$\notu{E}\mapsto\mathrm{ite}(E{=}0,1,0)$, tuple/attribute/table applications $\mapsto$ fresh
+integer variables.
+
+\section{Symbol glossary}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}llX@{}}
+\toprule
+symbol & read as & SQL\\
+\midrule
+$R(t)$ & multiplicity of row $t$ in $R$ & \lstinline|FROM R|\\
+$\ind{P}$ & $1$ if $P$ else $0$ & \lstinline|WHERE P|\\
+$\times$ & multiply multiplicities & \lstinline|JOIN|\\
+$+$ & add multiplicities & \lstinline|UNION ALL|\\
+$\usum{a}$ & try every $a$, add up & projection (\lstinline|COUNT(*)| when applied to a table)\\
+$\sq{e}$ & clamp to $0$ or $1$ & \lstinline|DISTINCT|, \lstinline|EXISTS|, \lstinline|GROUP BY| key\\
+$\notu{e}$ & $1$ iff $e=0$ & \lstinline|NOT EXISTS|\\
+$\lam{y}{e}$ & anonymous function; here \emph{a bag} & the group feeding an aggregate\\
+$\Sumagg(\lam{y}{f})$ & $\sum_y y\times f(y)$ & \lstinline|SUM(y)|\\
+$\Sumagg(\lam{y}{\sq{f}})$ & each distinct $y$ once & \lstinline|SUM(DISTINCT y)|\\
+$\usum{y}\sq{f(y)}$ & count distinct values & \lstinline|COUNT(DISTINCT y)|\\
+$\qop,\hop$ & uninterpreted query / scalar operator & \lstinline|LIMIT|, \lstinline|IN|, anything unmodelled\\
+$\Nbar$ & $\mathbb{N}\cup\{\infty\}$ & the multiplicity domain\\
+$\Gamma\mid\Delta\mid\Phi$ & tables $\mid$ other symbols $\mid$ assumptions & the proving context\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Reproducing the measurements}
+
+Calcite plans (\S\ref{sec:running}, \S\ref{sec:calcite-fires}): Calcite 1.19,
+\texttt{HepPlanner} with
+\texttt{AggregateProjectMergeRule} $\to$ \texttt{AggregateJoinTransposeRule.EXTENDED} $\to$
+\texttt{ProjectMergeRule} $\to$ \texttt{AggregateProjectMergeRule}. The first
+\texttt{AggregateProjectMergeRule} is required: without it the transpose rule does not fire,
+because \texttt{sql2rel} leaves a \texttt{LogicalProject} between the aggregate and the join.
+
+PostgreSQL measurements (Fig.~\ref{fig:pgplans}): PostgreSQL 18,
+\lstinline|EXPLAIN (ANALYZE, VERBOSE, BUFFERS)|; \texttt{r} $10^6$ rows with $\sim10^5$
+distinct \texttt{x}, \texttt{s} $5\cdot10^4$ rows with a primary key, both \texttt{ANALYZE}d.
+Equivalence spot-checked on $2\cdot10^5$ rows with \lstinline|EXCEPT ALL| in both
+directions ($0$ rows each way).

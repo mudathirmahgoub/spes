@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="582" height="582" viewBox="0 0 582 582" font-family="ui-sans-serif,-apple-system,Helvetica,Arial,sans-serif">
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<text x="28" y="36" font-size="19" font-weight="700" fill="#1A1A1E">Q1  —  aggregate ABOVE the join</text>
+<path d="M 429 476 C 429 448, 429 448, 429 420" stroke="#9A9AA4" stroke-width="1.8" fill="none"/>
+<path d="M 153 342 C 153 314, 291 314, 291 286" stroke="#9A9AA4" stroke-width="1.8" fill="none"/>
+<path d="M 429 342 C 429 314, 291 314, 291 286" stroke="#9A9AA4" stroke-width="1.8" fill="none"/>
+<path d="M 291 208 C 291 180, 291 180, 291 152" stroke="#9A9AA4" stroke-width="1.8" fill="none"/>
+<rect x="28" y="342" width="250" height="78" rx="9" fill="#E8F5EC" stroke="#2F855A" stroke-width="1.8"/>
+<text x="41" y="367" font-size="14.5" font-weight="700" fill="#1F5A3D">Seq Scan on r</text>
+<text x="41" y="407" font-size="11.5" font-family="ui-monospace,Menlo,monospace" fill="#1A1A1E">rows=1,000,000  (est 1,000,000)   22.7 ms</text>
+<rect x="304" y="476" width="250" height="78" rx="9" fill="#E8F5EC" stroke="#2F855A" stroke-width="1.8"/>
+<text x="317" y="501" font-size="14.5" font-weight="700" fill="#1F5A3D">Seq Scan on s</text>
+<text x="317" y="541" font-size="11.5" font-family="ui-monospace,Menlo,monospace" fill="#1A1A1E">rows=50,000  (est 50,000)   1.4 ms</text>
+<rect x="304" y="342" width="250" height="78" rx="9" fill="#F1F1F4" stroke="#6B6B76" stroke-width="1.8"/>
+<text x="317" y="367" font-size="14.5" font-weight="700" fill="#46464E">Hash</text>
+<text x="317" y="407" font-size="11.5" font-family="ui-monospace,Menlo,monospace" fill="#1A1A1E">rows=50,000  (est 50,000)   2.6 ms</text>
+<rect x="166" y="208" width="250" height="78" rx="9" fill="#E7F0FB" stroke="#2B6CB0" stroke-width="1.8"/>
+<text x="179" y="233" font-size="14.5" font-weight="700" fill="#1B4A7A">Hash Join</text>
+<text x="179" y="253" font-size="11.5" fill="#4A4A55">(r.x = s.a)  •  Inner Unique</text>
+<text x="179" y="273" font-size="11.5" font-family="ui-monospace,Menlo,monospace" fill="#1A1A1E">rows=499,738  (est 545,578)   76.4 ms</text>
+<rect x="166" y="74" width="250" height="78" rx="9" fill="#FDF0D5" stroke="#B4690E" stroke-width="1.8"/>
+<text x="179" y="99" font-size="14.5" font-weight="700" fill="#7A4708">HashAggregate</text>
+<text x="179" y="119" font-size="11.5" fill="#4A4A55">Group Key: r.x</text>
+<text x="179" y="139" font-size="11.5" font-family="ui-monospace,Menlo,monospace" fill="#1A1A1E">rows=49,996  (est 91,646)   103.9 ms</text>
+</svg>

@@ -1,0 +1,248 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\citation{udp}
+\citation{cohen}
+\citation{spes}
+\citation{spes}
+\@writefile{toc}{\contentsline {section}{\numberline {1}The problem, and why it is hard}{4}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{4}{The problem, and why it is hard}{section.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}What we are trying to decide}{4}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Bag semantics, and why it changes everything}{4}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}The common architecture}{4}{subsection.1.3}\protected@file@percent }
+\citation{green}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces The three systems at a glance. \textsc  {SPES}{}~\cite  {spes}, a fourth system, uses a \emph  {tree-structured} algebraic representation of relational operators rather than a U-expression, normalises it with hand-written rewrite rules, and calls an SMT solver only to compare predicates; we use it as a baseline throughout.}}{5}{table.caption.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}A warning about the published numbers}{5}{subsection.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries: a table is a counting function}{5}{section.2}\protected@file@percent }
+\newlabel{sec:prelim}{{2}{5}{Preliminaries: a table is a counting function}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}The one idea everything rests on}{5}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Query operators as arithmetic}{5}{subsection.2.2}\protected@file@percent }
+\citation{udp}
+\citation{qed}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces SQL as arithmetic on multiplicities.}}{6}{table.caption.3}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:rosetta}{{2}{6}{SQL as arithmetic on multiplicities}{table.caption.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why projection is a sum.}{6}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why the sum is ``unbounded''.}{6}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}$\Sigma $ versus $\ensuremath  {\mathrm  {Sum}}$: two things called ``sum''}{6}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}The running example: aggregate pushdown through a join}{6}{subsection.2.4}\protected@file@percent }
+\newlabel{sec:running}{{2.4}{6}{The running example: aggregate pushdown through a join}{subsection.2.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}Calcite plans (primary)}{7}{subsubsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Calcite applies the rule itself --- and reveals the key fact}{7}{subsubsection.2.4.2}\protected@file@percent }
+\newlabel{sec:calcite-fires}{{2.4.2}{7}{Calcite applies the rule itself --- and reveals the key fact}{subsubsection.2.4.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.3}PostgreSQL plans (secondary cross-check)}{7}{subsubsection.2.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.4}Why the primary key is load-bearing}{7}{subsubsection.2.4.4}\protected@file@percent }
+\newlabel{sec:pkcounter}{{2.4.4}{7}{Why the primary key is load-bearing}{subsubsection.2.4.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces PostgreSQL 18 \texttt  {EXPLAIN (ANALYZE, VERBOSE, BUFFERS)} for $Q_1$ (left) and $Q_2$ (right). Note \texttt  {Inner Unique} on both joins: the planner read the primary key and recorded ``at most one match on the inner side''. \emph  {That flag is the same fact the provers write as $\ensuremath  {\left \lVert S(a) \right \rVert }$} --- Postgres uses it to stop probing early, the provers use it to justify the rewrite.}}{8}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:pgplans}{{1}{8}{PostgreSQL 18 \texttt {EXPLAIN (ANALYZE, VERBOSE, BUFFERS)} for $Q_1$ (left) and $Q_2$ (right). Note \texttt {Inner Unique} on both joins: the planner read the primary key and recorded ``at most one match on the inner side''. \emph {That flag is the same fact the provers write as $\sq {S(a)}$} --- Postgres uses it to stop probing early, the provers use it to justify the rewrite}{figure.caption.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Measured. The pushdown is only $\approx $12\% faster here and its aggregate does \emph  {more} work; the win comes from the join seeing 99{,}995 rows instead of $10^6$. Whether to apply the rewrite is a cost question --- entirely separate from whether it is \emph  {correct}, which is what this document is about.}}{8}{table.caption.8}\protected@file@percent }
+\citation{udp}
+\citation{udp}
+\@writefile{toc}{\contentsline {section}{\numberline {3}U-expressions: the U-semiring and \textsc  {UDP}{}}{9}{section.3}\protected@file@percent }
+\newlabel{sec:uexpr}{{3}{9}{U-expressions: the U-semiring and \udp {}}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}The design goal, and the two constraints that shaped it}{9}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}The U-semiring}{9}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Squash $\ensuremath  {\left \lVert \cdot  \right \rVert }$ (models \lstinline |DISTINCT|).}{9}{section*.9}\protected@file@percent }
+\newlabel{ax:sq1}{{1}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.1}{}}
+\newlabel{ax:sq2}{{2}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.2}{}}
+\newlabel{ax:sq3}{{3}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.3}{}}
+\newlabel{ax:sq4}{{4}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.4}{}}
+\newlabel{ax:sq5}{{5}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.5}{}}
+\newlabel{ax:sq6}{{6}{9}{Squash $\sq {\cdot }$ (models \lstinline |DISTINCT|)}{equation.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Negation $\ensuremath  {\mathrm  {not}(\cdot )}$ (models \lstinline |NOT EXISTS|).}{9}{section*.10}\protected@file@percent }
+\newlabel{ax:not1}{{7}{9}{Negation $\notu {\cdot }$ (models \lstinline |NOT EXISTS|)}{equation.7}{}}
+\newlabel{ax:not2}{{8}{9}{Negation $\notu {\cdot }$ (models \lstinline |NOT EXISTS|)}{equation.8}{}}
+\newlabel{ax:not3}{{9}{9}{Negation $\notu {\cdot }$ (models \lstinline |NOT EXISTS|)}{equation.9}{}}
+\newlabel{ax:not4}{{10}{9}{Negation $\notu {\cdot }$ (models \lstinline |NOT EXISTS|)}{equation.10}{}}
+\citation{udp}
+\citation{udp}
+\@writefile{toc}{\contentsline {paragraph}{Unbounded summation $\ensuremath  {\DOTSB \sum@ \slimits@ _{t}}$ (models projection).}{10}{section*.11}\protected@file@percent }
+\newlabel{ax:s7}{{11}{10}{Unbounded summation $\usum {t}$ (models projection)}{equation.11}{}}
+\newlabel{ax:s8}{{12}{10}{Unbounded summation $\usum {t}$ (models projection)}{equation.12}{}}
+\newlabel{ax:s9}{{13}{10}{Unbounded summation $\usum {t}$ (models projection)}{equation.13}{}}
+\newlabel{ax:s10}{{14}{10}{Unbounded summation $\usum {t}$ (models projection)}{equation.14}{}}
+\@writefile{toc}{\contentsline {paragraph}{Predicates and equality.}{10}{section*.12}\protected@file@percent }
+\newlabel{ax:p11}{{15}{10}{Predicates and equality}{equation.15}{}}
+\newlabel{ax:p12}{{16}{10}{Predicates and equality}{equation.16}{}}
+\newlabel{ax:p13}{{17}{10}{Predicates and equality}{equation.17}{}}
+\newlabel{ax:p14}{{18}{10}{Predicates and equality}{equation.18}{}}
+\newlabel{lem:15}{{3.2}{10}{the workhorse, \cite {udp} Eq.\ 15}{definition.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Which structures actually \emph  {are} U-semirings?}{10}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Translating SQL into U-expressions}{10}{subsection.3.4}\protected@file@percent }
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\@writefile{toc}{\contentsline {paragraph}{Aggregates.}{11}{section*.13}\protected@file@percent }
+\newlabel{rem:groupby}{{3.4}{11}{an implementation trap}{definition.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Sum-Product Normal Form (SPNF)}{11}{subsection.3.5}\protected@file@percent }
+\newlabel{def:spnf}{{3.5}{11}{SPNF, \cite {udp} Def.\ 3.3}{definition.3.5}{}}
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Integrity constraints as identities}{12}{subsection.3.6}\protected@file@percent }
+\newlabel{sec:key}{{3.6}{12}{Integrity constraints as identities}{subsection.3.6}{}}
+\newlabel{def:key}{{3.7}{12}{KEY, \cite {udp} Def.\ 4.1}{definition.3.7}{}}
+\newlabel{def:fk}{{3.9}{12}{FOREIGN KEY, \cite {udp} Def.\ 4.4}{definition.3.9}{}}
+\newlabel{thm:43}{{3.10}{12}{key implies squash-stability, \cite {udp} Thm.\ 4.3}{definition.3.10}{}}
+\@writefile{toc}{\contentsline {paragraph}{Views and indexes.}{12}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}A complete worked proof: the index rewrite}{12}{subsection.3.7}\protected@file@percent }
+\newlabel{sec:udp-worked}{{3.7}{12}{A complete worked proof: the index rewrite}{subsection.3.7}{}}
+\citation{udp}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}The decision procedure}{13}{subsection.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 0: canonize (\cite  {udp} Alg.\ 1).}{13}{section*.15}\protected@file@percent }
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\citation{udp}
+\@writefile{toc}{\contentsline {paragraph}{Step 2: \textsc  {TDP} (\cite  {udp} Alg.\ 3).}{14}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 3: \textsc  {SDP} (\cite  {udp} Alg.\ 4).}{14}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9}Guarantees}{15}{subsection.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.10}\textsc  {UDP}{} on the running example --- and why it fails}{15}{subsection.3.10}\protected@file@percent }
+\newlabel{sec:udp-fails}{{3.10}{15}{\udp {} on the running example --- and why it fails}{subsection.3.10}{}}
+\@writefile{toc}{\contentsline {paragraph}{(a) The aggregate is a black box compared out of context.}{15}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(b) Predicate matching is syntactic.}{15}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What \textsc  {UDP}{} \emph  {can} do here.}{15}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.11}Scorecard for U-expressions as of 2018}{15}{subsection.3.11}\protected@file@percent }
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Q-expressions and \textsc  {Qed}{}}{16}{section.4}\protected@file@percent }
+\newlabel{sec:qexpr}{{4}{16}{Q-expressions and \QED {}}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}The one-line summary}{16}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}The concrete domain}{16}{subsection.4.2}\protected@file@percent }
+\newlabel{def:nbar}{{4.1}{16}{\cite {qed} Eq.\ 4}{definition.4.1}{}}
+\citation{qed}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Query syntax}{17}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Semantics}{17}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:qsem}{{4.4}{17}{Semantics}{subsection.4.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Read the \texttt  {GroupBy} rule slowly --- it is the crux of the paper.}{17}{section*.24}\protected@file@percent }
+\citation{qed}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Integrity constraints: rewrite the table, not the query}{18}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Primary key (\cite  {qed} Eqs.\ 6--8).}{18}{section*.25}\protected@file@percent }
+\newlabel{eq:pk-complete}{{19}{18}{Primary key (\cite {qed} Eqs.\ 6--8)}{equation.19}{}}
+\newlabel{eq:pk7}{{20}{18}{Primary key (\cite {qed} Eqs.\ 6--8)}{equation.20}{}}
+\newlabel{eq:pk8}{{21}{18}{Primary key (\cite {qed} Eqs.\ 6--8)}{equation.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Foreign key (\cite  {qed} Eq.\ 9).}{18}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Check constraint.}{18}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}NULL semantics}{18}{subsection.4.6}\protected@file@percent }
+\citation{qed}
+\citation{cohen}
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Algorithm A: the complete fragment}{19}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:qed-complete}{{4.7}{19}{Algorithm A: the complete fragment}{subsection.4.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.1}Scoped normal form (SNF)}{19}{subsubsection.4.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.2}Linearisation (LNF)}{19}{subsubsection.4.7.2}\protected@file@percent }
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.3}Unification and completeness}{20}{subsubsection.4.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Algorithm B: the general algorithm}{20}{subsection.4.8}\protected@file@percent }
+\newlabel{sec:qed-general}{{4.8}{20}{Algorithm B: the general algorithm}{subsection.4.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.1}SPNF (\cite  {qed} Alg.\ 4)}{20}{subsubsection.4.8.1}\protected@file@percent }
+\citation{qed}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.2}Stabilisation (\cite  {qed} Alg.\ 5)}{21}{subsubsection.4.8.2}\protected@file@percent }
+\newlabel{sec:stabilise}{{4.8.2}{21}{Stabilisation (\cite {qed} Alg.\ 5)}{subsubsection.4.8.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.3}Unification (\cite  {qed} Alg.\ 6)}{21}{subsubsection.4.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(i) Scope permutation.}{21}{section*.28}\protected@file@percent }
+\citation{qed}
+\@writefile{toc}{\contentsline {paragraph}{(ii) Higher-order operators become fresh variables.}{22}{section*.29}\protected@file@percent }
+\newlabel{sec:ambient}{{4.8.3}{22}{(iii) The ambient assumption --- the genuinely new idea}{section*.30}{}}
+\@writefile{toc}{\contentsline {paragraph}{(iii) The ambient assumption --- the genuinely new idea.}{22}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.4}Encoding to first-order logic}{22}{subsubsection.4.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}The running example, proved}{22}{subsection.4.9}\protected@file@percent }
+\newlabel{sec:qed-worked}{{4.9}{22}{The running example, proved}{subsection.4.9}{}}
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\citation{sqlsolver}
+\@writefile{toc}{\contentsline {paragraph}{Step 1 --- stabilise.}{23}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 2 --- encode.}{23}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 3 --- recursive check with the ambient assumption.}{23}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.10}Results and honest limits}{23}{subsection.4.10}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces \cite  {qed} Table 1. $\textsc  {Qed}'$ is the complete-fragment algorithm alone; \textsc  {Qed}{} is the full pipeline. Every case \textsc  {SPES}{} proves, \textsc  {Qed}{} also proves. Average runtime 0.88\,s (Calcite v1.32), of which $\sim $0.83\,s is SMT time inside stabilisation.}}{23}{table.caption.34}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces \cite  {qed} Table 3. Aggregates dominate on Calcite --- the direct cost of leaving $\alpha $ uninterpreted. \textsc  {SQLSolver}{} attacks exactly this column.}}{23}{table.caption.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}U-expressions $+$ \textsf  {LIA}\ensuremath  {^*}{}: \textsc  {SQLSolver}{}}{24}{section.5}\protected@file@percent }
+\newlabel{sec:lia}{{5}{24}{U-expressions $+$ \liastar {}: \sqlsolver {}}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}The diagnosis}{24}{subsection.5.1}\protected@file@percent }
+\newlabel{ex:splitunion}{{5.1}{24}{the motivating failure --- differing \emph {numbers} of summations}{definition.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}\textsf  {LIA}{} and \textsf  {LIA}\ensuremath  {^*}{}}{24}{subsection.5.2}\protected@file@percent }
+\citation{piskac}
+\citation{levatich}
+\citation{sqlsolver}
+\citation{levatich}
+\newlabel{thm:liastar}{{5.5}{25}{\cite {piskac,levatich}; \cite {sqlsolver} Thm.\ 4.1}{definition.5.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}The algorithm, on Example~\ref {ex:splitunion}}{25}{subsection.5.3}\protected@file@percent }
+\citation{sqlsolver}
+\citation{sqlsolver}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Three complications the textbook theory does not cover}{26}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:lia-challenges}{{5.4}{26}{Three complications the textbook theory does not cover}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{(1) Nested summations.}{26}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(2) Parameterised summations.}{26}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(3) Non-linear summations.}{26}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Extended U-expressions: modelling more SQL}{26}{subsection.5.5}\protected@file@percent }
+\newlabel{sec:ext-uexpr}{{5.5}{26}{Extended U-expressions: modelling more SQL}{subsection.5.5}{}}
+\citation{sqlsolver}
+\citation{sqlsolver}
+\@writefile{toc}{\contentsline {paragraph}{Concrete aggregates --- the big one.}{27}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Ordered bag semantics (\lstinline |ORDER BY|)}{27}{subsection.5.6}\protected@file@percent }
+\citation{sqlsolver}
+\citation{sqlsolver}
+\citation{sqlsolver}
+\citation{sqlsolver}
+\citation{sqlsolver}
+\citation{sqlsolver}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Guarantees}{28}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Results}{28}{subsection.5.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces \cite  {sqlsolver} Tables 1 and \S  6.2. Of $400$ pairs, the three prior provers prove $207$ between them; \textsc  {SQLSolver}{} proves $384$, a superset. $16$ pairs are proved by nobody.}}{28}{table.caption.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.9}\textsc  {SQLSolver}{} on the running example}{28}{subsection.5.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.10}Scorecard}{29}{subsection.5.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}The three approaches compared}{29}{section.6}\protected@file@percent }
+\newlabel{sec:compare}{{6}{29}{The three approaches compared}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Where the effort went}{29}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Capability matrix}{29}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}A gallery of separating examples}{29}{subsection.6.3}\protected@file@percent }
+\citation{qed}
+\citation{qed}
+\citation{qed}
+\@writefile{toc}{\contentsline {paragraph}{(1) Syntactically different but equal predicates.}{30}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(2) Aggregate pushdown through a key join}{30}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(3) Differing numbers of summations}{30}{section*.46}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(5) Redundant self-join on a unique key}{30}{section*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(6) Predicate pushdown through a left join}{30}{section*.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(7) \lstinline |ORDER BY| anything.}{30}{section*.50}\protected@file@percent }
+\citation{qed}
+\citation{sqlsolver}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}The deep structural difference: squashed versus not}{31}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}On the published numbers}{31}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}What the combination would look like}{32}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}An implementer's guide}{32}{section.7}\protected@file@percent }
+\newlabel{sec:impl}{{7}{32}{An implementer's guide}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Build order}{32}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Data structures}{32}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Ten traps, each of which will cost you a day}{33}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Testing: use a real database}{33}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Getting plans out of Calcite}{34}{subsection.7.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}All axioms and definitions on one page}{34}{appendix.A}\protected@file@percent }
+\newlabel{app:axioms}{{A}{34}{All axioms and definitions on one page}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Symbol glossary}{35}{appendix.B}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {C}Reproducing the measurements}{35}{appendix.C}\protected@file@percent }
+\bibcite{udp}{1}
+\bibcite{qed}{2}
+\bibcite{sqlsolver}{3}
+\bibcite{spes}{4}
+\bibcite{green}{5}
+\bibcite{cohen}{6}
+\bibcite{piskac}{7}
+\bibcite{levatich}{8}
+\bibcite{wetune}{9}
+\gdef \@abspage@last{36}

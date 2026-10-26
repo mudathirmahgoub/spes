@@ -1,0 +1,146 @@
+\section{An implementer's guide}
+\label{sec:impl}
+
+This section is the advice we wish the papers had included. It assumes you are building on
+Calcite (all of \spes{}, \QED{} and \sqlsolver{} consume relational plans, and Calcite's
+\texttt{RelNode} is the easiest source).
+
+\subsection{Build order}
+
+Do not start with the fancy parts. In dependency order:
+
+\begin{enumerate}
+\item \textbf{Plan $\to$ algebra.} Handle \texttt{TableScan}, \texttt{Filter},
+      \texttt{Project}, \texttt{Join}, \texttt{Union(all=true)} only. Represent an expression
+      as a sum of terms; a term as (scope, body predicate, list of table applications).
+\item \textbf{Normalisation to sum-of-products.} Pure syntax; no solver needed. Test by
+      round-tripping and by evaluating both forms on small random instances.
+\item \textbf{Pointwise term matching} with scope permutation. At this point you can already
+      prove filter/projection/join reordering.
+\item \textbf{Bring in SMT for predicates.} This is the single biggest capability jump per
+      line of code --- it is the whole difference between \udp{} and its successors.
+\item \textbf{Stabilisation} via congruence classes. Second biggest jump.
+\item \textbf{Primary keys.} One rewrite. Suddenly a large class of real rules becomes
+      provable.
+\item \textbf{Squash/\texttt{Distinct}/\texttt{GroupBy}}, then the $\neq0$ Boolean encoding.
+\item Only then: NULLs, foreign keys, uninterpreted operators, \liastar{}.
+\end{enumerate}
+
+\subsection{Data structures}
+
+\begin{lstlisting}[style=pseudo]
+Term   = { scope : List<(TableSym, Var, int power)>,   # Sum over R^k(s)
+           body  : Formula,                            # the [P] part, SMT-encodable
+           value : Expr }                              # the V part (QOp/HOp applications)
+Expr   = List<Term>                                    # a sum of terms
+\end{lstlisting}
+
+Keep \texttt{body} in your SMT library's AST from the very beginning. Converting a
+home-grown predicate type into SMT later is a rewrite you will do twice.
+
+\subsection{Ten traps, each of which will cost you a day}
+
+\begin{enumerate}
+\item \textbf{\lstinline|GROUP BY| needs a squash.} \udp{}'s printed de-sugaring
+      (Remark~\ref{rem:groupby}) iterates over every row of $R$, not every distinct key. Use
+      \QED{}'s two-factor rule: $\sq{\usum{s}\ind{x=k(s)}Q(s)}\times\ind{y=\alpha(\ldots)}$.
+      Get this wrong and multiplicities are silently wrong for duplicated keys.
+
+\item \textbf{The primary-key rule for tables with non-key columns.} Eq.~\eqref{eq:pk8},
+      $R\rightsquigarrow\lam{k}{\sq{R(k)}}$, applies only when the key is the \emph{whole}
+      schema. In general use Eq.~\eqref{eq:pk7} with the functional-dependency symbol $f_R$.
+      Almost every write-up quotes the easy form.
+
+\item \textbf{Foreign-key chasing may not terminate.} \udp{} says so explicitly: a cycle in
+      the FK graph loops. Either bound the depth or do what \QED{} does --- emit
+      $\forall b,k.\ \sq{S(b,k)}\to\sq{R'(k)}$ as one global assertion and let the solver
+      unfold it lazily.
+
+\item \textbf{Over-approximation is one-directional.} In \sqlsolver{}'s non-linear path,
+      \textsc{unsat} means equivalent, \textsc{sat} means \emph{nothing}. If you report
+      ``not equivalent'' on \textsc{sat} you have an unsound tool.
+
+\item \textbf{Permutation blowup.} $\textsf{termEq}$ enumerates bijections between scopes;
+      \QED{} caps at 24 and reports $\sim$98\% of cases match on the identity permutation.
+      Try identity first, always.
+
+\item \textbf{Linearisation blowup.} $\mathrm{Lin}(X)$ is the ordered Bell number:
+      $1,1,3,13,75,541,4683$. Eager linearisation on a term with five variables already
+      generates 541 cases \emph{per table}. Use it only inside the complete fragment.
+
+\item \textbf{Congruence classes only find expressions already present.} Given
+      $\ind{x+3=10}$ they will not produce $x=7$. If you need that, call SyGuS.
+
+\item \textbf{Finiteness.} \QED{} assumes every table has finite multiplicity at each row so
+      that $\infty$ never appears during term comparison. If you model tables as
+      $S\to\Nbar$ you must handle $\infty$ arithmetic; if as $S\to\mathbb{N}$ you must not
+      claim completeness over all U-semirings.
+
+\item \textbf{Bag \lstinline|EXCEPT ALL| / \lstinline|INTERSECT ALL| are not free.} They need
+      truncated subtraction (monus). \QED{} declines and treats them as unknown operators;
+      \sqlsolver{} encodes \lstinline|INTERSECT ALL| as
+      $\ind{f_l\le f_r}f_l+\notu{\ind{f_l\le f_r}}f_r$, the pointwise minimum. Pick one
+      deliberately.
+
+\item \textbf{Implicit casts.} \QED{}'s failure table lists ``typing'' for 6 Calcite and 26
+      CockroachDB pairs. Calcite inserts \texttt{CAST} nodes freely; if you model casts as
+      uninterpreted functions, two plans that differ only in an implicit cast will not
+      unify. Decide early whether to erase casts (unsound in general) or model them.
+\end{enumerate}
+
+\subsection{Testing: use a real database}
+
+The cheapest high-value test harness is differential testing against PostgreSQL, and it
+catches translation bugs that no amount of staring will.
+
+\begin{lstlisting}[style=pseudo]
+for each candidate rewrite (Q1, Q2):
+    1. generate small random instances (0-5 rows, heavy duplicates, some NULLs)
+    2. run both queries in Postgres, compare as BAGS:
+         (Q1 EXCEPT ALL Q2) must be empty  AND  (Q2 EXCEPT ALL Q1) must be empty
+    3. if they differ  -> your prover must NOT say "equivalent"
+    4. also evaluate your U-/Q-expression directly on the same instance
+       and check it reproduces Postgres' multiplicities row by row
+\end{lstlisting}
+
+Step 4 is the one people skip and the one that matters: it validates the \emph{translation},
+independently of the decision procedure. Two specific settings to include:
+
+\begin{itemize}
+\item \textbf{duplicates in the right-hand table of every join} --- this is what separates a
+      correct key model from a wrong one. Our running example produces $(1,60)$ versus two
+      copies of $(1,30)$ (\S\ref{sec:pkcounter}); if your translation does not reproduce
+      exactly that, your \texttt{GroupBy} or key rule is wrong.
+\item \textbf{\lstinline|NULL| in every nullable column} --- three-valued \texttt{AND}/\texttt{OR}
+      is easy to get subtly wrong, and \textsf{Null} \texttt{And} \textsf{False} $=$
+      \textsf{False} is the canonical check.
+\end{itemize}
+
+Use a session-local table to shadow a real one when you want a no-key variant, so you never
+mutate the reference schema:
+
+\begin{lstlisting}[style=sql]
+create temp table s (a int, b int);        -- hides the real s, no primary key
+insert into s values (1,100),(1,100);
+\end{lstlisting}
+
+\subsection{Getting plans out of Calcite}
+
+For the record, this is all it takes to obtain the trees in \S\ref{sec:running}:
+
+\begin{lstlisting}[style=pseudo]
+SchemaPlus root = Frameworks.createRootSchema(true);
+root.add("R", tableOf("X","Y", /*rows*/1e6, /*key*/null));
+root.add("S", tableOf("A","B", /*rows*/5e4, /*key*/0));   // column 0 unique
+FrameworkConfig cfg = Frameworks.newConfigBuilder().defaultSchema(root).build();
+Planner p = Frameworks.getPlanner(cfg);
+RelNode rel = p.rel(p.validate(p.parse(sql))).rel;
+System.out.println(RelOptUtil.toString(rel, SqlExplainLevel.EXPPLAN_ATTRIBUTES));
+\end{lstlisting}
+
+Declare uniqueness through the table's \texttt{Statistic}:
+\lstinline[style=pseudo]|Statistics.of(rows, ImmutableList.of(ImmutableBitSet.of(0)))|.
+That one bit is what makes Calcite's \texttt{AggregateJoinTransposeRule} produce $Q_2$
+instead of the compensated \texttt{SUM $\times$ COUNT} plan of \S\ref{sec:calcite-fires} ---
+and it is the same bit your prover needs for the key rewrite. A \texttt{Planner} instance is
+single-use; build a fresh one per query.

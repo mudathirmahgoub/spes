@@ -1,0 +1,217 @@
+\section{The three approaches compared}
+\label{sec:compare}
+
+\subsection{Where the effort went}
+
+\begin{center}
+\begin{tikzpicture}[font=\footnotesize\sffamily,
+  lay/.style={draw,rounded corners=3pt,minimum width=34mm,minimum height=8mm,align=center,inner sep=3pt},
+  a/.style={lay,draw=cGrey,fill=cGreyBg}, h/.style={lay,draw=cRed,fill=cAmberBg,line width=1pt}]
+\node[font=\small\bfseries\sffamily] at (0,3.3) {\udp{} 2018};
+\node[font=\small\bfseries\sffamily] at (4.5,3.3) {\QED{} 2024};
+\node[font=\small\bfseries\sffamily] at (9,3.3) {\sqlsolver{} 2024};
+\foreach \x/\t in {0/{}, 4.5/{}, 9/{}} {}
+% UDP column
+\node[a] at (0,2.5) {SQL $\to$ U-expression};
+\node[h] at (0,1.5) {\textbf{U-semiring axioms}\\\textbf{keys as identities}};
+\node[a] at (0,0.4) {SPNF};
+\node[h] at (0,-0.6) {\textbf{syntactic}\\\textbf{isomorphism}};
+% QED column
+\node[h] at (4.5,2.5) {\textbf{Q-expr over $\Nbar$}\\\textbf{NULLs, QOp/HOp}};
+\node[h] at (4.5,1.5) {\textbf{PK/FK as rewrites}\\\textbf{+ global formulas}};
+\node[h] at (4.5,0.4) {\textbf{stabilise (SMT}\\\textbf{congruence)}};
+\node[h] at (4.5,-0.6) {\textbf{unify + ambient}\\\textbf{assumption, SMT}};
+% SQLSolver column
+\node[h] at (9,2.5) {\textbf{extended U-expr}\\\textbf{concrete aggregates}};
+\node[a] at (9,1.5) {constraints\\(inherited)};
+\node[a] at (9,0.4) {vectorise sums};
+\node[h] at (9,-0.6) {\textbf{\liastar{} $\to$ \lia{}}\\\textbf{$\to$ SMT}};
+\node[align=left,font=\scriptsize\sffamily,text=cGrey] at (4.5,-1.7)
+  {\textcolor{cRed}{\rule{3mm}{2mm}} highlighted = where that system innovated \qquad
+   \textcolor{cGrey}{\rule{3mm}{2mm}} grey = inherited or routine};
+\end{tikzpicture}
+\end{center}
+
+\noindent The picture says it: \QED{} rebuilt the \emph{modelling} and the \emph{search};
+\sqlsolver{} rebuilt the \emph{translation of aggregates} and the \emph{arithmetic backend}.
+They are close to orthogonal.
+
+\subsection{Capability matrix}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & \udp{} & \QED{} & \sqlsolver{} \\
+\midrule
+semantic domain & any U-semiring & $\Nbar$ only & any U-semiring\\
+predicate reasoning & congruence closure & SMT & SMT\\
+NULL / 3-valued logic & \textcolor{cRed}{no} & \textcolor{cGreen}{full} & partial (from \wetune{})\\
+outer joins & \textcolor{cRed}{no} & \textcolor{cGreen}{yes} & partial\\
+primary / foreign keys & \textcolor{cGreen}{identities} & \textcolor{cGreen}{rewrite + global formula} & inherited\\
+FK cycles terminate & \textcolor{cRed}{no} & \textcolor{cGreen}{yes (lazy)} & --\\
+aggregates & uninterpreted & uninterpreted ($\hop$) & \textcolor{cGreen}{concrete}\\
+unknown operators & \textcolor{cRed}{unsupported} & \textcolor{cGreen}{$\qop$/$\hop$ first class} & \textcolor{cRed}{unsupported}\\
+differing \#summations & \textcolor{cRed}{no} & only inside $\mathcal F_T$ & \textcolor{cGreen}{yes (\liastar{})}\\
+\lstinline|ORDER BY| & \textcolor{cRed}{no} & \textcolor{cRed}{no} & \textcolor{cGreen}{yes (separate layer)}\\
+bag \lstinline|INTERSECT ALL| & \textcolor{cRed}{no} & \textcolor{cRed}{no (needs monus)} & \textcolor{cGreen}{yes}\\
+completeness fragment & UCQ (set \emph{or} bag) & $\mathcal F_T$ (UCQ + any theory $T$) & CQ/UCQ + a group-by fragment\\
+refutation & \textcolor{cRed}{no} & \textcolor{cRed}{no} & \textcolor{cRed}{no}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{A gallery of separating examples}
+
+The fastest way to understand three provers is to see what each one alone can do.
+
+\paragraph{(1) Syntactically different but equal predicates.}
+\lstinline|WHERE a+b = 0| versus \lstinline|WHERE a = -b|.
+\udp{} \textcolor{cRed}{fails} --- congruence closure treats $+$ as uninterpreted.
+\QED{} and \sqlsolver{} \textcolor{cGreen}{succeed} --- both call an SMT solver on
+predicates. This single limitation is why \emph{everyone} after 2018 uses SMT.
+
+\paragraph{(2) Aggregate pushdown through a key join} (\S\ref{sec:running}).
+Needs: primary key as an algebraic fact \emph{and} context-sensitive comparison of the two
+aggregate arguments. \QED{} \textcolor{cGreen}{succeeds} via
+$S\rightsquigarrow\lam{a}{\sq{S(a)}}$ plus the $\phi_1\vee\phi_2$ ambient assumption.
+\udp{} \textcolor{cRed}{fails} on the context-free recursive check (\S\ref{sec:udp-fails}).
+\spes{} \textcolor{cRed}{fails} --- no applicable key rule.
+
+\paragraph{(3) Differing numbers of summations} (Example~\ref{ex:splitunion}).
+\sqlsolver{} \textcolor{cGreen}{succeeds} via \liastar{}.
+\udp{} \textcolor{cRed}{fails} at Alg.~2 line 3 (term counts differ).
+\QED{} \textcolor{cGreen}{also succeeds} here --- but only because this query lies in
+$\mathcal F_T$, so the \emph{complete-fragment} algorithm applies: Alg.~3 groups terms by
+relational scope and compares $\ind{P_1}+\cdots+\ind{P_n}$ against
+$\ind{P'_1}+\cdots+\ind{P'_m}$ with $n\neq m$ allowed. This exact pattern is the paper's own
+motivating example for that step.
+\emph{Outside} $\mathcal F_T$ --- i.e.\ as soon as a \texttt{GroupBy}, \texttt{Distinct},
+\texttt{Minus} or unknown operator appears --- \QED{} falls back to Alg.~6, which needs a
+\textbf{bijection} between terms and returns \textsc{Unknown} when the counts differ. And
+neither \QED{} algorithm relates sums with \emph{different relational scopes}; \liastar{}
+does, and it applies uniformly rather than only inside a fragment.
+
+\paragraph{(4) A sum of counts equals a count.}
+\begin{lstlisting}[style=sql]
+Q1: select a, count(b) from R group by a
+Q2: select S.a, sum(S.cnt)
+    from (select a, count(b) as cnt from R group by a) S group by S.a
+\end{lstlisting}
+\sqlsolver{} \textcolor{cGreen}{succeeds} --- it knows what \textsc{Sum} and \textsc{Count}
+mean. \udp{} and \QED{} \textcolor{cRed}{cannot}, at any level of cleverness: with
+aggregates uninterpreted, the required fact is simply not expressible. This is why
+``aggregates'' is \QED{}'s largest Calcite failure bucket (96 cases).
+
+\paragraph{(5) Redundant self-join on a unique key} (\cite{qed} \S6.3.2).
+\begin{lstlisting}[style=sql]
+Q1: select R.a from R join S S1 on R.a=S1.k join S S2 on R.a=S2.k
+Q2: select R.a from R join S on R.a=S.k
+\end{lstlisting}
+\QED{} \textcolor{cGreen}{succeeds}: stabilisation finds $k_1=k_2=a$ through the SMT
+congruence classes, then $\sq{S(a)}\times\sq{S(a)}=\sq{S(a)}$.
+\spes{} \textcolor{cRed}{fails}: its self-join-on-key rule matches $R\bowtie(S\bowtie S)$, not
+$(R\bowtie S)\bowtie S$, and it cannot infer $S_1.k=S_2.k$ transitively.
+\textbf{Note this example has no top-level squash} --- the answer genuinely has multiplicity
+2 --- so \QED{} discharges it by proving the summands equal \emph{pointwise}, not by turning
+$\usum{}$ into $\exists$.
+
+\paragraph{(6) Predicate pushdown through a left join} (\cite{qed} \S6.3.1).
+\begin{lstlisting}[style=sql]
+Q1: select * from (select * from R where R.a=42) X left join S on X.a=S.b
+Q2: select * from (select * from R where R.a=42)
+                  left join (select * from S where S.b=42) on TRUE
+\end{lstlisting}
+\QED{} \textcolor{cGreen}{succeeds}. \spes{} \textcolor{cRed}{fails}, and \QED{}'s paper
+reports the reason as a soundness bug: it states that one of \spes{}'s normalisation rules
+\emph{unsoundly} rewrites a left join whose condition is \texttt{TRUE} into a cross join.
+(We report this as \cite{qed}'s claim; we did not reproduce it.) Anything needing NULL semantics
+is out of reach for \udp{} entirely.
+
+\paragraph{(7) \lstinline|ORDER BY| anything.} \sqlsolver{} only.
+
+\subsection{The deep structural difference: squashed versus not}
+
+Everything above has one root cause, and it is worth isolating because it predicts which
+examples a given prover will handle.
+
+When the top-level expression is \textbf{squashed} --- \lstinline|SELECT DISTINCT|,
+\lstinline|GROUP BY|, \lstinline|EXISTS| --- multiplicities are irrelevant. \QED{} can then
+push $\neq0$ inward, turning $\usum{}$ into $\exists$, $\times$ into $\wedge$ and $+$ into
+$\vee$, and hand a pure Boolean formula to SMT. Cheap and strong.
+
+When it is \textbf{not squashed} --- plain projection, a join, a \lstinline|UNION ALL| ---
+the counts \emph{are} the answer, and the two systems fall back on comparing summands
+pointwise, justified by
+$(\forall \vec s.\ f(\vec s)=g(\vec s))\Rightarrow \usum{\vec s}f=\usum{\vec s}g$. That is
+sound but demands \emph{alignable scopes}: \udp{}'s Alg.~2 and \QED{}'s Alg.~6 both require a
+one-to-one match between terms. (\QED{}'s Alg.~3 relaxes this to ``same relational scope'',
+which is strictly weaker but only available inside $\mathcal F_T$.)
+\sqlsolver{} instead reasons about the sums' \emph{values}, which needs no alignment at all.
+
+\keybox{Why the squash matters in practice}{%
+Under a squash the comparison is Boolean, so a \lstinline|UNION ALL| split like
+Example~\ref{ex:splitunion} reduces to
+$\exists y.(y{\le}1000\wedge R{\neq}0)\vee\exists y.(y{>}1000\wedge z{<}500\wedge R{\neq}0)
+\leftrightarrow \exists y.(\ldots)$ --- an ordinary SMT query that any SMT-backed tool settles.
+Without the squash the same rewrite is an \emph{arithmetic} statement about sums. \QED{}
+can still discharge it \emph{if} the terms share a relational scope and the query is in
+$\mathcal F_T$ (Alg.~3 sums the bodies); otherwise it needs a term bijection.
+\liastar{} needs neither condition.}
+
+\subsection{On the published numbers}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+reported by & benchmark described as & \spes{} & the paper's own tool\\
+\midrule
+\QED{}~\cite{qed}       & ``232 Calcite pairs'' & \textbf{95} & 147\\
+\sqlsolver{}~\cite{sqlsolver} & ``232 Calcite pairs'' & \textbf{99} & 232\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The same baseline on nominally the same benchmark differs. The extraction
+pipelines are different, so the suites are different, so the percentages are not
+comparable. Additional cautions:
+
+\begin{itemize}
+\item \QED{}'s harder suites (444 non-trivial Calcite v1.32 pairs; 1287 CockroachDB pairs)
+      were never run through \sqlsolver{}, and vice versa.
+\item \QED{} does not evaluate against \sqlsolver{} at all --- the two are near-simultaneous.
+\item \sqlsolver{}'s TPC-C/TPC-H pairs were generated by running Spark SQL's optimiser and
+      then \emph{manually} converting logical plans back into SQL. That is a reasonable
+      methodology but it is not an independent benchmark.
+\item ``Proves 100\% of Calcite'' should be read as ``100\% of the pairs this group
+      extracted and chose to model''.
+\end{itemize}
+
+\warnbox{If you are writing a paper in this area}{%
+Do not cite a cross-paper number as a head-to-head comparison. The only defensible
+comparison is one you run yourself, on one extraction, with all tools on the same input.
+As of these two papers, nobody has done that.}
+
+\subsection{What the combination would look like}
+
+The two 2024 systems are complementary to an unusual degree, and the merge is not
+speculative --- each piece has a clean interface.
+
+\begin{center}
+\begin{tikzpicture}[font=\footnotesize\sffamily,node distance=5mm,
+  b/.style={draw=cGrey,fill=cGreyBg,rounded corners=3pt,inner sep=5pt,align=center,minimum height=9mm},
+  q/.style={draw=cBlue,fill=cBlueBg,rounded corners=3pt,inner sep=5pt,align=center,minimum height=9mm},
+  s/.style={draw=cAmber,fill=cAmberBg,rounded corners=3pt,inner sep=5pt,align=center,minimum height=9mm},
+  ar/.style={-{Stealth[length=2.4mm]},cGrey,thick}]
+\node[q] (m) {\QED{} modelling\\NULLs, PK/FK, QOp/HOp};
+\node[q,right=of m] (st) {\QED{} stabilise\\SMT congruence};
+\node[s,right=of st] (ag) {\sqlsolver{}\\concrete aggregates};
+\node[s,right=of ag] (li) {\liastar{} backend\\no scope alignment needed};
+\draw[ar](m)--(st);\draw[ar](st)--(ag);\draw[ar](ag)--(li);
+\end{tikzpicture}
+\end{center}
+
+\QED{}'s term-bijection step is its ceiling; \liastar{} is exactly the tool that removes
+that ceiling. \QED{}'s uninterpreted $\hop$ for aggregates is its largest failure bucket;
+\sqlsolver{}'s aggregate tables fill it. Conversely \sqlsolver{}'s weakest areas --- NULLs,
+constraints, unknown operators --- are precisely \QED{}'s contributions. No published system
+does this.

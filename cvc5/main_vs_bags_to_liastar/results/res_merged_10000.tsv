@@ -1,0 +1,1102 @@
+bags__bags/testEmptyFilterProjectUnion.smt2	unsat	1.66	
+bags__bags/testEmptyMinus2.smt2	unsat	1.66	
+bags__bags/testReduceConstantsCalc.smt2	unsat	1.66	
+bags__sets/testEmptyFilterProjectUnion.smt2	unsat	1.66	
+bags__sets/testEmptyMinus2.smt2	unsat	1.66	
+bags__sets/testReduceConstantsCalc.smt2	unsat	1.65	
+calcite_tests__bags/testAddRedundantSemiJoinRule.smt2	timeout	11.67	cvc5 interrupted by timeout.
+calcite_tests__bags/testAggregateConstantKeyRule.smt2	timeout	11.67	cvc5 interrupted by timeout.
+calcite_tests__bags/testAggregateConstantKeyRule2.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testAggregateGroupingSetsProjectMerge.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testAggregateProjectMerge.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testAggregateProjectPullUpConstants.smt2	timeout	10.09	cvc5 interrupted by timeout.
+calcite_tests__bags/testCustomColumnResolvingInNonCorrelatedSubQuery.smt2	timeout	10.10	cvc5 interrupted by timeout.
+calcite_tests__bags/testDecorrelateTwoIn.smt2	timeout	10.07	cvc5 interrupted by timeout.
+calcite_tests__bags/testDistinctCountGroupingSets1.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+calcite_tests__bags/testEmptyMinus2.smt2	unsat	0.03	
+calcite_tests__bags/testExtractJoinFilterRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testFullOuterJoinSimplificationToInner.smt2	timeout	10.04	cvc5 interrupted by timeout.
+calcite_tests__bags/testFullOuterJoinSimplificationToLeftOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testFullOuterJoinSimplificationToRightOuter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testIntersectToDistinct.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testIntersectToDistinctAll.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testLeftOuterJoinSimplificationToInner.smt2	timeout	10.07	cvc5 interrupted by timeout.
+calcite_tests__bags/testMergeFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testMergeIntersect.smt2	unsat	0.07	
+calcite_tests__bags/testMergeJoinFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testMergeMinus.smt2	unsat	0.07	
+calcite_tests__bags/testMergeMinusRightDeep.smt2	unsat	0.06	
+calcite_tests__bags/testMergeSetOpMixed.smt2	unsat	0.06	
+calcite_tests__bags/testMergeUnionAll.smt2	unsat	0.07	
+calcite_tests__bags/testMergeUnionDistinct.smt2	unsat	0.07	
+calcite_tests__bags/testMergeUnionMixed.smt2	unsat	0.07	
+calcite_tests__bags/testMergeUnionMixed2.smt2	unsat	0.07	
+calcite_tests__bags/testMinusMergeRule.smt2	timeout	10.04	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullAggregateThroughUnion.smt2	unsat	0.04	
+calcite_tests__bags/testPullConstantIntoFilter.smt2	unsat	0.05	
+calcite_tests__bags/testPullConstantIntoJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantIntoProject.smt2	timeout	10.04	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregateAllConst.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregateAllLiterals.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregateConstGroupBy.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregatePermuted.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregatePermutedConstFirst.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregatePermutedConstGroupBy.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughAggregateSimpleNonNullable.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughConstLast.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullConstantThroughUnion2.smt2	unsat	0.03	
+calcite_tests__bags/testPullConstantThroughUnion3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPullFilterThroughAggregate.smt2	unsat	0.04	
+calcite_tests__bags/testPullFilterThroughAggregateGroupingSets.smt2	unsat	0.05	
+calcite_tests__bags/testPushAggregateSumNoGroup.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushAggregateThroughJoin1.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushAggregateThroughJoin3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushAggregateThroughJoin4.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushAggregateThroughJoin5.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushAggregateThroughJoinDistinct.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushCountFilterThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushCountNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushCountNullableThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushCountStarGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushCountStarThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterPastAgg.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterPastAggThree.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterPastAggTwo.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterPastAggWithGroupingSets1.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterPastAggWithGroupingSets2.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushFilterThroughSemiJoin.smt2	unsat	0.20	
+calcite_tests__bags/testPushJoinThroughUnionOnLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushJoinThroughUnionOnRight.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushMaxNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushMaxNullableThroughUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushMinGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushProjectPastFilter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushProjectPastFilter2*.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushProjectPastSetOp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSemiJoinPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSumCountStarGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSumCountStarThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSumNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSumNullableNOGBYThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testPushSumNullableThroughUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceConstants2.smt2	unsat	0.04	
+calcite_tests__bags/testReduceConstantsCalc.smt2	unsat	0.04	
+calcite_tests__bags/testReduceConstantsCaseEquals.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceConstantsCaseEquals2.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceConstantsCaseEquals3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceConstantsIsNotNull.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceConstantsProjectNullable*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceExpressionsNot.smt2	unsat	0.04	
+calcite_tests__bags/testReduceNestedCaseWhen.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceNot.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceNullableCase.smt2	unsat	0.03	
+calcite_tests__bags/testReduceOrCaseWhen.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testReduceValuesUnderFilter.smt2	unsat	0.03	
+calcite_tests__bags/testReduceValuesUnderProject.smt2	unsat	0.04	
+calcite_tests__bags/testRemoveSemiJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testRemoveSemiJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testRemoveSemiJoinRightWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testRemoveSemiJoinWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testRightOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinReduceConstants.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinRuleExists.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinRuleFull.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinRuleLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSemiJoinRuleRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testSwapOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceAggregate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceComplexPredicate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceConjunctInPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceConstantEquiPredicate.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceFullOuterJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceJoin3way.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceJoin3wayAgg.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceLeftOuterJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceNoPullUpExprs.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferencePreventProjectPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceRightOuterJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	timeout	10.07	cvc5 interrupted by timeout.
+calcite_tests__bags/testUnionMergeRule.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__bags/testUnionToDistinctRule.smt2	unsat	0.04	
+calcite_tests__bags/testWhereInCorrelated.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testAddRedundantSemiJoinRule.smt2	unsat	0.06	
+calcite_tests__sets/testAggregateConstantKeyRule.smt2	error	0.25	MODEL-ERROR Fatal failure within void cvc5::internal::smt::CheckModels::checkModel(TheoryModel *, const context::CDList<Node> &, boo
+calcite_tests__sets/testAggregateConstantKeyRule2.smt2	error	0.11	MODEL-ERROR Fatal failure within void cvc5::internal::smt::CheckModels::checkModel(TheoryModel *, const context::CDList<Node> &, boo
+calcite_tests__sets/testAggregateGroupingSetsProjectMerge.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testAggregateProjectMerge.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testAggregateProjectPullUpConstants.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testCustomColumnResolvingInNonCorrelatedSubQuery.smt2	unsat	0.05	
+calcite_tests__sets/testDecorrelateTwoIn.smt2	unsat	0.09	
+calcite_tests__sets/testDistinctCountGroupingSets1.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testEmptyFilterProjectUnion.smt2	unsat	0.04	
+calcite_tests__sets/testEmptyMinus2.smt2	unsat	0.04	
+calcite_tests__sets/testExtractJoinFilterRule.smt2	unsat	0.06	
+calcite_tests__sets/testFullOuterJoinSimplificationToInner.smt2	unsat	0.09	
+calcite_tests__sets/testFullOuterJoinSimplificationToLeftOuter.smt2	unsat	0.39	
+calcite_tests__sets/testFullOuterJoinSimplificationToRightOuter.smt2	unsat	0.43	
+calcite_tests__sets/testIntersectToDistinct.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testIntersectToDistinctAll.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testLeftOuterJoinSimplificationToInner.smt2	unsat	0.09	
+calcite_tests__sets/testMergeFilter.smt2	unsat	0.04	
+calcite_tests__sets/testMergeIntersect.smt2	unsat	0.04	
+calcite_tests__sets/testMergeJoinFilter.smt2	unsat	0.05	
+calcite_tests__sets/testMergeMinus.smt2	unsat	0.05	
+calcite_tests__sets/testMergeMinusRightDeep.smt2	unsat	0.04	
+calcite_tests__sets/testMergeSetOpMixed.smt2	unsat	0.05	
+calcite_tests__sets/testMergeUnionAll.smt2	unsat	0.07	
+calcite_tests__sets/testMergeUnionDistinct.smt2	unsat	0.08	
+calcite_tests__sets/testMergeUnionMixed.smt2	unsat	0.08	
+calcite_tests__sets/testMergeUnionMixed2.smt2	unsat	0.07	
+calcite_tests__sets/testMinusMergeRule.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullAggregateThroughUnion.smt2	unsat	0.03	
+calcite_tests__sets/testPullConstantIntoFilter.smt2	unsat	0.04	
+calcite_tests__sets/testPullConstantIntoJoin.smt2	unsat	0.34	
+calcite_tests__sets/testPullConstantIntoProject.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregateAllConst.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregateAllLiterals.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregateConstGroupBy.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregatePermuted.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregatePermutedConstFirst.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregatePermutedConstGroupBy.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughAggregateSimpleNonNullable.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughConstLast.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPullConstantThroughUnion.smt2	unsat	0.03	
+calcite_tests__sets/testPullConstantThroughUnion2.smt2	unsat	0.04	
+calcite_tests__sets/testPullConstantThroughUnion3.smt2	unsat	0.03	
+calcite_tests__sets/testPullFilterThroughAggregate.smt2	unsat	0.03	
+calcite_tests__sets/testPullFilterThroughAggregateGroupingSets.smt2	unsat	0.04	
+calcite_tests__sets/testPushAggregateSumNoGroup.smt2	sat	0.05	
+calcite_tests__sets/testPushAggregateThroughJoin1.smt2	unsat	0.08	
+calcite_tests__sets/testPushAggregateThroughJoin3.smt2	unsat	0.06	
+calcite_tests__sets/testPushAggregateThroughJoin4.smt2	unsat	0.06	
+calcite_tests__sets/testPushAggregateThroughJoin5.smt2	unsat	0.05	
+calcite_tests__sets/testPushAggregateThroughJoinDistinct.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushCountFilterThroughUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushCountNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushCountNullableThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushCountStarGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushCountStarThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushFilterPastAgg.smt2	error	0.31	MODEL-ERROR Fatal failure within void cvc5::internal::smt::CheckModels::checkModel(TheoryModel *, const context::CDList<Node> &, boo
+calcite_tests__sets/testPushFilterPastAggThree.smt2	unsat	0.04	
+calcite_tests__sets/testPushFilterPastAggTwo.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushFilterPastAggWithGroupingSets1.smt2	unsat	0.04	
+calcite_tests__sets/testPushFilterPastAggWithGroupingSets2.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushFilterThroughSemiJoin.smt2	unsat	0.06	
+calcite_tests__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.05	
+calcite_tests__sets/testPushJoinThroughUnionOnRight.smt2	unsat	0.05	
+calcite_tests__sets/testPushMaxNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushMaxNullableThroughUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushMinGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushProjectPastFilter2*.smt2	unsat	0.04	
+calcite_tests__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+calcite_tests__sets/testPushSemiJoinPastFilter.smt2	unsat	0.07	
+calcite_tests__sets/testPushSemiJoinPastJoinRuleLeft.smt2	unsat	0.15	
+calcite_tests__sets/testPushSumCountStarGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushSumCountStarThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushSumNullableGroupingSetsThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushSumNullableNOGBYThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testPushSumNullableThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testReduceConstants2.smt2	unsat	0.03	
+calcite_tests__sets/testReduceConstantsCalc.smt2	unsat	0.03	
+calcite_tests__sets/testReduceConstantsCaseEquals.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testReduceConstantsCaseEquals2.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testReduceConstantsCaseEquals3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testReduceConstantsIsNotNull.smt2	unsat	0.04	
+calcite_tests__sets/testReduceConstantsProjectNullable*.smt2	unsat	0.03	
+calcite_tests__sets/testReduceExpressionsNot.smt2	unsat	0.03	
+calcite_tests__sets/testReduceNestedCaseWhen.smt2	unsat	0.04	
+calcite_tests__sets/testReduceNot.smt2	unsat	0.04	
+calcite_tests__sets/testReduceNullableCase.smt2	unsat	0.03	
+calcite_tests__sets/testReduceOrCaseWhen.smt2	unsat	0.04	
+calcite_tests__sets/testReduceValuesUnderFilter.smt2	unsat	0.03	
+calcite_tests__sets/testReduceValuesUnderProject.smt2	unsat	0.03	
+calcite_tests__sets/testRemoveSemiJoin.smt2	unsat	0.04	
+calcite_tests__sets/testRemoveSemiJoinRight.smt2	unsat	0.06	
+calcite_tests__sets/testRemoveSemiJoinRightWithFilter.smt2	unsat	0.08	
+calcite_tests__sets/testRemoveSemiJoinWithFilter.smt2	unsat	0.06	
+calcite_tests__sets/testRightOuterJoinSimplificationToInner.smt2	unsat	0.08	
+calcite_tests__sets/testSemiJoinReduceConstants.smt2	unsat	0.11	
+calcite_tests__sets/testSemiJoinRule.smt2	unsat	0.06	
+calcite_tests__sets/testSemiJoinRuleExists.smt2	unsat	0.08	
+calcite_tests__sets/testSemiJoinRuleFull.smt2	unsat	1.23	
+calcite_tests__sets/testSemiJoinRuleLeft.smt2	unsat	0.05	
+calcite_tests__sets/testSemiJoinRuleRight.smt2	unsat	0.33	
+calcite_tests__sets/testSwapOuterJoin.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferenceAggregate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testTransitiveInferenceComplexPredicate.smt2	unsat	0.14	
+calcite_tests__sets/testTransitiveInferenceConjunctInPullUp.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferenceConstantEquiPredicate.smt2	unsat	0.04	
+calcite_tests__sets/testTransitiveInferenceFullOuterJoin.smt2	unsat	0.14	
+calcite_tests__sets/testTransitiveInferenceJoin.smt2	unsat	0.07	
+calcite_tests__sets/testTransitiveInferenceJoin3way.smt2	unsat	0.27	
+calcite_tests__sets/testTransitiveInferenceJoin3wayAgg.smt2	timeout	10.06	cvc5 interrupted by timeout.
+calcite_tests__sets/testTransitiveInferenceLeftOuterJoin.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferenceNoPullUpExprs.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferencePreventProjectPullUp.smt2	unsat	0.08	
+calcite_tests__sets/testTransitiveInferenceProject.smt2	unsat	0.07	
+calcite_tests__sets/testTransitiveInferencePullUpThruAlias.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferenceRightOuterJoin.smt2	unsat	0.10	
+calcite_tests__sets/testTransitiveInferenceUnion.smt2	unsat	0.11	
+calcite_tests__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.16	
+calcite_tests__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	unsat	0.09	
+calcite_tests__sets/testUnionMergeRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+calcite_tests__sets/testUnionToDistinctRule.smt2	unsat	0.03	
+calcite_tests__sets/testWhereInCorrelated.smt2	unsat	0.05	
+no_aggregation__bags/testAddRedundantSemiJoinRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testAlreadyFalseEliminatesFilter.smt2	unsat	0.04	
+no_aggregation__bags/testDecorrelateTwoIn.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation__bags/testEmptyIntersect.smt2	unsat	0.03	
+no_aggregation__bags/testEmptyJoin.smt2	unsat	0.06	
+no_aggregation__bags/testEmptyJoinLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testEmptyJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testEmptyMinus.smt2	unsat	0.03	
+no_aggregation__bags/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation__bags/testEmptyProject.smt2	unsat	0.03	
+no_aggregation__bags/testEmptyProject2.smt2	unsat	0.03	
+no_aggregation__bags/testExtractJoinFilterRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testFullOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testFullOuterJoinSimplificationToLeftOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testFullOuterJoinSimplificationToRightOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testLeftOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testMergeFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testMergeIntersect.smt2	unsat	0.09	
+no_aggregation__bags/testMergeJoinFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testMergeMinus.smt2	unsat	0.09	
+no_aggregation__bags/testMergeMinusRightDeep.smt2	unsat	0.07	
+no_aggregation__bags/testMergeSetOpMixed.smt2	unsat	0.07	
+no_aggregation__bags/testMergeUnionAll.smt2	unsat	0.07	
+no_aggregation__bags/testMergeUnionDistinct.smt2	unsat	0.08	
+no_aggregation__bags/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation__bags/testMergeUnionMixed2.smt2	unsat	0.08	
+no_aggregation__bags/testPullConstantIntoFilter.smt2	unsat	0.06	
+no_aggregation__bags/testPullConstantIntoJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testPullConstantIntoProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testPullConstantThroughUnion.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation__bags/testPullConstantThroughUnion3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testPullNull.smt2	sat	0.13	
+no_aggregation__bags/testPushFilterThroughSemiJoin.smt2	unsat	0.20	
+no_aggregation__bags/testPushJoinCondDownToProject.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushJoinThroughUnionOnLeft.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushJoinThroughUnionOnRight.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushProjectPastFilter2*.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushProjectPastSetOp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushSemiJoinPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceConstants.smt2	unsat	0.05	
+no_aggregation__bags/testReduceConstants2.smt2	unsat	0.03	
+no_aggregation__bags/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation__bags/testReduceConstantsDup.smt2	unsat	0.04	
+no_aggregation__bags/testReduceConstantsDup2.smt2	unsat	0.05	
+no_aggregation__bags/testReduceConstantsEliminatesFilter.smt2	unsat	0.04	
+no_aggregation__bags/testReduceConstantsIsNotNull.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceConstantsIsNull.smt2	unsat	0.04	
+no_aggregation__bags/testReduceConstantsNegated.smt2	unsat	0.04	
+no_aggregation__bags/testReduceConstantsNegatedInverted.smt2	unsat	0.04	
+no_aggregation__bags/testReduceConstantsNull.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceConstantsProjectNullable*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceConstantsRequiresExecutor.smt2	unsat	0.03	
+no_aggregation__bags/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation__bags/testReduceNestedCaseWhen.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceNot.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceNullableCase.smt2	unsat	0.03	
+no_aggregation__bags/testReduceOrCaseWhen.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testReduceValuesToEmpty.smt2	unsat	0.03	
+no_aggregation__bags/testReduceValuesUnderFilter.smt2	unsat	0.03	
+no_aggregation__bags/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation__bags/testReduceValuesUnderProjectFilter.smt2	unsat	0.03	
+no_aggregation__bags/testRemoveSemiJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testRemoveSemiJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testRemoveSemiJoinRightWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testRemoveSemiJoinWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testRightOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testSemiJoinReduceConstants.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testSwapOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceComplexPredicate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceConjunctInPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceConstantEquiPredicate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceFullOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceJoin3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceLeftOuterJoin.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceNoPullUpExprs.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferencePreventProjectPullUp.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceRightOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__bags/testWhereInCorrelated.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__sets/testAddRedundantSemiJoinRule.smt2	unsat	0.04	
+no_aggregation__sets/testAlreadyFalseEliminatesFilter.smt2	unsat	0.03	
+no_aggregation__sets/testDecorrelateTwoIn.smt2	unsat	0.07	
+no_aggregation__sets/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyIntersect.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyJoin.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyJoinLeft.smt2	unsat	0.05	
+no_aggregation__sets/testEmptyJoinRight.smt2	unsat	0.06	
+no_aggregation__sets/testEmptyMinus.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyProject.smt2	unsat	0.03	
+no_aggregation__sets/testEmptyProject2.smt2	unsat	0.03	
+no_aggregation__sets/testExtractJoinFilterRule.smt2	unsat	0.04	
+no_aggregation__sets/testFullOuterJoinSimplificationToInner.smt2	unsat	0.09	
+no_aggregation__sets/testFullOuterJoinSimplificationToLeftOuter.smt2	unsat	0.33	
+no_aggregation__sets/testFullOuterJoinSimplificationToRightOuter.smt2	unsat	0.40	
+no_aggregation__sets/testLeftOuterJoinSimplificationToInner.smt2	unsat	0.08	
+no_aggregation__sets/testMergeFilter.smt2	unsat	0.04	
+no_aggregation__sets/testMergeIntersect.smt2	unsat	0.04	
+no_aggregation__sets/testMergeJoinFilter.smt2	unsat	0.06	
+no_aggregation__sets/testMergeMinus.smt2	unsat	0.04	
+no_aggregation__sets/testMergeMinusRightDeep.smt2	unsat	0.04	
+no_aggregation__sets/testMergeSetOpMixed.smt2	unsat	0.05	
+no_aggregation__sets/testMergeUnionAll.smt2	unsat	0.07	
+no_aggregation__sets/testMergeUnionDistinct.smt2	unsat	0.07	
+no_aggregation__sets/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation__sets/testMergeUnionMixed2.smt2	unsat	0.07	
+no_aggregation__sets/testPullConstantIntoFilter.smt2	unsat	0.04	
+no_aggregation__sets/testPullConstantIntoJoin.smt2	unsat	0.35	
+no_aggregation__sets/testPullConstantIntoProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__sets/testPullConstantThroughUnion.smt2	unsat	0.04	
+no_aggregation__sets/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation__sets/testPullConstantThroughUnion3.smt2	unsat	0.03	
+no_aggregation__sets/testPullNull.smt2	sat	0.04	
+no_aggregation__sets/testPushFilterThroughSemiJoin.smt2	unsat	0.06	
+no_aggregation__sets/testPushJoinCondDownToProject.smt2	unsat	0.07	
+no_aggregation__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.05	
+no_aggregation__sets/testPushJoinThroughUnionOnRight.smt2	unsat	0.04	
+no_aggregation__sets/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation__sets/testPushProjectPastFilter2*.smt2	unsat	0.04	
+no_aggregation__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+no_aggregation__sets/testPushSemiJoinPastFilter.smt2	unsat	0.07	
+no_aggregation__sets/testPushSemiJoinPastJoinRuleLeft.smt2	unsat	0.15	
+no_aggregation__sets/testReduceConstants.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstants2.smt2	unsat	0.03	
+no_aggregation__sets/testReduceConstantsCalc.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsDup.smt2	unsat	0.03	
+no_aggregation__sets/testReduceConstantsDup2.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsEliminatesFilter.smt2	unsat	0.03	
+no_aggregation__sets/testReduceConstantsIsNotNull.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsIsNull.smt2	unsat	0.03	
+no_aggregation__sets/testReduceConstantsNegated.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsNegatedInverted.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsNull.smt2	unsat	0.03	
+no_aggregation__sets/testReduceConstantsProjectNullable*.smt2	unsat	0.04	
+no_aggregation__sets/testReduceConstantsRequiresExecutor.smt2	unsat	0.03	
+no_aggregation__sets/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation__sets/testReduceNestedCaseWhen.smt2	unsat	0.05	
+no_aggregation__sets/testReduceNot.smt2	unsat	0.04	
+no_aggregation__sets/testReduceNullableCase.smt2	unsat	0.03	
+no_aggregation__sets/testReduceOrCaseWhen.smt2	unsat	0.04	
+no_aggregation__sets/testReduceValuesToEmpty.smt2	unsat	0.03	
+no_aggregation__sets/testReduceValuesUnderFilter.smt2	unsat	0.04	
+no_aggregation__sets/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation__sets/testReduceValuesUnderProjectFilter.smt2	unsat	0.03	
+no_aggregation__sets/testRemoveSemiJoin.smt2	unsat	0.04	
+no_aggregation__sets/testRemoveSemiJoinRight.smt2	unsat	0.06	
+no_aggregation__sets/testRemoveSemiJoinRightWithFilter.smt2	unsat	0.08	
+no_aggregation__sets/testRemoveSemiJoinWithFilter.smt2	unsat	0.06	
+no_aggregation__sets/testRightOuterJoinSimplificationToInner.smt2	unsat	0.07	
+no_aggregation__sets/testSemiJoinReduceConstants.smt2	unsat	0.11	
+no_aggregation__sets/testSwapOuterJoin.smt2	unsat	0.10	
+no_aggregation__sets/testTransitiveInferenceComplexPredicate.smt2	unsat	0.14	
+no_aggregation__sets/testTransitiveInferenceConjunctInPullUp.smt2	unsat	0.10	
+no_aggregation__sets/testTransitiveInferenceConstantEquiPredicate.smt2	unsat	0.04	
+no_aggregation__sets/testTransitiveInferenceFullOuterJoin.smt2	unsat	0.12	
+no_aggregation__sets/testTransitiveInferenceJoin.smt2	unsat	0.07	
+no_aggregation__sets/testTransitiveInferenceJoin3way.smt2	unsat	0.24	
+no_aggregation__sets/testTransitiveInferenceLeftOuterJoin.smt2	unsat	0.09	
+no_aggregation__sets/testTransitiveInferenceNoPullUpExprs.smt2	unsat	0.10	
+no_aggregation__sets/testTransitiveInferencePreventProjectPullUp.smt2	unsat	0.08	
+no_aggregation__sets/testTransitiveInferenceProject.smt2	unsat	0.06	
+no_aggregation__sets/testTransitiveInferencePullUpThruAlias.smt2	unsat	0.09	
+no_aggregation__sets/testTransitiveInferenceRightOuterJoin.smt2	unsat	0.10	
+no_aggregation__sets/testTransitiveInferenceUnion.smt2	unsat	0.10	
+no_aggregation__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.15	
+no_aggregation__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	unsat	0.08	
+no_aggregation__sets/testWhereInCorrelated.smt2	unsat	0.05	
+no_aggregation_no_null__bags/testAddRedundantSemiJoinRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testDecorrelateTwoIn.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testExtractJoinFilterRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testFullOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testFullOuterJoinSimplificationToLeftOuter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testFullOuterJoinSimplificationToRightOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testLeftOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testMergeFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testMergeIntersect.smt2	unsat	0.09	
+no_aggregation_no_null__bags/testMergeJoinFilter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testMergeMinus.smt2	unsat	0.09	
+no_aggregation_no_null__bags/testMergeMinusRightDeep.smt2	unsat	0.07	
+no_aggregation_no_null__bags/testMergeSetOpMixed.smt2	unsat	0.07	
+no_aggregation_no_null__bags/testMergeUnionAll.smt2	unsat	0.08	
+no_aggregation_no_null__bags/testMergeUnionDistinct.smt2	unsat	0.08	
+no_aggregation_no_null__bags/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation_no_null__bags/testMergeUnionMixed2.smt2	unsat	0.09	
+no_aggregation_no_null__bags/testPullConstantIntoFilter.smt2	unsat	0.07	
+no_aggregation_no_null__bags/testPullConstantIntoJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPullConstantIntoProject.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPullConstantThroughUnion.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testPullConstantThroughUnion3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushFilterThroughSemiJoin.smt2	unsat	0.20	
+no_aggregation_no_null__bags/testPushJoinThroughUnionOnLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushJoinThroughUnionOnRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushProjectPastFilter2*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushProjectPastSetOp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushSemiJoinPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testReduceConstantsProjectNullable*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testReduceNullableCase.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testReduceValuesUnderFilter.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation_no_null__bags/testRemoveSemiJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testRemoveSemiJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testRemoveSemiJoinRightWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testRemoveSemiJoinWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testRightOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testSemiJoinReduceConstants.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testSwapOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceComplexPredicate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceConjunctInPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceConstantEquiPredicate.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceFullOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceJoin3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceLeftOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceNoPullUpExprs.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferencePreventProjectPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceProject.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceRightOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__bags/testWhereInCorrelated.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__sets/testAddRedundantSemiJoinRule.smt2	unsat	0.05	
+no_aggregation_no_null__sets/testDecorrelateTwoIn.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testEmptyFilterProjectUnion.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testExtractJoinFilterRule.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testFullOuterJoinSimplificationToInner.smt2	unsat	0.09	
+no_aggregation_no_null__sets/testFullOuterJoinSimplificationToLeftOuter.smt2	unsat	0.36	
+no_aggregation_no_null__sets/testFullOuterJoinSimplificationToRightOuter.smt2	unsat	0.42	
+no_aggregation_no_null__sets/testLeftOuterJoinSimplificationToInner.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testMergeFilter.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testMergeIntersect.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testMergeJoinFilter.smt2	unsat	0.07	
+no_aggregation_no_null__sets/testMergeMinus.smt2	unsat	0.05	
+no_aggregation_no_null__sets/testMergeMinusRightDeep.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testMergeSetOpMixed.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testMergeUnionAll.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testMergeUnionDistinct.smt2	unsat	0.09	
+no_aggregation_no_null__sets/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testMergeUnionMixed2.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testPullConstantIntoFilter.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testPullConstantIntoJoin.smt2	unsat	0.36	
+no_aggregation_no_null__sets/testPullConstantIntoProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__sets/testPullConstantThroughUnion.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testPullConstantThroughUnion3.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testPushFilterThroughSemiJoin.smt2	unsat	0.05	
+no_aggregation_no_null__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.05	
+no_aggregation_no_null__sets/testPushJoinThroughUnionOnRight.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null__sets/testPushProjectPastFilter2*.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testPushSemiJoinPastFilter.smt2	unsat	0.07	
+no_aggregation_no_null__sets/testPushSemiJoinPastJoinRuleLeft.smt2	unsat	0.15	
+no_aggregation_no_null__sets/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testReduceConstantsProjectNullable*.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testReduceNullableCase.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testReduceValuesUnderFilter.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation_no_null__sets/testRemoveSemiJoin.smt2	unsat	0.04	
+no_aggregation_no_null__sets/testRemoveSemiJoinRight.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testRemoveSemiJoinRightWithFilter.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testRemoveSemiJoinWithFilter.smt2	unsat	0.06	
+no_aggregation_no_null__sets/testRightOuterJoinSimplificationToInner.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testSemiJoinReduceConstants.smt2	unsat	0.10	
+no_aggregation_no_null__sets/testSwapOuterJoin.smt2	unsat	0.10	
+no_aggregation_no_null__sets/testTransitiveInferenceComplexPredicate.smt2	unsat	0.14	
+no_aggregation_no_null__sets/testTransitiveInferenceConjunctInPullUp.smt2	unsat	0.10	
+no_aggregation_no_null__sets/testTransitiveInferenceConstantEquiPredicate.smt2	unsat	0.05	
+no_aggregation_no_null__sets/testTransitiveInferenceFullOuterJoin.smt2	unsat	0.13	
+no_aggregation_no_null__sets/testTransitiveInferenceJoin.smt2	unsat	0.07	
+no_aggregation_no_null__sets/testTransitiveInferenceJoin3way.smt2	unsat	0.27	
+no_aggregation_no_null__sets/testTransitiveInferenceLeftOuterJoin.smt2	unsat	0.10	
+no_aggregation_no_null__sets/testTransitiveInferenceNoPullUpExprs.smt2	unsat	0.10	
+no_aggregation_no_null__sets/testTransitiveInferencePreventProjectPullUp.smt2	unsat	0.09	
+no_aggregation_no_null__sets/testTransitiveInferenceProject.smt2	unsat	0.07	
+no_aggregation_no_null__sets/testTransitiveInferencePullUpThruAlias.smt2	unsat	0.09	
+no_aggregation_no_null__sets/testTransitiveInferenceRightOuterJoin.smt2	unsat	0.11	
+no_aggregation_no_null__sets/testTransitiveInferenceUnion.smt2	unsat	0.11	
+no_aggregation_no_null__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.16	
+no_aggregation_no_null__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	unsat	0.08	
+no_aggregation_no_null__sets/testWhereInCorrelated.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__bags/testAddRedundantSemiJoinRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testDecorrelateTwoIn.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testExtractJoinFilterRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testFullOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testFullOuterJoinSimplificationToLeftOuter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testFullOuterJoinSimplificationToRightOuter.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testLeftOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testMergeFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testMergeIntersect.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__bags/testMergeJoinFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testMergeMinus.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__bags/testMergeMinusRightDeep.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__bags/testMergeSetOpMixed.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__bags/testMergeUnionAll.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__bags/testMergeUnionDistinct.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__bags/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__bags/testMergeUnionMixed2.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__bags/testPullConstantIntoFilter.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__bags/testPullConstantIntoJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPullConstantIntoProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPullConstantThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testPullConstantThroughUnion3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushFilterThroughSemiJoin.smt2	unsat	0.20	
+no_aggregation_no_null_no_cast__bags/testPushJoinThroughUnionOnLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushJoinThroughUnionOnRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushProjectPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushProjectPastFilter2*.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushProjectPastSetOp.smt2	timeout	10.12	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushSemiJoinPastFilter.smt2	timeout	10.09	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.09	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testReduceConstantsCalc.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast__bags/testReduceConstantsProjectNullable*.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testReduceValuesUnderFilter.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__bags/testRemoveSemiJoin.smt2	timeout	10.16	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testRemoveSemiJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testRemoveSemiJoinRightWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testRemoveSemiJoinWithFilter.smt2	timeout	10.12	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testRightOuterJoinSimplificationToInner.smt2	timeout	10.12	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testSemiJoinReduceConstants.smt2	timeout	10.13	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testSwapOuterJoin.smt2	timeout	10.13	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceComplexPredicate.smt2	timeout	10.15	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceConjunctInPullUp.smt2	timeout	10.10	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceConstantEquiPredicate.smt2	timeout	10.33	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceFullOuterJoin.smt2	timeout	10.08	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceJoin.smt2	timeout	10.18	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceJoin3way.smt2	timeout	10.11	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceLeftOuterJoin.smt2	timeout	10.12	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceNoPullUpExprs.smt2	timeout	10.16	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferencePreventProjectPullUp.smt2	timeout	10.14	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceProject.smt2	timeout	10.14	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.13	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceRightOuterJoin.smt2	timeout	10.15	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceUnion.smt2	timeout	10.08	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.09	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	timeout	10.10	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__bags/testWhereInCorrelated.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__sets/testAddRedundantSemiJoinRule.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testDecorrelateTwoIn.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testEmptyFilterProjectUnion.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testEmptyMinus2.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testExtractJoinFilterRule.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__sets/testFullOuterJoinSimplificationToInner.smt2	unsat	0.12	
+no_aggregation_no_null_no_cast__sets/testFullOuterJoinSimplificationToLeftOuter.smt2	unsat	0.39	
+no_aggregation_no_null_no_cast__sets/testFullOuterJoinSimplificationToRightOuter.smt2	unsat	0.46	
+no_aggregation_no_null_no_cast__sets/testLeftOuterJoinSimplificationToInner.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testMergeFilter.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testMergeIntersect.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testMergeJoinFilter.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testMergeMinus.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testMergeMinusRightDeep.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__sets/testMergeSetOpMixed.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testMergeUnionAll.smt2	unsat	0.12	
+no_aggregation_no_null_no_cast__sets/testMergeUnionDistinct.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testMergeUnionMixed.smt2	unsat	0.12	
+no_aggregation_no_null_no_cast__sets/testMergeUnionMixed2.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast__sets/testPullConstantIntoFilter.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testPullConstantIntoJoin.smt2	unsat	0.37	
+no_aggregation_no_null_no_cast__sets/testPullConstantIntoProject.smt2	timeout	10.07	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__sets/testPullConstantThroughUnion.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testPullConstantThroughUnion2.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast__sets/testPullConstantThroughUnion3.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testPushFilterThroughSemiJoin.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testPushJoinThroughUnionOnRight.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast__sets/testPushProjectPastFilter.smt2	timeout	10.09	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast__sets/testPushProjectPastFilter2*.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__sets/testPushSemiJoinPastFilter.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testPushSemiJoinPastJoinRuleLeft.smt2	unsat	0.15	
+no_aggregation_no_null_no_cast__sets/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast__sets/testReduceConstantsProjectNullable*.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast__sets/testReduceExpressionsNot.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast__sets/testReduceValuesUnderFilter.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testReduceValuesUnderProject.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testRemoveSemiJoin.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast__sets/testRemoveSemiJoinRight.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__sets/testRemoveSemiJoinRightWithFilter.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testRemoveSemiJoinWithFilter.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast__sets/testRightOuterJoinSimplificationToInner.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testSemiJoinReduceConstants.smt2	unsat	0.12	
+no_aggregation_no_null_no_cast__sets/testSwapOuterJoin.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceComplexPredicate.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceConjunctInPullUp.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceConstantEquiPredicate.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceFullOuterJoin.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceJoin.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceJoin3way.smt2	unsat	0.26	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceLeftOuterJoin.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceNoPullUpExprs.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferencePreventProjectPullUp.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceProject.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferencePullUpThruAlias.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceRightOuterJoin.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceUnion.smt2	unsat	0.13	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.18	
+no_aggregation_no_null_no_cast__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast__sets/testWhereInCorrelated.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testAddRedundantSemiJoinRule.smt2	timeout	10.08	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testDecorrelateTwoIn.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testExtractJoinFilterRule.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeIntersect.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeJoinFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeMinus.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeMinusRightDeep.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeSetOpMixed.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeUnionAll.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeUnionDistinct.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testMergeUnionMixed2.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPullConstantIntoFilter.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPullConstantThroughUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPullConstantThroughUnion2.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPullConstantThroughUnion3.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushFilterThroughSemiJoin.smt2	unsat	0.20	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushJoinThroughUnionOnLeft.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushJoinThroughUnionOnRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushProjectPastFilter2*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushProjectPastSetOp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushSemiJoinPastFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testReduceConstantsProjectNullable*.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testReduceExpressionsNot.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testReduceValuesUnderFilter.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testReduceValuesUnderProject.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__bags/testRemoveSemiJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testRemoveSemiJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testRemoveSemiJoinRightWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testRemoveSemiJoinWithFilter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testSemiJoinReduceConstants.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceComplexPredicate.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceConjunctInPullUp.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceConstantEquiPredicate.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceJoin3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceNoPullUpExprs.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferencePreventProjectPullUp.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.06	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceUnion.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__bags/testWhereInCorrelated.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_no_null_no_cast_no_outer_join__sets/testAddRedundantSemiJoinRule.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testDecorrelateTwoIn.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testEmptyFilterProjectUnion.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testEmptyMinus2.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testExtractJoinFilterRule.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeFilter.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeIntersect.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeJoinFilter.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeMinus.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeMinusRightDeep.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeSetOpMixed.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeUnionAll.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeUnionDistinct.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeUnionMixed.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testMergeUnionMixed2.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPullConstantIntoFilter.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPullConstantThroughUnion.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPullConstantThroughUnion2.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPullConstantThroughUnion3.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushFilterThroughSemiJoin.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.05	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushJoinThroughUnionOnRight.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushProjectPastFilter2*.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushSemiJoinPastFilter.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testPushSemiJoinPastJoinRuleLeft.smt2	unsat	0.16	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testReduceConstantsCalc.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testReduceConstantsProjectNullable*.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testReduceValuesUnderFilter.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testReduceValuesUnderProject.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testRemoveSemiJoin.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testRemoveSemiJoinRight.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testRemoveSemiJoinRightWithFilter.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testRemoveSemiJoinWithFilter.smt2	unsat	0.06	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testSemiJoinReduceConstants.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceComplexPredicate.smt2	unsat	0.14	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceConjunctInPullUp.smt2	unsat	0.09	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceConstantEquiPredicate.smt2	unsat	0.04	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceJoin.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceJoin3way.smt2	unsat	0.27	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceNoPullUpExprs.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferencePreventProjectPullUp.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceProject.smt2	unsat	0.07	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferencePullUpThruAlias.smt2	unsat	0.10	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceUnion.smt2	unsat	0.11	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.17	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	unsat	0.08	
+no_aggregation_no_null_no_cast_no_outer_join__sets/testWhereInCorrelated.smt2	unsat	0.05	
+no_aggregation_sat__bags/testAlreadyFalseEliminatesFilter.smt2	sat	0.03	
+no_aggregation_sat__bags/testDecorrelateTwoIn.smt2	sat	7.08	
+no_aggregation_sat__bags/testEmptyFilterProjectUnion.smt2	sat	0.03	
+no_aggregation_sat__bags/testEmptyIntersect.smt2	sat	0.03	
+no_aggregation_sat__bags/testEmptyJoin.smt2	sat	0.17	
+no_aggregation_sat__bags/testEmptyJoinLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testEmptyJoinRight.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testEmptyMinus.smt2	sat	0.04	
+no_aggregation_sat__bags/testEmptyMinus2.smt2	sat	0.03	
+no_aggregation_sat__bags/testEmptyProject.smt2	sat	0.03	
+no_aggregation_sat__bags/testEmptyProject2.smt2	sat	0.04	
+no_aggregation_sat__bags/testExtractJoinFilterRule.smt2	sat	0.37	
+no_aggregation_sat__bags/testFullOuterJoinSimplificationToInner.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testFullOuterJoinSimplificationToLeftOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testFullOuterJoinSimplificationToRightOuter.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testLeftOuterJoinSimplificationToInner.smt2	sat	3.26	
+no_aggregation_sat__bags/testMergeFilter.smt2	sat	0.09	
+no_aggregation_sat__bags/testMergeIntersect.smt2	sat	0.38	
+no_aggregation_sat__bags/testMergeJoinFilter.smt2	sat	6.27	
+no_aggregation_sat__bags/testMergeMinus.smt2	sat	0.46	
+no_aggregation_sat__bags/testMergeMinusRightDeep.smt2	sat	0.38	
+no_aggregation_sat__bags/testMergeSetOpMixed.smt2	sat	0.66	
+no_aggregation_sat__bags/testMergeUnionAll.smt2	sat	0.40	
+no_aggregation_sat__bags/testMergeUnionDistinct.smt2	sat	0.65	
+no_aggregation_sat__bags/testMergeUnionMixed.smt2	sat	0.35	
+no_aggregation_sat__bags/testMergeUnionMixed2.smt2	sat	0.29	
+no_aggregation_sat__bags/testPullConstantIntoFilter.smt2	sat	0.10	
+no_aggregation_sat__bags/testPullConstantIntoJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testPullConstantIntoProject.smt2	sat	0.12	
+no_aggregation_sat__bags/testPullConstantThroughUnion.smt2	sat	0.11	
+no_aggregation_sat__bags/testPullConstantThroughUnion2.smt2	sat	0.07	
+no_aggregation_sat__bags/testPullConstantThroughUnion3.smt2	sat	0.09	
+no_aggregation_sat__bags/testPushFilterThroughSemiJoin.smt2	sat	0.37	
+no_aggregation_sat__bags/testPushJoinCondDownToProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testPushJoinThroughUnionOnLeft.smt2	sat	3.71	
+no_aggregation_sat__bags/testPushJoinThroughUnionOnRight.smt2	sat	9.19	
+no_aggregation_sat__bags/testPushProjectPastFilter.smt2	sat	0.17	
+no_aggregation_sat__bags/testPushProjectPastFilter2*.smt2	sat	0.13	
+no_aggregation_sat__bags/testPushProjectPastSetOp.smt2	sat	0.16	
+no_aggregation_sat__bags/testPushSemiJoinPastJoinRuleLeft.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testReduceConstants.smt2	sat	0.62	
+no_aggregation_sat__bags/testReduceConstants2.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceConstantsCalc.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceConstantsDup.smt2	sat	0.06	
+no_aggregation_sat__bags/testReduceConstantsDup2.smt2	sat	0.08	
+no_aggregation_sat__bags/testReduceConstantsEliminatesFilter.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceConstantsIsNotNull.smt2	sat	0.25	
+no_aggregation_sat__bags/testReduceConstantsIsNull.smt2	sat	0.04	
+no_aggregation_sat__bags/testReduceConstantsNegated.smt2	sat	0.06	
+no_aggregation_sat__bags/testReduceConstantsNegatedInverted.smt2	sat	0.06	
+no_aggregation_sat__bags/testReduceConstantsNull.smt2	sat	0.06	
+no_aggregation_sat__bags/testReduceConstantsProjectNullable*.smt2	sat	0.11	
+no_aggregation_sat__bags/testReduceConstantsRequiresExecutor.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceExpressionsNot.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceNestedCaseWhen.smt2	sat	0.18	
+no_aggregation_sat__bags/testReduceNot.smt2	sat	0.08	
+no_aggregation_sat__bags/testReduceNullableCase.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceOrCaseWhen.smt2	sat	0.14	
+no_aggregation_sat__bags/testReduceValuesToEmpty.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceValuesUnderFilter.smt2	sat	0.03	
+no_aggregation_sat__bags/testReduceValuesUnderProject.smt2	sat	0.04	
+no_aggregation_sat__bags/testReduceValuesUnderProjectFilter.smt2	sat	0.03	
+no_aggregation_sat__bags/testRemoveSemiJoin.smt2	sat	0.85	
+no_aggregation_sat__bags/testRemoveSemiJoinRight.smt2	sat	2.42	
+no_aggregation_sat__bags/testRemoveSemiJoinRightWithFilter.smt2	sat	5.37	
+no_aggregation_sat__bags/testRemoveSemiJoinWithFilter.smt2	sat	2.06	
+no_aggregation_sat__bags/testRightOuterJoinSimplificationToInner.smt2	sat	1.69	
+no_aggregation_sat__bags/testSemiJoinReduceConstants.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testSwapOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceComplexPredicate.smt2	sat	1.65	
+no_aggregation_sat__bags/testTransitiveInferenceConjunctInPullUp.smt2	sat	1.31	
+no_aggregation_sat__bags/testTransitiveInferenceConstantEquiPredicate.smt2	sat	0.39	
+no_aggregation_sat__bags/testTransitiveInferenceFullOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceJoin.smt2	sat	0.68	
+no_aggregation_sat__bags/testTransitiveInferenceJoin3way.smt2	sat	7.52	
+no_aggregation_sat__bags/testTransitiveInferenceLeftOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceNoPullUpExprs.smt2	sat	1.26	
+no_aggregation_sat__bags/testTransitiveInferencePreventProjectPullUp.smt2	sat	3.24	
+no_aggregation_sat__bags/testTransitiveInferenceProject.smt2	sat	1.09	
+no_aggregation_sat__bags/testTransitiveInferencePullUpThruAlias.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceRightOuterJoin.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceUnion.smt2	sat	4.62	
+no_aggregation_sat__bags/testTransitiveInferenceUnion3way.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__bags/testTransitiveInferenceUnionAlwaysTrue.smt2	sat	9.07	
+no_aggregation_sat__bags/testWhereInCorrelated.smt2	sat	2.26	
+no_aggregation_sat__sets/testAlreadyFalseEliminatesFilter.smt2	sat	0.03	
+no_aggregation_sat__sets/testDecorrelateTwoIn.smt2	sat	0.07	
+no_aggregation_sat__sets/testEmptyFilterProjectUnion.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyIntersect.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyJoin.smt2	sat	0.04	
+no_aggregation_sat__sets/testEmptyJoinLeft.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyJoinRight.smt2	sat	0.04	
+no_aggregation_sat__sets/testEmptyMinus.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyMinus2.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyProject.smt2	sat	0.03	
+no_aggregation_sat__sets/testEmptyProject2.smt2	sat	0.03	
+no_aggregation_sat__sets/testExtractJoinFilterRule.smt2	sat	0.04	
+no_aggregation_sat__sets/testFullOuterJoinSimplificationToInner.smt2	sat	0.05	
+no_aggregation_sat__sets/testFullOuterJoinSimplificationToLeftOuter.smt2	sat	0.05	
+no_aggregation_sat__sets/testFullOuterJoinSimplificationToRightOuter.smt2	sat	0.54	
+no_aggregation_sat__sets/testLeftOuterJoinSimplificationToInner.smt2	sat	0.05	
+no_aggregation_sat__sets/testMergeFilter.smt2	sat	0.03	
+no_aggregation_sat__sets/testMergeIntersect.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeJoinFilter.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeMinus.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeMinusRightDeep.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeSetOpMixed.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeUnionAll.smt2	sat	0.07	
+no_aggregation_sat__sets/testMergeUnionDistinct.smt2	sat	0.04	
+no_aggregation_sat__sets/testMergeUnionMixed.smt2	sat	0.05	
+no_aggregation_sat__sets/testMergeUnionMixed2.smt2	sat	0.07	
+no_aggregation_sat__sets/testPullConstantIntoFilter.smt2	sat	0.04	
+no_aggregation_sat__sets/testPullConstantIntoJoin.smt2	sat	0.05	
+no_aggregation_sat__sets/testPullConstantIntoProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__sets/testPullConstantThroughUnion.smt2	sat	0.04	
+no_aggregation_sat__sets/testPullConstantThroughUnion2.smt2	sat	0.03	
+no_aggregation_sat__sets/testPullConstantThroughUnion3.smt2	unsat	0.03	
+no_aggregation_sat__sets/testPushFilterThroughSemiJoin.smt2	sat	0.05	
+no_aggregation_sat__sets/testPushJoinCondDownToProject.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__sets/testPushJoinThroughUnionOnLeft.smt2	unsat	0.05	
+no_aggregation_sat__sets/testPushJoinThroughUnionOnRight.smt2	sat	0.04	
+no_aggregation_sat__sets/testPushProjectPastFilter.smt2	sat	0.09	
+no_aggregation_sat__sets/testPushProjectPastFilter2*.smt2	sat	0.04	
+no_aggregation_sat__sets/testPushProjectPastSetOp.smt2	unsat	0.03	
+no_aggregation_sat__sets/testPushSemiJoinPastJoinRuleLeft.smt2	sat	0.15	
+no_aggregation_sat__sets/testReduceConstants.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__sets/testReduceConstants2.smt2	unsat	0.03	
+no_aggregation_sat__sets/testReduceConstantsCalc.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceConstantsDup.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceConstantsDup2.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceConstantsEliminatesFilter.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceConstantsIsNotNull.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceConstantsIsNull.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceConstantsNegated.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceConstantsNegatedInverted.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceConstantsNull.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceConstantsProjectNullable*.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceConstantsRequiresExecutor.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceExpressionsNot.smt2	unsat	0.03	
+no_aggregation_sat__sets/testReduceNestedCaseWhen.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceNot.smt2	timeout	10.05	cvc5 interrupted by timeout.
+no_aggregation_sat__sets/testReduceNullableCase.smt2	unsat	0.03	
+no_aggregation_sat__sets/testReduceOrCaseWhen.smt2	sat	0.04	
+no_aggregation_sat__sets/testReduceValuesToEmpty.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceValuesUnderFilter.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceValuesUnderProject.smt2	sat	0.03	
+no_aggregation_sat__sets/testReduceValuesUnderProjectFilter.smt2	sat	0.03	
+no_aggregation_sat__sets/testRemoveSemiJoin.smt2	sat	0.04	
+no_aggregation_sat__sets/testRemoveSemiJoinRight.smt2	sat	0.04	
+no_aggregation_sat__sets/testRemoveSemiJoinRightWithFilter.smt2	sat	0.05	
+no_aggregation_sat__sets/testRemoveSemiJoinWithFilter.smt2	sat	0.04	
+no_aggregation_sat__sets/testRightOuterJoinSimplificationToInner.smt2	sat	0.05	
+no_aggregation_sat__sets/testSemiJoinReduceConstants.smt2	sat	0.05	
+no_aggregation_sat__sets/testSwapOuterJoin.smt2	unsat	0.14	
+no_aggregation_sat__sets/testTransitiveInferenceComplexPredicate.smt2	sat	0.08	
+no_aggregation_sat__sets/testTransitiveInferenceConjunctInPullUp.smt2	sat	0.06	
+no_aggregation_sat__sets/testTransitiveInferenceConstantEquiPredicate.smt2	sat	0.05	
+no_aggregation_sat__sets/testTransitiveInferenceFullOuterJoin.smt2	sat	0.13	
+no_aggregation_sat__sets/testTransitiveInferenceJoin.smt2	sat	0.04	
+no_aggregation_sat__sets/testTransitiveInferenceJoin3way.smt2	sat	0.32	
+no_aggregation_sat__sets/testTransitiveInferenceLeftOuterJoin.smt2	sat	0.14	
+no_aggregation_sat__sets/testTransitiveInferenceNoPullUpExprs.smt2	sat	0.06	
+no_aggregation_sat__sets/testTransitiveInferencePreventProjectPullUp.smt2	sat	0.09	
+no_aggregation_sat__sets/testTransitiveInferenceProject.smt2	sat	0.08	
+no_aggregation_sat__sets/testTransitiveInferencePullUpThruAlias.smt2	sat	0.05	
+no_aggregation_sat__sets/testTransitiveInferenceRightOuterJoin.smt2	sat	0.06	
+no_aggregation_sat__sets/testTransitiveInferenceUnion.smt2	sat	0.08	
+no_aggregation_sat__sets/testTransitiveInferenceUnion3way.smt2	unsat	0.15	
+no_aggregation_sat__sets/testTransitiveInferenceUnionAlwaysTrue.smt2	sat	0.08	
+no_aggregation_sat__sets/testWhereInCorrelated.smt2	sat	0.04	
+spark_tests__bags/1.smt2	unsat	0.03	
+spark_tests__bags/10.smt2	unsat	0.03	
+spark_tests__bags/101.smt2	unsat	0.04	
+spark_tests__bags/102.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/104.smt2	unsat	0.12	
+spark_tests__bags/105.smt2	unsat	0.29	
+spark_tests__bags/106.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/107.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/108.smt2	timeout	10.06	cvc5 interrupted by timeout.
+spark_tests__bags/109.smt2	unsat	0.10	
+spark_tests__bags/11.smt2	unsat	0.04	
+spark_tests__bags/113.smt2	unsat	0.04	
+spark_tests__bags/114.smt2	unsat	0.05	
+spark_tests__bags/12.smt2	unsat	0.04	
+spark_tests__bags/13.smt2	unsat	0.06	
+spark_tests__bags/14.smt2	sat	0.10	
+spark_tests__bags/15.smt2	unsat	0.06	
+spark_tests__bags/16.smt2	unsat	0.05	
+spark_tests__bags/17.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/18.smt2	unsat	0.03	
+spark_tests__bags/19.smt2	unsat	0.03	
+spark_tests__bags/2.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/20.smt2	unsat	0.03	
+spark_tests__bags/23.smt2	unsat	0.03	
+spark_tests__bags/24.smt2	unsat	0.03	
+spark_tests__bags/26.smt2	unsat	0.03	
+spark_tests__bags/27.smt2	unsat	0.03	
+spark_tests__bags/28.smt2	unsat	0.03	
+spark_tests__bags/29.smt2	unsat	0.03	
+spark_tests__bags/3.smt2	unsat	0.06	
+spark_tests__bags/31.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/32.smt2	unsat	0.04	
+spark_tests__bags/33.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/34.smt2	unsat	0.03	
+spark_tests__bags/35.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/36.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/37.smt2	unsat	0.03	
+spark_tests__bags/38.smt2	unsat	0.03	
+spark_tests__bags/39.smt2	sat	0.10	
+spark_tests__bags/4.smt2	unsat	0.06	
+spark_tests__bags/48.smt2	unsat	0.48	
+spark_tests__bags/49.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/5.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/50.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/56.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/59.smt2	unsat	0.03	
+spark_tests__bags/6.smt2	unsat	0.71	
+spark_tests__bags/60.smt2	unsat	0.05	
+spark_tests__bags/63.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/65.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/66.smt2	unsat	0.03	
+spark_tests__bags/67.smt2	unsat	0.04	
+spark_tests__bags/68.smt2	unsat	0.06	
+spark_tests__bags/69.smt2	unsat	0.09	
+spark_tests__bags/7.smt2	unsat	0.06	
+spark_tests__bags/70.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/71.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/77.smt2	unsat	0.03	
+spark_tests__bags/78.smt2	unsat	0.05	
+spark_tests__bags/79.smt2	unsat	0.07	
+spark_tests__bags/8.smt2	unsat	0.05	
+spark_tests__bags/80.smt2	unsat	0.07	
+spark_tests__bags/81.smt2	unsat	0.06	
+spark_tests__bags/82.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/83.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/84.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/86.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/87.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/88.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/89.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/9.smt2	unsat	0.05	
+spark_tests__bags/90.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/92.smt2	unsat	0.03	
+spark_tests__bags/93.smt2	unsat	0.03	
+spark_tests__bags/94.smt2	unsat	0.04	
+spark_tests__bags/95.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__bags/96.smt2	unsat	0.03	
+spark_tests__bags/98.smt2	unsat	0.04	
+spark_tests__bags/99.smt2	unsat	0.05	
+spark_tests__sets/1.smt2	unsat	0.03	
+spark_tests__sets/10.smt2	unsat	0.03	
+spark_tests__sets/101.smt2	unsat	0.03	
+spark_tests__sets/102.smt2	unsat	0.03	
+spark_tests__sets/104.smt2	unsat	0.12	
+spark_tests__sets/105.smt2	unsat	0.09	
+spark_tests__sets/106.smt2	unsat	0.65	
+spark_tests__sets/107.smt2	unsat	0.45	
+spark_tests__sets/108.smt2	unsat	1.43	
+spark_tests__sets/109.smt2	unsat	0.05	
+spark_tests__sets/11.smt2	unsat	0.04	
+spark_tests__sets/113.smt2	unsat	0.03	
+spark_tests__sets/114.smt2	unsat	0.04	
+spark_tests__sets/12.smt2	unsat	0.03	
+spark_tests__sets/13.smt2	unsat	0.05	
+spark_tests__sets/14.smt2	sat	0.04	
+spark_tests__sets/15.smt2	unsat	0.05	
+spark_tests__sets/16.smt2	unsat	0.05	
+spark_tests__sets/17.smt2	sat	0.03	
+spark_tests__sets/18.smt2	unsat	0.03	
+spark_tests__sets/19.smt2	unsat	0.03	
+spark_tests__sets/2.smt2	unsat	0.03	
+spark_tests__sets/20.smt2	unsat	0.04	
+spark_tests__sets/23.smt2	unsat	0.03	
+spark_tests__sets/24.smt2	unsat	0.03	
+spark_tests__sets/26.smt2	unsat	0.03	
+spark_tests__sets/27.smt2	unsat	0.03	
+spark_tests__sets/28.smt2	unsat	0.03	
+spark_tests__sets/29.smt2	unsat	0.03	
+spark_tests__sets/3.smt2	unsat	0.04	
+spark_tests__sets/31.smt2	unsat	0.03	
+spark_tests__sets/32.smt2	unsat	0.03	
+spark_tests__sets/33.smt2	unsat	0.04	
+spark_tests__sets/34.smt2	unsat	0.03	
+spark_tests__sets/35.smt2	unsat	0.05	
+spark_tests__sets/36.smt2	unsat	0.05	
+spark_tests__sets/37.smt2	unsat	0.03	
+spark_tests__sets/38.smt2	unsat	0.03	
+spark_tests__sets/39.smt2	sat	0.04	
+spark_tests__sets/4.smt2	unsat	0.05	
+spark_tests__sets/48.smt2	unsat	0.05	
+spark_tests__sets/49.smt2	unsat	0.41	
+spark_tests__sets/5.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__sets/50.smt2	unsat	0.11	
+spark_tests__sets/56.smt2	unsat	1.09	
+spark_tests__sets/59.smt2	unsat	0.03	
+spark_tests__sets/6.smt2	unsat	0.04	
+spark_tests__sets/60.smt2	unsat	0.03	
+spark_tests__sets/63.smt2	unsat	0.03	
+spark_tests__sets/65.smt2	unsat	0.04	
+spark_tests__sets/66.smt2	unsat	0.03	
+spark_tests__sets/67.smt2	unsat	0.03	
+spark_tests__sets/68.smt2	unsat	0.04	
+spark_tests__sets/69.smt2	unsat	0.06	
+spark_tests__sets/7.smt2	unsat	0.04	
+spark_tests__sets/70.smt2	unsat	0.21	
+spark_tests__sets/71.smt2	unsat	0.04	
+spark_tests__sets/77.smt2	unsat	0.03	
+spark_tests__sets/78.smt2	unsat	0.04	
+spark_tests__sets/79.smt2	unsat	0.04	
+spark_tests__sets/8.smt2	unsat	0.04	
+spark_tests__sets/80.smt2	unsat	0.05	
+spark_tests__sets/81.smt2	unsat	0.04	
+spark_tests__sets/82.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__sets/83.smt2	unsat	0.04	
+spark_tests__sets/84.smt2	unsat	0.04	
+spark_tests__sets/86.smt2	unsat	0.07	
+spark_tests__sets/87.smt2	unsat	0.09	
+spark_tests__sets/88.smt2	unsat	0.07	
+spark_tests__sets/89.smt2	unsat	0.52	
+spark_tests__sets/9.smt2	unsat	0.04	
+spark_tests__sets/90.smt2	timeout	10.05	cvc5 interrupted by timeout.
+spark_tests__sets/92.smt2	unsat	0.03	
+spark_tests__sets/93.smt2	unsat	0.03	
+spark_tests__sets/94.smt2	unsat	0.03	
+spark_tests__sets/95.smt2	unsat	0.03	
+spark_tests__sets/96.smt2	unsat	0.03	
+spark_tests__sets/98.smt2	unsat	0.03	
+spark_tests__sets/99.smt2	unsat	0.03	

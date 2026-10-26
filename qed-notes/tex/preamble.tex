@@ -1,0 +1,107 @@
+% ---------------------------------------------------------------
+%  Shared preamble: notation, colours, listings, theorem envs
+% ---------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric,decorations.pathreplacing}
+\usepackage{caption}
+
+% ---------- palette (colour-blind safe, prints legibly in grey) ----------
+\definecolor{cBlue}{HTML}{2B6CB0}
+\definecolor{cBlueBg}{HTML}{E7F0FB}
+\definecolor{cAmber}{HTML}{B4690E}
+\definecolor{cAmberBg}{HTML}{FDF0D5}
+\definecolor{cGreen}{HTML}{2F855A}
+\definecolor{cGreenBg}{HTML}{E8F5EC}
+\definecolor{cPurple}{HTML}{7B3FA0}
+\definecolor{cPurpleBg}{HTML}{F6ECFA}
+\definecolor{cGrey}{HTML}{6B6B76}
+\definecolor{cGreyBg}{HTML}{F1F1F4}
+\definecolor{cRed}{HTML}{B03030}
+\definecolor{cInk}{HTML}{1A1A1E}
+
+% ---------- U-semiring / Q-expression notation ----------
+\newcommand{\Usemi}{\ensuremath{\mathcal{U}}}
+\newcommand{\Nbar}{\ensuremath{\overline{\mathbb{N}}}}
+\newcommand{\sq}[1]{\ensuremath{\left\lVert #1 \right\rVert}}       % squash
+\newcommand{\notu}[1]{\ensuremath{\mathrm{not}(#1)}}                % negation
+\newcommand{\ind}[1]{\ensuremath{[\,#1\,]}}                          % indicator
+\newcommand{\usum}[1]{\ensuremath{\sum_{#1}}}                        % unbounded sum
+\newcommand{\den}[1]{\ensuremath{[\![ #1 ]\!]}}                      % denotation
+\newcommand{\Tup}[1]{\ensuremath{\mathrm{Tuple}(#1)}}
+\newcommand{\Sumagg}{\ensuremath{\mathrm{Sum}}}
+\newcommand{\lam}[2]{\ensuremath{\lambda #1.\,#2}}
+\newcommand{\qop}{\ensuremath{\mathrm{QOp}}}
+\newcommand{\hop}{\ensuremath{\mathrm{HOp}}}
+\newcommand{\zzero}{\ensuremath{\mathbf{0}}}
+\newcommand{\oone}{\ensuremath{\mathbf{1}}}
+
+% ---------- inline tags ----------
+\newcommand{\udp}{\textsc{UDP}}
+\newcommand{\QED}{\textsc{Qed}}
+\newcommand{\sqlsolver}{\textsc{SQLSolver}}
+\newcommand{\spes}{\textsc{SPES}}
+\newcommand{\wetune}{\textsc{WeTune}}
+\newcommand{\lia}{\textsf{LIA}}
+\newcommand{\liastar}{\textsf{LIA}\ensuremath{^*}}
+
+% ---------- code listings ----------
+\lstdefinestyle{sql}{
+  language=SQL,
+  basicstyle=\ttfamily\small\color{cInk},
+  keywordstyle=\color{cBlue}\bfseries,
+  commentstyle=\color{cGrey}\itshape,
+  stringstyle=\color{cGreen},
+  showstringspaces=false,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  morekeywords={ALL,DISTINCT,GROUP,BY,ORDER,INTERSECT,EXCEPT,VALUES,OVER,PARTITION}
+}
+\lstdefinestyle{plan}{
+  basicstyle=\ttfamily\footnotesize\color{cInk},
+  breaklines=false,
+  columns=fullflexible,
+  keepspaces=true,
+  escapeinside={(@}{@)}
+}
+\lstdefinestyle{pseudo}{
+  basicstyle=\ttfamily\small\color{cInk},
+  keywordstyle=\color{cPurple}\bfseries,
+  morekeywords={procedure,function,for,all,if,then,else,return,while,do,end,foreach,and,or,not},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  mathescape=true
+}
+\lstset{style=sql}
+
+% ---------- boxed "key idea" ----------
+\newcommand{\keybox}[2]{%
+  \begin{center}
+  \begin{tikzpicture}
+    \node[draw=cAmber,fill=cAmberBg,line width=0.9pt,rounded corners=3pt,
+          inner sep=8pt,text width=0.92\linewidth,align=left]
+      {\textbf{\color{cAmber}#1}\\[2pt]#2};
+  \end{tikzpicture}
+  \end{center}}
+
+\newcommand{\warnbox}[2]{%
+  \begin{center}
+  \begin{tikzpicture}
+    \node[draw=cRed,fill=cGreyBg,line width=0.9pt,rounded corners=3pt,
+          inner sep=8pt,text width=0.92\linewidth,align=left]
+      {\textbf{\color{cRed}#1}\\[2pt]#2};
+  \end{tikzpicture}
+  \end{center}}

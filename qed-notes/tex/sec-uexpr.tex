@@ -1,0 +1,463 @@
+\section{U-expressions: the U-semiring and \udp{}}
+\label{sec:uexpr}
+
+\emph{Source: Chu, Murphy, Roesch, Cheung, Suciu, PVLDB 11(11), 2018~\cite{udp}.}
+
+\subsection{The design goal, and the two constraints that shaped it}
+
+The authors wanted an algebra in which SQL equivalence proofs are \emph{machine-checkable
+down to axioms}, so they could be discharged in Coq. That imposes two constraints that
+explain almost every design choice:
+
+\begin{enumerate}
+\item \textbf{Everything must be an identity} (an equation $E_1 = E_2$), not a logical
+      sentence like $\forall t\,(\phi \Rightarrow \psi)$. Identities can be used as rewrite
+      rules; implications need a theorem prover. This is why the key constraint gets the
+      unusual definition in \S\ref{sec:key}.
+\item \textbf{As few axioms as possible.} Fewer axioms means a smaller trusted base and a
+      simpler proof search. The paper deliberately \emph{excludes} an order relation
+      $\le$, even though $\le$ would make keys easy to state.
+\end{enumerate}
+
+\subsection{The U-semiring}
+
+\begin{definition}[U-semiring, \cite{udp} Def.\ 3.1]
+An \emph{unbounded semiring} is a structure
+$(\Usemi,0,1,+,\times,\sq{\cdot},\notu{\cdot},(\usum{D})_{D\in\mathcal D})$ where
+$(\Usemi,0,1,+,\times)$ is a commutative semiring and the extra operations satisfy the
+axioms below.
+\end{definition}
+
+A commutative semiring is just ``arithmetic without subtraction'': $+$ and $\times$ are
+associative and commutative, $0$ is the unit of $+$, $1$ the unit of $\times$, $\times$
+distributes over $+$, and $0 \times x = 0$.
+
+\paragraph{Squash $\sq{\cdot}$ (models \lstinline|DISTINCT|).}
+\begin{align}
+\sq{0} &= 0, &  \sq{1+x} &= 1 \label{ax:sq1}\\
+\sq{\sq{x}+y} &= \sq{x+y} \label{ax:sq2}\\
+\sq{x}\times\sq{y} &= \sq{x\times y} \label{ax:sq3}\\
+\sq{x}\times\sq{x} &= \sq{x} \label{ax:sq4}\\
+x \times \sq{x} &= x \label{ax:sq5}\\
+x^2 = x &\;\Rightarrow\; \sq{x} = x \label{ax:sq6}
+\end{align}
+
+\paragraph{Negation $\notu{\cdot}$ (models \lstinline|NOT EXISTS|).}
+\begin{align}
+\notu{0} &= 1 \label{ax:not1}\\
+\notu{x\times y} &= \sq{\notu{x}+\notu{y}} \label{ax:not2}\\
+\notu{x+y} &= \notu{x}\times\notu{y} \label{ax:not3}\\
+\notu{\sq{x}} &= \sq{\notu{x}} = \notu{x} \label{ax:not4}
+\end{align}
+
+\paragraph{Unbounded summation $\usum{t}$ (models projection).}
+\begin{align}
+\usum{t}\bigl(f_1(t)+f_2(t)\bigr) &= \usum{t}f_1(t) + \usum{t}f_2(t) \label{ax:s7}\\
+\usum{t_1}\usum{t_2} f(t_1,t_2) &= \usum{t_2}\usum{t_1} f(t_1,t_2) \label{ax:s8}\\
+x \times \usum{t} f(t) &= \usum{t} \bigl(x\times f(t)\bigr) \label{ax:s9}\\
+\Bigl\lVert \usum{t} f(t) \Bigr\rVert &= \Bigl\lVert \usum{t} \sq{f(t)} \Bigr\rVert \label{ax:s10}
+\end{align}
+
+\paragraph{Predicates and equality.}
+For each SQL predicate $b$ there is $\ind{b}\in\Usemi$ with
+\begin{align}
+\ind{b} &= \sq{\ind{b}} \label{ax:p11}
+\intertext{and equality satisfies \emph{excluded middle}, \emph{substitution of equals} and
+\emph{uniqueness}:}
+\ind{e_1=e_2} + \ind{e_1\neq e_2} &= 1 \label{ax:p12}\\
+f(e_1)\times\ind{e_1=e_2} &= f(e_2)\times\ind{e_1=e_2} \label{ax:p13}\\
+\usum{t}\ind{t=e} &= 1 \label{ax:p14}
+\end{align}
+
+\begin{lemma}[the workhorse, \cite{udp} Eq.\ 15]\label{lem:15}
+$\displaystyle \usum{t}\ind{t=e}\times f(t) = f(e).$
+\end{lemma}
+\begin{proof}
+By \eqref{ax:p13}, $\usum{t}\ind{t=e}f(t) = \usum{t}\ind{t=e}f(e)$; by \eqref{ax:s9} pull
+$f(e)$ out, giving $f(e)\times\usum{t}\ind{t=e}$; by \eqref{ax:p14} the sum is $1$.
+\end{proof}
+
+\keybox{Lemma \ref{lem:15} is the single most-used rule in the whole system}{%
+It says: \emph{a summation whose body pins the summation variable to a value collapses to
+that one value.} A join condition \lstinline|ON x = a| creates exactly such a pin, which is
+why join conditions make summations disappear. \QED{} rediscovers this as ``stabilisation''
+(\S\ref{sec:stabilise}) but finds the pin with an SMT solver instead of syntactically.}
+
+\subsection{Which structures actually \emph{are} U-semirings?}
+
+This matters for soundness. The paper gives four models~\cite[\S3.1]{udp}:
+$\mathbb{N}$ (if all summation domains are finite);
+$\Nbar = \mathbb{N}\cup\{\infty\}$ (for arbitrary domains, with $x+\infty=\infty$,
+$0\times\infty=0$, $x\times\infty=\infty$ for $x\neq0$);
+univalent types; and cardinal numbers.
+
+$\Nbar$ is the one to keep in mind --- and note that \QED{} later takes $\Nbar$ as its
+\emph{only} model rather than as one model among many. That single decision is most of the
+difference between the two systems.
+
+\begin{remark}[why no order relation]
+One could define a key by ``every key value occurs at most once'', i.e.\
+$\usum{t}R(t)\times\ind{t.k=e} \le 1$. But $\le$ requires an ordered semiring, adding
+axioms. The paper instead finds an \emph{equational} formulation (\S\ref{sec:key}).
+Beware: axioms that look obviously true may not be. The paper's counterexample is the
+semiring of diagonal $2\times2$ matrices over $\Nbar$, in which the plausible rule
+``if $x\neq0$ then $\sq{x}=1$'' fails.
+\end{remark}
+
+\subsection{Translating SQL into U-expressions}
+
+Every query $q$ becomes a function $\den{q} : \Tup{\sigma}\to\Usemi$.
+
+\begin{align*}
+\den{R} &= \lam{t}{R(t)}\\
+\den{\text{\texttt{SELECT * FROM R x, S y}}} &= \lam{(t_1,t_2)}{R(t_1)\times S(t_2)}\\
+\den{\text{\texttt{SELECT * FROM R WHERE b}}} &= \lam{t}{\ind{b}\times R(t)}\\
+\den{\text{\texttt{SELECT a FROM R}}} &= \lam{t}{\usum{t'}\ind{t'.a = t}\times R(t')}\\
+\den{\text{\texttt{q1 UNION ALL q2}}} &= \lam{t}{\den{q_1}(t)+\den{q_2}(t)}\\
+\den{\text{\texttt{DISTINCT q}}} &= \lam{t}{\sq{\den{q}(t)}}\\
+\den{\text{\texttt{EXISTS q}}} &= \sq{\den{q}}, \qquad
+\den{\text{\texttt{NOT EXISTS q}}} = \notu{\den{q}}
+\end{align*}
+Boolean connectives follow the same pattern: \texttt{AND} $\mapsto \times$,
+\texttt{OR} $\mapsto +$, \texttt{NOT} $\mapsto \notu{\cdot}$.
+
+\paragraph{Aggregates.}
+\udp{} treats every aggregate as an \emph{uninterpreted function} applied to a
+U-expression: $\mathrm{agg}(E)$ is a value expression usable inside a predicate, e.g.\
+$\ind{\mathrm{agg}(E)=t.a}$. Nothing is known about it except congruence: equal arguments
+give equal results. \lstinline|GROUP BY| is de-sugared into a correlated subquery
+\cite[\S3.2]{udp}:
+
+\begin{lstlisting}[style=sql]
+SELECT x.k AS k, agg(x.a) AS a1 FROM R x GROUP BY x.k
+-- becomes
+SELECT y.k AS k,
+       agg(SELECT x.a AS a FROM R x WHERE x.k = y.k) AS a1
+FROM R y
+\end{lstlisting}
+
+\begin{remark}[an implementation trap]\label{rem:groupby}
+As printed above (and in the paper), the outer query iterates over \emph{every} row of
+\texttt{R}, so a key occurring twice yields two output rows --- but \lstinline|GROUP BY|
+emits one row per \emph{distinct} key. A faithful de-sugaring needs
+\lstinline|SELECT DISTINCT| on the outer query, i.e.\ a squash. \QED{} makes this explicit
+in its \texttt{GroupBy} rule (\S\ref{sec:qsem}), where the group-non-empty factor is
+wrapped in $\sq{\cdot}$. If you implement the de-sugaring literally you will get wrong
+multiplicities.
+\end{remark}
+
+\subsection{Sum-Product Normal Form (SPNF)}
+
+\begin{definition}[SPNF, \cite{udp} Def.\ 3.3]\label{def:spnf}
+$E$ is in SPNF if $E = T_1+\cdots+T_n$ and each term has the shape
+\[
+T \;=\; \usum{t_1,\dots,t_m}\ \ind{b_1}\times\cdots\times\ind{b_k}
+\;\times\; \sq{E_s} \;\times\; \notu{E_n} \;\times\; M_1\times\cdots\times M_j
+\]
+where each $M_i$ is a table application $R(t)$, each $\ind{b_i}$ a predicate,
+\textbf{exactly one} squash factor $\sq{E_s}$ (omitted when $E_s=1$),
+\textbf{exactly one} negation factor $\notu{E_n}$ (omitted when $E_n=0$), and
+$E_s,E_n$ are themselves in SPNF.
+\end{definition}
+
+Think of SPNF as ``disjunctive normal form for bags'': a sum of products, all summations
+hoisted to the front, all predicates to the left, all squashes fused into one.
+
+\begin{theorem}[\cite{udp} Thm.\ 3.4]
+Every U-expression can be rewritten into SPNF using only U-semiring axioms.
+\end{theorem}
+
+The rewrite system, applied left-to-right until fixpoint:
+\begin{align*}
+E_1\times(E_2+E_3) &\rightsquigarrow E_1E_2+E_1E_3 &
+(E_1+E_2)\times E_3 &\rightsquigarrow E_1E_3+E_2E_3\\
+E_1\times(E_2\times E_3) &\rightsquigarrow (E_1\times E_2)\times E_3 &
+\cdots M\ind{b}\cdots &\rightsquigarrow \cdots \ind{b} M\cdots\\
+\usum{t}(f_1+f_2) &\rightsquigarrow \usum{t}f_1+\usum{t}f_2 &
+E\times\usum{t}f(t) &\rightsquigarrow \usum{t}E\times f(t)\\
+\Bigl(\usum{t}f(t)\Bigr)\times E &\rightsquigarrow \usum{t}f(t)\times E &
+\sq{E_1}\times\sq{E_2} &\rightsquigarrow \sq{E_1\times E_2}\\
+\notu{E_1}\times\notu{E_2} &\rightsquigarrow \notu{E_1+E_2} &&
+\end{align*}
+Each rule is an axiom used in one direction; each strictly makes progress, so the system
+terminates. Note how \eqref{ax:sq3} and \eqref{ax:not3} are exactly what let you
+\emph{merge} multiple squashes and negations into the single ones Definition~\ref{def:spnf}
+demands.
+
+\subsection{Integrity constraints as identities}
+\label{sec:key}
+
+This is \udp{}'s most original contribution and the part most worth stealing.
+
+\begin{definition}[KEY, \cite{udp} Def.\ 4.1]\label{def:key}
+$R.k$ is a key iff for all $t,t'$:
+\[
+\ind{t.k = t'.k}\times R(t)\times R(t') \;=\; \ind{t=t'}\times R(t).
+\]
+\end{definition}
+
+Why this is the right definition, in two steps. Set $t=t'$: the left becomes
+$R(t)\times R(t)$ and the right $R(t)$, so $R(t)^2 = R(t)$, which over $\mathbb{N}$ forces
+$R(t)\in\{0,1\}$ --- \emph{no duplicate rows}. Now take $t\neq t'$ with $t.k=t'.k$: the
+right side is $0$, so $R(t)\times R(t')=0$, i.e.\ at most one of them is present ---
+\emph{no two rows share a key}. Together:
+
+\begin{theorem}[\cite{udp} Thm.\ 4.2]
+Over the U-semiring $\mathbb{N}$, Definition~\ref{def:key} holds iff $R.k$ is a key in the
+ordinary sense.
+\end{theorem}
+
+\begin{definition}[FOREIGN KEY, \cite{udp} Def.\ 4.4]\label{def:fk}
+$S.k'$ references $R.k$ iff
+$\;S(t') = S(t')\times\usum{t}R(t)\times\ind{t.k=t'.k'}$.
+\end{definition}
+Read it as: ``if $t'$ is in $S$ then multiplying by the number of matching $R$ rows changes
+nothing'', which over $\mathbb{N}$ forces that number to be exactly $1$ whenever
+$S(t')\neq0$.
+
+\begin{theorem}[key implies squash-stability, \cite{udp} Thm.\ 4.3]\label{thm:43}
+If $R.k$ is a key then for any $E$, $e$, $b$:
+\[
+\usum{t}\ind{b}\times\sq{E}\times\ind{t.k=e}\times R(t)
+=\Bigl\lVert \usum{t}\ind{b}\times\sq{E}\times\ind{t.k=e}\times R(t)\Bigr\rVert.
+\]
+\end{theorem}
+\begin{proof}[Proof sketch]
+By \eqref{ax:sq6} it suffices to show the left side squared equals itself. Multiply
+Definition~\ref{def:key} through by $\ind{b}^2\sq{E}^2$ (using $\ind{b}^2=\ind{b}$ and
+$\sq{E}^2=\sq{E}$), sum over $t$ and $t'$, apply \eqref{ax:s9} twice on the left and
+Lemma~\ref{lem:15} on the right.
+\end{proof}
+
+\noindent\textbf{Why Theorem~\ref{thm:43} matters:} it is the formal statement of
+``a lookup by key returns at most one row''. It is what turns a key into a squash, and it
+is the ancestor of \QED{}'s much simpler rule $S \rightsquigarrow \lam{a}{\sq{S(a)}}$.
+
+\paragraph{Views and indexes.} A view becomes an assertion $v(t)=q(t)$ and is inlined. An
+index on $R.a$ is modelled, GMAP-style, as the view
+\lstinline|SELECT x.a, x.k FROM R x| where $k$ is the key --- then inlined too. So indexes
+need no new machinery.
+
+\subsection{A complete worked proof: the index rewrite}
+\label{sec:udp-worked}
+
+This is \cite[Ex.\ 4.7]{udp}, and it is the best single illustration of axiom-chasing.
+$R$ has key $k$; $I$ is an index on $R.a$.
+
+\begin{lstlisting}[style=sql]
+-- Q1 : plain scan
+SELECT * FROM R WHERE R.a >= 12
+-- Q2 : index lookup
+SELECT t2.* FROM I t1, R t2 WHERE t1.k = t2.k AND t1.a >= 12
+\end{lstlisting}
+
+$\den{Q_1}(t) = R(t)\times\ind{t.a\ge 12}$. Inlining $I$ and normalising to SPNF:
+\[
+\den{Q_2}(t)=\usum{t_1,t_2,t_3}
+\ind{t_2=t}\ind{t_1.k=t_2.k}\ind{t_1.a\ge12}\ind{t_3.k=t_1.k}\ind{t_3.a=t_1.a}R(t_3)R(t_2).
+\]
+
+\begin{enumerate}
+\item $t_1$ ranges over tuples of $I$'s schema, namely $(k,a)$. The two equalities
+      $\ind{t_3.k=t_1.k}$ and $\ind{t_3.a=t_1.a}$ therefore \emph{determine} $t_1$
+      completely: $\ind{t_1 = (t_3.k,t_3.a)}$. Apply Lemma~\ref{lem:15} to delete
+      $\usum{t_1}$ and substitute:
+      \[
+      \usum{t_2,t_3}\ind{t_2=t}\ind{t_3.k=t_2.k}\ind{t_3.a\ge12}R(t_3)R(t_2).
+      \]
+\item Apply the KEY identity (Def.~\ref{def:key}) to
+      $\ind{t_3.k=t_2.k}R(t_3)R(t_2) = \ind{t_2=t_3}R(t_2)$:
+      \[
+      \usum{t_2,t_3}\ind{t_2=t}\ind{t_3.a\ge12}R(t_2)\ind{t_2=t_3}.
+      \]
+\item Lemma~\ref{lem:15} on $t_3$ (pinned to $t_2$), then on $t_2$ (pinned to $t$):
+      \[
+      \den{Q_2}(t) = \ind{t.a\ge12}\times R(t) = \den{Q_1}(t).\qquad\blacksquare
+      \]
+\end{enumerate}
+
+\keybox{The proof strategy in one sentence}{%
+Put both queries in SPNF, then repeatedly (i) delete summations whose variable is pinned,
+and (ii) apply constraint identities, until the two expressions are \emph{syntactically
+identical}.}
+
+\subsection{The decision procedure}
+
+\udp{} is three mutually recursive procedures. Read them together with
+Definition~\ref{def:spnf}; each procedure handles one layer of that grammar.
+
+\begin{center}
+\begin{tikzpicture}[node distance=8mm,
+  b/.style={draw=cGrey,fill=cGreyBg,rounded corners=3pt,inner sep=5pt,
+            font=\footnotesize\sffamily,align=center,minimum width=26mm},
+  ar/.style={-{Stealth[length=2.2mm]},cGrey,thick}]
+\node[b,fill=cBlueBg,draw=cBlue] (u) {\textbf{UDP}\\sum of terms\\$T_1+\cdots+T_n$};
+\node[b,fill=cAmberBg,draw=cAmber,right=14mm of u] (t) {\textbf{TDP}\\one term\\$\usum{\vec t}\cdots$};
+\node[b,fill=cGreenBg,draw=cGreen,right=14mm of t] (s) {\textbf{SDP}\\squashed\\$\sq{E}$};
+\draw[ar] (u)--node[above,font=\tiny\sffamily]{per term}(t);
+\draw[ar] (t)--node[above,font=\tiny\sffamily]{$\sq{E_s}$ factor}(s);
+\draw[ar] (t.south) to[out=-60,in=-120] node[below,font=\tiny\sffamily]{$\notu{E_n}$ factor} (u.south);
+\draw[ar] (s.north) to[out=120,in=60] node[above,font=\tiny\sffamily]{canonize} (u.north);
+\end{tikzpicture}
+\end{center}
+
+\paragraph{Step 0: canonize (\cite{udp} Alg.\ 1).}
+Given $E$ in SPNF and constraint set $C$:
+\begin{enumerate}
+\item Close equality predicates under transitivity:
+      $\ind{e_1{=}e_2}\ind{e_2{=}e_3} = \ind{e_1{=}e_2}\ind{e_2{=}e_3}\ind{e_1{=}e_3}$.
+\item Repeatedly apply Lemma~\ref{lem:15} to delete pinned summations.
+\item For each key constraint, rewrite with Def.~\ref{def:key} and Thm.~\ref{thm:43}.
+\item For each foreign key, rewrite with Def.~\ref{def:fk}.
+\end{enumerate}
+
+\warnbox{Canonization may not terminate}{%
+Steps 3--4 are a \emph{chase}. The paper says so explicitly: a cycle in the
+key/foreign-key graph can loop forever. Their mitigation is pragmatic --- step 4 is applied
+to squashed expressions only until the result stops changing (checked by calling
+\textsc{SDP}), and elsewhere only until no new base relation is introduced. If you
+implement this, put a depth bound on it.}
+
+\paragraph{Step 1: \textsc{UDP} (\cite{udp} Alg.\ 2).}
+\begin{lstlisting}[style=pseudo]
+procedure UDP(E1, E2, C):
+    E1 <- canonize(E1, C);  E2 <- canonize(E2, C)
+    # E1 = T(1,1)+...+T(1,n),  E2 = T(2,1)+...+T(2,m)
+    if m != n: return false                 # <-- the hard ceiling
+    for each permutation p of E1's terms:
+        if for all i: TDP(p[i], T(2,i), C): return true
+    return false
+\end{lstlisting}
+
+\paragraph{Step 2: \textsc{TDP} (\cite{udp} Alg.\ 3).}
+Two terms are compared by searching for a \emph{bijection} $h$ between their summation
+variables; after substituting, the terms must match componentwise:
+\begin{itemize}
+\item \textbf{predicates:} $\ind{b_{1,1}}\cdots\ind{b_{1,k}} = \ind{b_{2,1}}\cdots\ind{b_{2,m}}$,
+      decided by \emph{congruence closure} --- compute equivalence classes of variables and
+      function applications and compare. E.g.\ $\ind{a{=}b}\ind{c{=}d}\ind{b{=}e}\ind{f(a){=}g(d)}$
+      matches $\ind{a{=}b}\ind{a{=}e}\ind{c{=}d}\ind{f(e){=}g(c)}$ via the classes
+      $\{a,b,e\},\{c,d\},\{f(a),f(e)\},\{g(c),g(d)\}$. Aggregates appearing in predicates are
+      treated as uninterpreted functions here.
+\item \textbf{squash factors:} $\sq{E_{1,1}}$ vs $\sq{E_{2,1}}$ by \textsc{SDP};
+\item \textbf{negation factors:} by calling \textsc{UDP} recursively;
+\item \textbf{table factors:} same number, and $M_{1,1},\dots,M_{1,j}$ \emph{identical} to
+      $M_{2,1},\dots,M_{2,\ell}$.
+\end{itemize}
+
+\warnbox{Where \udp{} is weakest}{%
+The predicate check is congruence closure over \emph{uninterpreted} functions. It proves
+$\ind{a{=}b}\Rightarrow\ind{f(a){=}f(b)}$ but it does \emph{not} know arithmetic. So
+$\ind{a+b=0}$ and $\ind{a=-b}$ are different predicates to \udp{}, and it fails. This one
+limitation motivates both successors: \spes{} and \QED{} call an SMT solver here instead.}
+
+\paragraph{Step 3: \textsc{SDP} (\cite{udp} Alg.\ 4).}
+Under a squash, multiplicities do not matter, so \emph{set} reasoning applies. \textsc{SDP}
+first flattens nested squashes using
+\begin{lemma}[\cite{udp} Lem.\ 5.1]
+$\sq{a\times\sq{x}+y} = \sq{a\times x+y}$ in any U-semiring.
+\end{lemma}
+then canonizes both sides and checks mutual containment --- but without an order relation
+it cannot express containment directly. Instead it \emph{minimises} each term using only
+U-semiring axioms (the analogue of conjunctive-query minimisation) and compares the minimal
+forms syntactically:
+\[
+\forall i\,\exists j.\ \mathrm{minimize}(\sq{T_i})=\mathrm{minimize}(\sq{T'_j})
+\ \wedge\
+\forall j\,\exists i.\ \mathrm{minimize}(\sq{T'_j})=\mathrm{minimize}(\sq{T_i}).
+\]
+
+\begin{example}[\cite{udp} Ex.\ 5.2 --- self-join under DISTINCT]
+\lstinline|SELECT DISTINCT x.a FROM R x, R y| $\;\equiv\;$ \lstinline|SELECT DISTINCT R.a FROM R|.
+\[
+Q_1(t)=\Bigl\lVert\usum{t_1,t_2}\ind{t_1.a=t}R(t_1)R(t_2)\Bigr\rVert
+\]
+Insert $1 = \ind{t_1{=}t_2}+\ind{t_1{\neq}t_2}$ by \eqref{ax:p12} and distribute:
+\[
+Q_1(t)=\Bigl\lVert\usum{t_1}\ind{t_1.a{=}t}R(t_1)R(t_1)
++\usum{t_1,t_2}\ind{t_1{\neq}t_2}\ind{t_1.a{=}t}R(t_1)R(t_2)\Bigr\rVert
+\]
+(the first sum used Lemma~\ref{lem:15} on $t_2$). By \eqref{ax:s10} and \eqref{ax:sq4},
+$R(t_1)R(t_1)$ under a squash becomes $R(t_1)$. Factor with \eqref{ax:s7}/\eqref{ax:s9}:
+\[
+Q_1(t)=\Bigl\lVert\usum{t_1}\ind{t_1.a{=}t}R(t_1)\times\bigl(1+\usum{t_2}\ind{t_1{\neq}t_2}R(t_2)\bigr)\Bigr\rVert
+\]
+and by \eqref{ax:sq1} ($\sq{1+x}=1$) together with \eqref{ax:sq3}, the parenthesised factor
+collapses, giving $\sq{\usum{t_1}\ind{t_1.a=t}R(t_1)} = Q_2(t)$.
+\end{example}
+
+\subsection{Guarantees}
+
+\begin{theorem}[soundness, \cite{udp} Thm.\ 5.3]
+If \textsc{UDP} returns true, the queries are equivalent under standard SQL semantics.
+\end{theorem}
+The argument is short because every step is an axiom application, and $\mathbb{N}$ is a
+model of the axioms.
+
+\begin{theorem}[completeness for UCQ]
+\textsc{UDP} is complete when both inputs are unions of conjunctive queries, evaluated
+under set semantics only, or under bag semantics only.
+\end{theorem}
+For a bag CQ \lstinline|SELECT p FROM R1 t1,...,Rn tn WHERE b| with $b$ a conjunction of
+equalities, canonization yields the \emph{unique} canonical form
+$\usum{t_1\ldots t_n}\ind{b}R_1(t_1)\cdots R_n(t_n)$; for the set version the same inside a
+squash. Uniqueness plus the term-matching search gives completeness.
+
+\begin{remark}[a genuine incompleteness, and it is interesting]
+U-equivalence is \emph{stronger} than SQL equivalence, because U-semirings include models
+with infinite relations. Take a first-order \emph{infinity axiom} $\varphi$ --- a sentence
+false on every finite $R$ but satisfiable on an infinite one (e.g.\ ``$R$ is a non-empty,
+injective, non-surjective function''). Encode $\varphi$ as a query $Q$ returning one row
+when $\varphi$ holds and none otherwise. On every finite database $Q$ is equivalent to the
+empty query, but they are \emph{not} U-equivalent, because they differ in the model $\Nbar$
+with infinite support. So \udp{} must answer UNKNOWN. This is the price of keeping
+unbounded summation primitive.
+\end{remark}
+
+\subsection{\udp{} on the running example --- and why it fails}
+\label{sec:udp-fails}
+
+Take $Q_1,Q_2$ from \S\ref{sec:running}. Two things go wrong, and both are structural.
+
+\paragraph{(a) The aggregate is a black box compared out of context.}
+After de-sugaring, both queries contain $\mathrm{Sum}$ applied to a U-expression. \udp{}
+can conclude $\mathrm{Sum}(E_1)=\mathrm{Sum}(E_2)$ only by congruence, i.e.\ only if
+$E_1$ and $E_2$ are equal \emph{as U-expressions}. Here
+\[
+E_1 = \lam{y}{R(x,y)\times\sq{S(x)}} \qquad\text{versus}\qquad E_2=\lam{y}{R(x,y)},
+\]
+and these are genuinely \emph{not} equal: when $x$ does not occur in $S$, the left is $0$
+and the right is not. The recursive check is performed with no knowledge of the enclosing
+context, so it fails --- correctly, but uselessly. Fixing this is precisely \QED{}'s
+$\phi_1\vee\phi_2$ trick (\S\ref{sec:ambient}).
+
+\paragraph{(b) Predicate matching is syntactic.}
+Even the easy part --- deleting $\usum{a}$ using $\ind{x=a}$ --- only works when the pin is
+syntactically visible. Write the join condition as \lstinline|x - a = 0| and \udp{} no
+longer sees it.
+
+\paragraph{What \udp{} \emph{can} do here.}
+It handles the primary key fine: Theorem~\ref{thm:43} converts the key lookup into a
+squash, exactly as needed. The key machinery is not the weak point --- the aggregate and
+the syntactic predicate check are.
+
+\subsection{Scorecard for U-expressions as of 2018}
+
+\begin{table}[h]\centering\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Strong} & minimal axiom set, machine-checkable proofs, first equational treatment of
+keys/foreign keys, UCQ-complete under set \emph{or} bag semantics, handles mixed
+set/bag queries and \lstinline|NOT EXISTS|.\\
+\midrule
+\textbf{Weak} & syntactic predicate matching (no arithmetic); aggregates uninterpreted and
+compared out of context; \lstinline|UDP| bails when the two sides have different numbers of
+terms; canonization may not terminate; no NULL semantics at all, hence no outer joins;
+proved 33--34 of the 232 Calcite pairs.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Both successors attack exactly one of these lists. \QED{} attacks ``no NULLs, no SMT,
+context-free subquery checks''. \sqlsolver{} attacks ``different numbers of terms,
+uninterpreted aggregates''.

@@ -1,0 +1,361 @@
+\section{U-expressions $+$ \liastar{}: \sqlsolver{}}
+\label{sec:lia}
+
+\emph{Source: Ding, Wang, Yang, Zhang, Xu, Chen, Piskac, Li. PACMMOD 1(4), Art.\ 227
+(SIGMOD), 2023~\cite{sqlsolver}.}
+
+\subsection{The diagnosis}
+
+\sqlsolver{} keeps the U-expression formalism --- it adds new \emph{translation} rules
+(\S\ref{sec:ext-uexpr}) but no new algebraic operators --- and asks a sharper question:
+\emph{what, specifically, blocks a semantics-based prover?} Its answer is the unbounded
+summation.
+
+Once you translate two queries to $f_1(t)$ and $f_2(t)$, equivalence is the
+unsatisfiability of $\exists t.\ f_1(t)\neq f_2(t)$. If $f_1,f_2$ were plain arithmetic an
+SMT solver would settle it. But they contain $\usum{t}$, and no SMT solver has a theory of
+unbounded sums. Prior systems coped by:
+
+\begin{itemize}
+\item \udp{}: demand the summations be \emph{syntactically identical} after normalisation.
+\item \wetune{}: a handful of heuristics --- essentially only the case where both sides have
+      exactly one summation, handled by comparing the summands.
+\end{itemize}
+
+Neither survives contact with real queries. The paper quantifies it: on the Calcite suite,
+$180$ of the pairs have unbounded summations in their U-expressions; \udp{} handles $33$,
+\wetune{} $71$.
+
+\begin{example}[the motivating failure --- differing \emph{numbers} of summations]
+\label{ex:splitunion}
+\begin{lstlisting}[style=sql]
+Q1: select x from R where y<=1000
+    union all
+    select x from R where y>1000 and z<500
+Q2: select x from R where y<=1000 or z<500
+\end{lstlisting}
+\[
+f_1(t)=\usum{t_1}E_1+\usum{t_1}E_2, \qquad f_2(t)=\usum{t_1}E_3
+\]
+with $E_1=\ind{t{=}x(t_1)}R(t_1)\ind{y(t_1){\le}1000}$,
+$E_2=\ind{t{=}x(t_1)}R(t_1)\ind{y(t_1){>}1000}\ind{z(t_1){<}500}$,
+$E_3=\ind{t{=}x(t_1)}R(t_1)\ind{y(t_1){\le}1000\vee z(t_1){<}500}$.
+
+\textbf{Two summations on the left, one on the right.} \udp{} rejects immediately (its
+Alg.~2 returns false when the term counts differ). \wetune{}'s rules do not cover
+$\usum{}+\usum{}$. Yet the queries are obviously equivalent, since the two filters are
+disjoint and cover the disjunction.
+
+\emph{Fairness note.} \QED{} --- published after \sqlsolver{} --- \emph{does} handle this
+shape, because the query lies in its complete fragment $\mathcal F_T$ and Alg.~3 groups
+terms by relational scope, comparing $\ind{P_1}+\ind{P_2}$ with $\ind{P_3}$ pointwise. What
+\liastar{} adds is generality: it requires neither a shared relational scope nor membership
+in a fragment, and it keeps working under aggregates, nesting and non-linearity
+(\S\ref{sec:lia-challenges}).
+\end{example}
+
+\subsection{\lia{} and \liastar{}}
+
+\begin{definition}[\lia{}]
+Linear integer arithmetic: first-order formulas over $\le$ and $=$ whose terms are
+$T ::= x \mid c \mid T_1+T_2 \mid c\times T_1 \mid \mathrm{ite}(F,T_1,T_2)$.
+Note $c\times T$ --- multiplication by a \emph{constant} only. Two variables may never be
+multiplied. Decidable, and Z3 is good at it.
+\end{definition}
+
+\begin{definition}[additive closure]
+For a set $S$ of integer vectors,
+$S^* = \bigl\{\,\vec v \;\bigm|\; \vec v=\sum_{i=1}^{n}\lambda_i \vec v_i,\ \vec v_i\in S,\ \lambda_i\ge0 \,\bigr\}$
+--- all non-negative integer combinations of members of $S$, with $n$ arbitrary.
+\end{definition}
+
+\begin{definition}[\liastar{}]
+A formula of the shape
+$\exists \vec u,\vec v.\ F_1(\vec u,\vec v) \wedge \vec v \in \{\vec x \mid F_2(\vec x)\}^*$
+with $F_1,F_2$ in \lia{}.
+\end{definition}
+
+\keybox{Why $\{\cdot\}^*$ is exactly the right tool}{%
+$\usum{t}f(t)$ adds up $f$ over an unknown, unbounded number of tuples. $S^*$ is the set of
+things obtainable by adding up an unknown, unbounded number of members of $S$. Take $S$ to
+be the set of possible \emph{per-tuple contribution vectors}, and the value of the
+summation is precisely an element of $S^*$. The unboundedness moves from the sum's index
+into the closure operator, where a decision procedure already exists.}
+
+\begin{theorem}[\cite{piskac,levatich}; \cite{sqlsolver} Thm.\ 4.1]\label{thm:liastar}
+Every \liastar{} formula has an equisatisfiable \lia{} formula: there is a $k$ with
+\[
+\exists \vec u,\vec v,\vec x_1,\dots,\vec x_k,\lambda_1,\dots,\lambda_k.\
+F_1(\vec u,\vec v)\wedge \vec v=\sum_{i=1}^{k}\lambda_i\vec x_i \wedge F_2(\vec x_1)\wedge\cdots\wedge F_2(\vec x_k).
+\]
+Satisfiability of \liastar{} is NP-complete.
+\end{theorem}
+
+The $\vec x_i$ are \emph{generators} of $F_2$: every solution of $F_2$ is a non-negative
+combination of them. \sqlsolver{} computes them with the incremental approximation method
+of Levatich et al.~\cite{levatich}.
+
+\begin{example}[generators, concretely]
+For $F_2 \equiv (x_3=x_1+x_2)$ the generators are $(1,0,1)$ and $(0,1,1)$: every solution is
+$\lambda_1(1,0,1)+\lambda_2(0,1,1)$. So
+$\vec v\in\{\vec x\mid x_3=x_1+x_2\}^*$ becomes
+$\exists\lambda_1,\lambda_2.\ \vec v=\lambda_1(1,0,1)+\lambda_2(0,1,1)$, which is plain \lia{}.
+\end{example}
+
+\subsection{The algorithm, on Example~\ref{ex:splitunion}}
+
+\begin{description}
+\item[Step 1.] Translate to U-expressions; the goal is unsatisfiability of
+  $\exists t.\ f_1(t)\neq f_2(t)$, i.e.\ $\usum{t_1}E_1+\usum{t_1}E_2\neq\usum{t_1}E_3$.
+
+\item[Step 2.] Name each summation. Introduce $v_i$ with $v_i=\usum{t_1}E_i$ and write them
+  as one vector equation:
+  \[
+  \exists t,v_1,v_2,v_3.\ v_1+v_2\neq v_3 \ \wedge\ (v_1,v_2,v_3)=\usum{t_1}(E_1,E_2,E_3).
+  \]
+  \emph{This vectorisation is the key move}: three separate scalar sums over the same index
+  become one vector-valued sum, which is what the closure operator consumes.
+
+\item[Step 3.] Replace the vector sum by additive closure:
+  \[
+  \exists t,\vec v.\ v_1+v_2\neq v_3\ \wedge\ \vec v\in\{(x_1,x_2,x_3)\mid x_1{=}E_1\wedge x_2{=}E_2\wedge x_3{=}E_3\}^*.
+  \]
+
+\item[Step 4.] Replace U-expression syntax by \lia{} terms: $\ind{b}\mapsto\mathrm{ite}(b,1,0)$,
+  $\sq{E}\mapsto\mathrm{ite}(E{=}0,0,1)$, $\notu{E}\mapsto\mathrm{ite}(E{=}0,1,0)$, and every
+  tuple variable, attribute access $x(t_1)$ and table application $R(t_1)$ becomes a fresh
+  integer variable. With $x_4\coloneqq t$, $x_5\coloneqq x(t_1)$, $x_6\coloneqq R(t_1)$,
+  $x_7\coloneqq y(t_1)$, $x_8\coloneqq z(t_1)$:
+  \[
+  \begin{aligned}
+  x_1&=\mathrm{ite}(x_4{=}x_5\wedge x_7{\le}1000,\ x_6,\ 0)\\
+  x_2&=\mathrm{ite}(x_4{=}x_5\wedge x_7{>}1000\wedge x_8{<}500,\ x_6,\ 0)\\
+  x_3&=\mathrm{ite}(x_4{=}x_5\wedge (x_7{\le}1000\vee x_8{<}500),\ x_6,\ 0)
+  \end{aligned}
+  \]
+
+\item[Step 5.] Compute generators and emit \lia{}. Here the solver infers $x_1+x_2=x_3$ from
+  the \texttt{ite} definitions, so the generators are $(1,0,1)$ and $(0,1,1)$, giving
+  \[
+  \exists \vec v,\lambda_1,\lambda_2.\ v_1+v_2\neq v_3\wedge \vec v=\lambda_1(1,0,1)+\lambda_2(0,1,1),
+  \]
+  i.e.\ $\vec v=(\lambda_1,\lambda_2,\lambda_1{+}\lambda_2)$, which forces $v_3=v_1+v_2$ and
+  contradicts $v_1+v_2\neq v_3$. \textbf{Unsatisfiable $\Rightarrow$ the queries are
+  equivalent.} $\blacksquare$
+\end{description}
+
+\keybox{What just happened, in one sentence}{%
+\sqlsolver{} never matched the two sides structurally. It reasoned \emph{arithmetically}
+about the relationship between three sums that share an index --- and the relationship
+$x_1+x_2=x_3$ holds pointwise, so it lifts to the sums. Structural provers cannot express
+that step at all.}
+
+\subsection{Three complications the textbook theory does not cover}
+\label{sec:lia-challenges}
+
+Real U-expressions violate the shape \liastar{} expects in three ways. Each got a new
+procedure.
+
+\paragraph{(1) Nested summations.} A summation whose body contains another summation ---
+which is what subqueries, \lstinline|EXISTS| and aggregates produce. \sqlsolver{} replaces
+each inner $\usum{}e_j$ with a fresh $y_j$ and applies the closure operator again, producing
+a \emph{nested} \liastar{} formula
+$\ell \coloneqq \exists\vec u,\vec v.\ F(\vec u,\vec v)\wedge\vec v\in\{\vec x\mid \ell'(\vec x)\}^*$.
+
+\begin{theorem}[\cite{sqlsolver} Thm.\ 4.2]
+If $\ell'(\vec x)$ is equivalent to a \lia{} formula $F_2$, then $\ell$ is equivalent to
+$\exists\vec u,\vec v.\ F_1(\vec u,\vec v)\wedge\vec v\in\{\vec x\mid F_2(\vec x)\}^*$.
+\end{theorem}
+So nesting is handled by \emph{recursion}: flatten the innermost \liastar{} to \lia{}, then
+the next one out, and so on.
+
+\paragraph{(2) Parameterised summations.} A summation whose body has free variables bound
+outside it, e.g.\ $t_1$ in
+$\usum{t_1}\bigl(\ind{a(t_1){>}3}\times\usum{t_2}\ind{a(t_1){=}a(t_2)}R(t_2)\bigr)$; also
+any summation mentioning non-integer values (strings, reals), which \liastar{} has no sorts
+for.
+
+\paragraph{(3) Non-linear summations.} $\usum{t_1,t_2}R(t_1)\times S(t_2)$ becomes
+$\usum{}(x_1\times x_2)$ --- a product of two variables, forbidden in \lia{}. Joins and
+\lstinline|INTERSECT| produce these constantly. The fix is \textbf{over-approximation}:
+replace the product $x_1 \times x_2$ by a fresh variable $y$, constrained only by
+$y = 0 \leftrightarrow (x_1=0 \vee x_2 = 0)$.
+
+\begin{definition}[over-approximation]
+$Q$ over-approximates $P$ if $\neg Q\to\neg P$. Equivalently every model of $P$ is a model
+of $Q$.
+\end{definition}
+
+\warnbox{The soundness direction, and what it costs}{%
+\sqlsolver{} builds an over-approximation $Q$ of $\exists t.f_1(t)\neq f_2(t)$.
+If $Q$ is \textbf{unsat} then the original is unsat, so the queries are equivalent --- the
+answer you want is sound. If $Q$ is \textbf{sat} you learn \emph{nothing}: the queries may
+still be equivalent. The paper states this plainly as reason (2) for incompleteness. So
+\sqlsolver{} is a prover, never a refuter --- a ``sat'' result is not a counterexample.}
+
+\subsection{Extended U-expressions: modelling more SQL}
+\label{sec:ext-uexpr}
+
+\sqlsolver{}'s second contribution is a larger translation table~\cite[Tab.\ 3--4]{sqlsolver}.
+
+\begin{table}[h]\centering\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\lstinline|INTERSECT| & $\sq{f_l(t)\times f_r(t)}$\\
+\lstinline|INTERSECT ALL| & $E\times f_l(t)+\notu{E}\times f_r(t)$ where $E=\ind{f_l(t)\le f_r(t)}$ \quad(i.e.\ the pointwise \emph{minimum})\\
+\lstinline|VALUES (t1),...| & $\ind{t{=}t_1}+\cdots$\\
+scalar subquery & $\ind{1{=}\usum{t_1}E}\times\sq{\usum{t_1}(E\times\ind{t{=}a(t_1)})}+\mathit{IsNull}(t)\times\notu{\usum{t_1}E}$\\
+\lstinline|CASE WHEN| & $\ind{p_0}\ind{a{=}a_0}+\cdots+\notu{\ind{p_0}}\cdots\notu{\ind{p_{n-1}}}\ind{a{=}a_n}$\\
+\lstinline|a IN (v1,...)| & $\sq{\ind{a(t){=}v_1}+\cdots}$\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The scalar-subquery row repays study: it says ``if the subquery returns exactly one row, $t$
+is that row's value; if it returns none, $t$ is \textsf{Null}''. The $>1$ row case is a
+runtime error and is simply not modelled.
+
+\paragraph{Concrete aggregates --- the big one.}
+\udp{}, \wetune{} and \QED{} all treat aggregates as uninterpreted. \sqlsolver{} writes them
+out. Every entry has the same skeleton:
+\[
+f(t_l\cdot t_r) \coloneqq \underbrace{\ind{p(t_r)}}_{\text{HAVING}}\times
+\underbrace{\Bigl\lVert\usum{t_1}R(t_1)\ind{t_l{=}x(t_1)}\Bigr\rVert}_{\text{the group is non-empty}}\times
+\underbrace{(\text{characterisation of }t_r)}_{\text{the aggregate itself}}
+\]
+where the output row is the concatenation $t_l\cdot t_r$ of group key and aggregate value.
+The third factor per function:
+\begin{align*}
+\textsc{Count}:&\quad \Bigl[t_r=\usum{t_1}R(t_1)\ind{t_l{=}x(t_1)}\notu{\ind{\mathit{IsNull}(y(t_1))}}\Bigr]\\
+\textsc{Sum}:&\quad \Bigl[t_r=\usum{t_1}R(t_1)\ind{t_l{=}x(t_1)}\notu{\ind{\mathit{IsNull}(y(t_1))}}\,y(t_1)\Bigr]\\
+\textsc{Count Distinct}:&\quad \Bigl[t_r=\usum{t_1}\bigl\lVert\usum{t_2}R(t_2)\ind{t_l{=}x(t_2)}\ind{t_1{=}y(t_2)}\notu{\ind{\mathit{IsNull}(y(t_2))}}\bigr\rVert\Bigr]\\
+\textsc{Max}:&\quad \notu{\usum{t_1}R(t_1)\ind{t_l{=}x(t_1)}\ind{y(t_1){>}t_r}}\times\Bigl\lVert\usum{t_1}R(t_1)\ind{t_l{=}x(t_1)}\ind{y(t_1){=}t_r}\Bigr\rVert\\
+\textsc{Avg}:&\quad \bigl[t_r\times(\textsc{Count expr}) = (\textsc{Sum expr})\bigr]
+\end{align*}
+
+Three techniques worth noting. \textsc{Sum} is literally
+$\sum_y y\times(\text{multiplicity})$ --- the definition from \S\ref{sec:prelim} written in
+the algebra. \textsc{Max} is not computed but \emph{characterised} by two properties (``no
+element exceeds $t_r$'' and ``some element equals $t_r$''), because a maximum cannot be
+expressed as a sum. \textsc{Avg} avoids division by asserting
+$t_r\times\mathrm{count}=\mathrm{sum}$.
+
+\begin{remark}[the payoff]
+This is what lets \sqlsolver{} prove
+\lstinline|select a, count(b) from R group by a| $\equiv$
+\lstinline|select S.a, sum(S.cnt) from (select a, count(b) as cnt from R group by a) S group by S.a|
+--- a sum of counts equalling one count. No uninterpreted-aggregate prover can do this, at
+any level of cleverness, because the fact needed is a fact \emph{about} \textsc{Sum} and
+\textsc{Count}.
+\end{remark}
+
+\subsection{Ordered bag semantics (\lstinline|ORDER BY|)}
+
+U-expressions model bags, which have no order, so \lstinline|ORDER BY| is out of reach by
+construction. \sqlsolver{} adds a separate, syntactic layer.
+
+\begin{definition}[\cite{sqlsolver} Def.\ 1]
+If $Q_1$'s result is ordered, $Q_2\equiv Q_1$ iff (i) they contain the same multiset of
+tuples \emph{and} (ii) any two tuples appear in the same relative order in both.
+\end{definition}
+
+\textbf{Step 1 --- simplify.} Delete \lstinline|ORDER BY| in a subquery unless followed by
+\lstinline|LIMIT|/\lstinline|OFFSET| (it has no observable effect); replace
+\lstinline|... ORDER BY e LIMIT 0| by the empty table; hoist an \lstinline|ORDER BY| out of
+the left arm of a \lstinline|UNION ALL|/outer join when the same clause is applied outside;
+and merge stacked \lstinline|ORDER BY ... LIMIT n1 OFFSET o1| / \lstinline|LIMIT n2 OFFSET o2|
+into one with $o_3=o_1+o_2$ and $n_3 = n_2$ if $o_2+n_2\le n_1$, else $\max(n_1-o_2,0)$.
+
+\textbf{Step 2 --- divide and conquer.} Pick an \lstinline|ORDER BY| in $Q_1$; find the
+matching ones in $Q_2$ (same sort attributes, same \lstinline|LIMIT|/\lstinline|OFFSET|). For
+each candidate, recursively prove the two \emph{sorted subqueries} $Q_3\equiv Q_4$ with the
+bag algorithm, then replace both by the same fresh relation and recurse on what remains.
+
+\begin{theorem}[\cite{sqlsolver} Thm.\ 4.4]
+If the check of Step 2 passes after simplification, the queries are equivalent under ordered
+bag semantics.
+\end{theorem}
+
+\begin{remark}
+This layer is orthogonal: the paper combines it with \udp{}, \spes{} and \wetune{} too. Of
+$400$ pairs, $39$ needed it. It is also acknowledged as a source of incompleteness --- it is
+syntactic, and cannot handle every \lstinline|ORDER BY| query.
+\end{remark}
+
+\subsection{Guarantees}
+
+\begin{theorem}[\cite{sqlsolver} Thm.\ 5.1]
+\sqlsolver{} is sound under both bag and ordered bag semantics.
+\end{theorem}
+
+\noindent Incompleteness has three named sources~\cite[\S5]{sqlsolver}:
+(1) unmodelled SQL (lateral subqueries, window functions);
+(2) the over-approximation used for non-linear summations, which is not equisatisfiable;
+(3) the syntactic \lstinline|ORDER BY| layer.
+The paper reports that (2) and (3) caused no false negatives in its evaluation --- all
+failures were unmodelled features.
+
+\begin{theorem}[\cite{sqlsolver} Thm.\ 5.2]
+\sqlsolver{} is complete for CQ and UCQ, and additionally for queries of the form
+$Q_1'\ \texttt{UNION ALL}\ \cdots\ \texttt{UNION ALL}\ Q_n'$ where each $Q_i'$ is
+\lstinline|SELECT R.a1..aj, agg1(R.b1)..aggk(R.bk) FROM Ri WHERE p GROUP BY .. HAVING q| or
+\lstinline|SELECT [DISTINCT] R.a1..aj FROM Ri WHERE p|, with aggregates restricted to
+\textsc{Count}, \textsc{Max}, \textsc{Min}, and predicates decidable by SMT.
+\end{theorem}
+
+This second fragment is the interesting one: it is \emph{disjoint} from what UCQ-complete
+provers cover, since it contains group-by and aggregation.
+
+\subsection{Results}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+suite & \udp{} & \spes{} & \wetune{} & \sqlsolver{}\\
+\midrule
+Calcite (232)   & 33 & 99 & 78 & \textbf{232}\\
+Spark SQL (127) & 20 & 56 & 31 & \textbf{114}\\
+TPC-C (19)      & -- & 15 & -- & \textbf{19}\\
+TPC-H (22)      & -- & 0  & -- & \textbf{19}\\
+\bottomrule
+\end{tabular}
+\caption{\cite{sqlsolver} Tables 1 and \S6.2. Of $400$ pairs, the three prior provers prove
+$207$ between them; \sqlsolver{} proves $384$, a superset. $16$ pairs are proved by nobody.}
+\end{table}
+
+Failure attribution among the pairs \sqlsolver{} proves~\cite[Tab.\ 5]{sqlsolver}: \udp{}
+misses $132$ for unsupported features, $160$ for its checking algorithm, $39$ for ordering;
+\spes{} $103/72/39$; \wetune{} $63/181/31$. Read the middle column as ``the cost of not
+having \liastar{}''.
+
+\subsection{\sqlsolver{} on the running example}
+
+\sqlsolver{} reports proving all $232$ of its Calcite pairs, and the aggregate-pushdown rule
+is a Calcite rule, so it is very likely covered --- but we cannot verify \emph{which} pairs
+those are from the paper alone, so we describe the mechanisms rather than assert a result.
+
+Two of \sqlsolver{}'s three strengths bear on it. Concrete \textsc{Sum} means the two
+aggregates are related by a real fact, not just congruence. \liastar{} means differing
+summation structure is not fatal. The third element --- the primary key --- is
+\emph{not} a \sqlsolver{} contribution: constraint handling is inherited from
+\udp{}/\wetune{}, and the paper's own related-work section says so. On this particular
+rewrite the key is the crux, so \sqlsolver{}'s advantage over \QED{} is smaller here than
+its headline numbers suggest.
+
+\subsection{Scorecard}
+
+\begin{table}[h]\centering\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Strong} & a principled decision procedure for unbounded sums; differing numbers of
+summations and of aggregates are no obstacle; concrete \textsc{Sum}/\textsc{Count}/\textsc{Max}/\textsc{Min}/\textsc{Avg};
+\lstinline|INTERSECT ALL|, \lstinline|VALUES|, scalar subqueries, \lstinline|CASE|;
+\lstinline|ORDER BY| via a separate layer; complete for a group-by fragment no one else covers.\\
+\midrule
+\textbf{Weak} & NULL handling inherited from \wetune{}, not developed; integrity constraints
+inherited from \udp{}/\wetune{}; no first-class story for unknown operators; the non-linear
+path is a one-way over-approximation; lateral subqueries and window functions unmodelled;
+the concrete aggregate tables are a large hand-written trusted base.\\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,514 @@
+\section{Q-expressions and \QED{}}
+\label{sec:qexpr}
+
+\emph{Source: Wang, Pan, Cheung, PVLDB 17(11):3602--3614, 2024~\cite{qed}.}
+
+\subsection{The one-line summary}
+
+Q-expressions have \emph{the same syntax} as U-expressions. What changes is that they are
+pinned to a single concrete semantic domain, which makes every operator \emph{definable}
+rather than axiomatised, which in turn makes them cheaply encodable into SMT. Everything
+else in \QED{} follows from that.
+
+\begin{table}[h]\centering\small
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+\toprule
+ & \textbf{U-expression} & \textbf{Q-expression}\\
+\midrule
+semantics & any U-semiring; operators fixed by \emph{axioms} & the single model $\Nbar$; operators fixed by \emph{definitions}\\
+$\sq{a}$ & 6 axiom lines (7 identities) & \emph{defined} as $\ind{a\neq0}$\\
+$\notu{a}$ & 4 axiom lines & \emph{defined} as $\ind{a=0}$\\
+decision & syntactic isomorphism & SMT, used at every stage\\
+NULL & absent & first class (option types, 3-valued logic)\\
+unknown operators & unsupported & $\qop$/$\hop$, first class\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{The concrete domain}
+
+\begin{definition}[\cite{qed} Eq.\ 4]\label{def:nbar}
+Multiplicities live in $\Nbar=\mathbb{N}\cup\{\infty\}$ with
+\[
+\infty+a=\infty,\qquad 0\times\infty=0,\qquad a\times\infty=\infty\ (a\neq0),
+\]
+\[
+\usum{s} f(s)=\begin{cases} f(s_1)+\cdots+f(s_n) & \text{if } \mathrm{supp}(f)=\{s_1,\dots,s_n\}\text{ is finite}\\ \infty & \text{otherwise,}\end{cases}
+\]
+\[
+\ind{P}=\begin{cases}1&P\text{ true}\\0&\text{else,}\end{cases}
+\qquad \sq{a}=\ind{a\neq0},\qquad \notu{a}=\ind{a=0}.
+\]
+A \emph{Q-expression} is any expression of type $\Nbar$.
+\end{definition}
+
+\keybox{Why this is more than bookkeeping}{%
+$\Nbar$ \emph{is} a U-semiring, so nothing is lost. But because $\sq{a}$ is now literally
+$\ind{a\neq0}$, a squash of a table application is just a Boolean --- an uninterpreted
+predicate an SMT solver can reason about directly. In the axiomatic setting $\sq{\cdot}$ is
+an opaque symbol you may only rewrite with the six squash axioms. This is the difference
+between ``call Z3'' and ``search for an axiom chain''.}
+
+\subsection{Query syntax}
+
+\QED{} fixes a small relational core~\cite[Fig.\ 2]{qed}:
+\[
+\begin{array}{r@{\;}l@{\qquad}r@{\;}l}
+Q ::=& \texttt{Table}(R:\sigma) & \mid& \texttt{Values}(v_1,\dots,v_n)\\
+\mid& \texttt{Filter}(P,Q) & \mid& \texttt{Proj}(f,Q)\\
+\mid& \texttt{Join}(Q_1,Q_2) & \mid& \texttt{Union}(Q_1,Q_2)\\
+\mid& \texttt{Minus}(Q_1,Q_2) & \mid& \texttt{Distinct}(Q)\\
+\mid& \texttt{GroupBy}(k,\alpha(f),Q) & \mid& \qop(o,v_1,\dots,v_n,Q)\\[4pt]
+v,P,f ::=& x \mid \texttt{Exists}(Q) & \mid& \texttt{Op}(o,\vec v) \mid \hop(o,\vec v,Q)
+\end{array}
+\]
+Two entries deserve comment.
+
+$\qop$ and $\hop$ are \textbf{uninterpreted operators} --- \emph{first-class} escape
+hatches. \lstinline|LIMIT 10| is $\qop(\texttt{Limit},10,Q)$; \lstinline|a IN Q| is
+$\hop(\texttt{In},a,Q)$. Anything \QED{} does not model becomes one of these and still
+participates in reasoning through congruence, rather than aborting the proof.
+
+\begin{remark}[what is deliberately missing]
+Set \texttt{Minus} and set \texttt{Intersect} are modelled; \emph{bag} minus and
+\emph{bag} intersect are not. The paper's footnote is explicit: those would need a
+\emph{monus} (truncated subtraction) at the semiring level, which \QED{} declines to add.
+Handle them as $\qop$.
+\end{remark}
+
+\subsection{Semantics}
+\label{sec:qsem}
+
+\begin{align*}
+\den{\texttt{Table}(R{:}\sigma)} &= \lam{x}{R(x)}\\
+\den{\texttt{Values}(v_1..v_n)} &= \lam{x}{\ind{x{=}v_1}+\cdots+\ind{x{=}v_n}}\\
+\den{\texttt{Filter}(P,Q)} &= \lam{x}{\ind{\den{P}(x)=\textsf{True}}\times\den{Q}(x)}\\
+\den{\texttt{Proj}(f,Q)} &= \lam{x}{\usum{s}\ind{x=\den{f}(s)}\times\den{Q}(s)}\\
+\den{\texttt{Join}(Q_1,Q_2)} &= \lam{x_1,x_2}{\den{Q_1}(x_1)\times\den{Q_2}(x_2)}\\
+\den{\texttt{Union}(Q_1,Q_2)} &= \lam{x}{\den{Q_1}(x)+\den{Q_2}(x)}\\
+\den{\texttt{Distinct}(Q)} &= \lam{x}{\sq{\den{Q}(x)}}\\
+\den{\texttt{Minus}(Q_1,Q_2)} &= \lam{x}{\sq{Q_1(x)\times\notu{Q_2(x)}}}\\
+\den{\texttt{GroupBy}(k,\alpha(f),Q)} &= \lam{x,y}{
+   \underbrace{\Bigl\lVert\usum{s}\ind{x=\den{k}(s)}\times\den{Q}(s)\Bigr\rVert}_{\text{the group is non-empty}}
+   \times \underbrace{\Bigl[\,y=\hop\bigl(\alpha,\lam{y'}{\usum{s}\den{Q}(s)\times\ind{x=\den{k}(s)\wedge y'=\den{f}(s)}}\bigr)\Bigr]}_{\text{$y$ is the aggregate of the group's bag}}}
+\end{align*}
+and for scalars, $\den{\texttt{Exists}(Q)}=\sq{\usum{s}\den{Q}(s)}$.
+
+\paragraph{Read the \texttt{GroupBy} rule slowly --- it is the crux of the paper.}
+The output row is the pair $(x,y)$ = (group key, aggregate value). Two factors:
+\begin{itemize}
+\item The \emph{squashed} sum says ``at least one input row has key $x$'', and the squash is
+      what makes \lstinline|GROUP BY| emit \textbf{one} row per key regardless of input
+      multiplicities. (This is exactly the subtlety \udp{}'s de-sugaring glosses over ---
+      Remark~\ref{rem:groupby}.)
+\item The bracket pins $y$ to $\alpha$ applied to a \emph{bag}: the function
+      $\lam{y'}{\dots}$ whose value at $y'$ is the multiplicity of $y'$ within the group.
+      $\alpha$ is an $\hop$, i.e.\ \textbf{uninterpreted}. \QED{} knows only that equal bags
+      give equal aggregates.
+\end{itemize}
+
+\begin{definition}[the equivalence problem]
+Write $\Gamma\mid\Delta\mid\Phi \vdash Q_1 \stackrel{?}{=} Q_2$, where $\Gamma$ are table
+symbols, $\Delta$ other uninterpreted symbols and $\Phi$ an assumed predicate. It asks
+whether $\den{Q_1}(s)=\den{Q_2}(s)$ for all instantiations of $\Gamma,\Delta$ satisfying
+$\Phi$ and all rows $s$.
+\end{definition}
+
+\subsection{Integrity constraints: rewrite the table, not the query}
+
+\paragraph{Primary key (\cite{qed} Eqs.\ 6--8).}
+Let $R$ have schema $K\times S$ with key column(s) $k$. A table with a primary key is
+\emph{exactly} a subset of $K$ plus a function $f_R:K\to S$ giving the non-key columns.
+Formally, for any predicate $P$ over tables,
+\begin{equation}\label{eq:pk-complete}
+\forall R \text{ with primary key } k.\ P(R)
+\iff \forall R',f_R.\ P\bigl(\lam{k,s}{\sq{R'(k)}\times\ind{s=f_R(k)}}\bigr)
+\end{equation}
+which licenses the rewrite
+\begin{equation}\label{eq:pk7}
+R \;\rightsquigarrow\; \lam{k,s}{\sq{R'(k)}\times\ind{s=f_R(k)}}
+\end{equation}
+introducing a fresh table symbol $R'$ of schema $K$ and a fresh function symbol $f_R$.
+When $k$ is the \emph{only} column this collapses to the form everyone quotes:
+\begin{equation}\label{eq:pk8}
+R \;\rightsquigarrow\; \lam{k}{\sq{R(k)}}.
+\end{equation}
+
+\warnbox{Do not quote Eq.~\eqref{eq:pk8} when the table has non-key columns}{%
+In our running example $S$ has schema $(a,b)$ with key $a$, so the applicable rule is
+\eqref{eq:pk7}: $S\rightsquigarrow\lam{a,b}{\sq{S'(a)}\times\ind{b=f_S(a)}}$.
+The familiar $\lam{a}{\sq{S(a)}}$ appears only after $b$ is projected away --- which the
+queries do, since neither mentions $S.b$. The distinction matters the moment a query reads
+a non-key column.}
+
+The word \emph{complete} in the paper is Eq.~\eqref{eq:pk-complete}: the rewrite yields an
+equivalence problem that is equivalent to the original, not merely implied by it. Contrast
+\spes{}, whose primary-key support is a finite list of query-level rewrite rules --- sound,
+but only firing on shapes someone anticipated.
+
+\paragraph{Foreign key (\cite{qed} Eq.\ 9).}
+\[
+S \;\rightsquigarrow\; S,R' \mid \forall b,k.\ \sq{S(b,k)}\to\sq{R'(k)} \;\vdash\; S
+\]
+Note what changed relative to \udp{}: \udp{} applies its foreign-key identity
+\emph{eagerly} as a rewrite, which does not terminate when two tables reference each other.
+\QED{} emits \emph{one global logical formula} instead and lets the SMT solver unfold its
+consequences lazily. That is a strictly better engineering decision and removes \udp{}'s
+non-termination hazard.
+
+\paragraph{Check constraint.} $\forall s.\ \sq{R(s)}\to C(s)$. One line, same idea.
+
+\subsection{NULL semantics}
+
+\udp{} has none; this alone rules out outer joins. \QED{} lifts every type $T$ to
+$\mathrm{Option}(T)$, an algebraic datatype modern SMT solvers support natively.
+
+\begin{itemize}
+\item \textbf{Strict by default:} an $n$-ary operation returns \textsf{Null} exactly when
+      some argument is \textsf{Null}. This lifts $+$, $\times$, comparisons, etc.
+\item \textbf{Three-valued \texttt{AND}/\texttt{OR}} are the documented exceptions:
+\begin{align*}
+a\ \texttt{And}\ b &\coloneqq \mathrm{ite}(a=\textsf{Null},\ \mathrm{ite}(b=\textsf{True},\textsf{Null},b),\ \mathrm{ite}(a=\textsf{True},b,a))\\
+a\ \texttt{Or}\ b &\coloneqq \mathrm{ite}(a=\textsf{Null},\ \mathrm{ite}(b=\textsf{False},\textsf{Null},b),\ \mathrm{ite}(a=\textsf{False},b,a))
+\end{align*}
+      Check them: \textsf{Null} \texttt{And} \textsf{False} $=$ \textsf{False} (not
+      \textsf{Null}), and \textsf{Null} \texttt{Or} \textsf{True} $=$ \textsf{True}.
+      Strictness would get both wrong.
+\item \textbf{Quantified comparison:}
+\[
+a\ \langle\mathrm{cmp}\rangle\ \texttt{Some}\ Q \coloneqq
+\mathrm{ite}\bigl(\exists x.\sq{Q(x)}\wedge (x\,\langle\mathrm{cmp}\rangle\,a)=\textsf{True},\ \textsf{True},\
+\mathrm{ite}(\exists x.\sq{Q(x)}\wedge(x\,\langle\mathrm{cmp}\rangle\,a)=\textsf{Null},\ \textsf{Null},\ \textsf{False})\bigr)
+\]
+      \lstinline|a IN Q| is the special case with $\langle\mathrm{cmp}\rangle$ being
+      \texttt{=}. The nesting order encodes SQL's rule: \emph{a true match wins over a
+      null one}, and only if there is no match at all and no null do you get
+      \textsf{False}.
+\item \textbf{\lstinline|COUNT(*)| vs \lstinline|COUNT(k)|:} modelled by optionally applying
+      a non-\textsf{Null} filter before the aggregate.
+\end{itemize}
+
+\subsection{Algorithm A: the complete fragment}
+\label{sec:qed-complete}
+
+\QED{} has \emph{two} algorithms and picks between them. The first is complete on a
+restricted fragment; this is the paper's theoretical contribution.
+
+\begin{definition}[$\mathcal F_T$, \cite{qed} Def.\ 1]
+Fix a first-order theory $T$. The fragment $\mathcal F_T$ consists of
+\texttt{Table}, \texttt{Values}, \texttt{Filter}, \texttt{Proj}, \texttt{Join},
+\texttt{Union}, where all values, projection functions and filter predicates are definable
+in $T$. Primary keys on the tables are allowed.
+\end{definition}
+
+This generalises Cohen's classical UCQ result~\cite{cohen}: UCQ forces predicates to be
+conjunctions of (in)equalities and projections to be bare column references, whereas
+$\mathcal F_T$ allows \emph{anything expressible in $T$}. With $T$ = the SMT solver's
+theories, that is a large class. Note $\mathcal F_T$ excludes \texttt{GroupBy},
+\texttt{Distinct} and \texttt{Minus} --- so our running example is \emph{not} in it.
+
+\subsubsection{Scoped normal form (SNF)}
+\begin{definition}[\cite{qed} Def.\ 2]
+$U$ is in SNF if $U=T_1+\cdots+T_n$ where each \emph{normal term} is
+\[
+T=\usum{R_1^{k_1}(s_1)}\cdots\usum{R_m^{k_m}(s_m)} \ind{P},
+\qquad
+\usum{R^0(s)}U \coloneqq \usum{s}\sq{R(s)}\times U,\quad
+\usum{R^k(s)}U \coloneqq \usum{s}\underbrace{R(s)\cdots R(s)}_{k}\times U
+\]
+with $P$ (the \emph{body}, $\mathrm{Bdy}\,T$) containing no table variables, and the
+summations ordered consistently with a fixed order on table symbols.
+\end{definition}
+Auxiliary notation used below: $\mathrm{Scp}\,T$ is the list of all summation variables;
+$\mathrm{Scp}_R T$ those attached to table $R$; $\mathrm{Rel}\,T$ the list of table
+variables with their powers; $\mathrm{Rel}'T$ the same without powers.
+
+\noindent Normalisation (\cite{qed} Alg.\ 1) is a straightforward induction:
+\texttt{Table} is already a term; \texttt{Filter} conjoins its predicate into every body;
+\texttt{Proj} post-composes $f$ into the body \emph{without} adding a summation;
+\texttt{Join} merges scopes and conjoins bodies pairwise; \texttt{Union} concatenates terms.
+
+\subsubsection{Linearisation (LNF)}
+Two obstacles remain. First, summation variables attached to the same table can be
+introduced in any order, so terms that differ only by a permutation look different.
+Second, redundant variables: in
+\[
+T_1=\usum{R(s_1)}\usum{R(s_2)}\ind{(x{=}s_2)\wedge(s_1{=}s_2)}
+\qquad\text{vs}\qquad
+T_2=\usum{R^2(s_1)}\ind{x{=}s_1}
+\]
+$T_1$'s $s_2$ is redundant, but the scopes have different lengths so they cannot be
+compared directly.
+
+\begin{definition}[LNF, \cite{qed} Def.\ 3]
+$U$ is in LNF if it is in SNF and, for every term $T$ and table variable $R$, $\mathrm{Bdy}\,T$
+implies the variables of $\mathrm{Scp}_R T$ are pairwise distinct and form a linearly
+ordered chain.
+\end{definition}
+
+Algorithm 2 achieves this by \emph{case-splitting on the order}. For a scope
+$\{a,b,c\}$, $\mathrm{Lin}$ enumerates all $13$ ways three values can be ordered-or-equal
+($a{<}b{<}c$, \dots, $a{=}b{<}c$, \dots, $a{=}b{=}c$). Each term is replaced by the sum over
+all cases; within each case, variables proved equal are merged (the oracle decides
+$\mathrm{Bdy}\,T'\to s_j=s_k$), and the survivors are sorted ascending. Now every term has a
+canonical variable order.
+
+\begin{remark}[cost]
+$|\mathrm{Lin}(X)|$ is the ordered Bell number of $|X|$: $1, 1, 3, 13, 75, 541,\dots$
+Eager linearisation is therefore expensive, which is exactly why \QED{}'s \emph{general}
+algorithm (\S\ref{sec:qed-general}) defers permutation to the matching step instead.
+\end{remark}
+
+\subsubsection{Unification and completeness}
+Terms are grouped by relational scope; within a group the summation disappears and only the
+bodies are compared, because
+\[
+\usum{S}\ind{P_1}+\cdots+\ind{P_n} \;=\; \usum{S}\ind{P'_1}+\cdots+\ind{P'_m}
+\quad\Longleftarrow\quad
+\vec s \vdash_{\mathcal O} \ind{P_1}+\cdots+\ind{P_n} = \ind{P'_1}+\cdots+\ind{P'_m}
+\]
+and the right-hand side is an ordinary SMT query ($\ind{\cdot}$ becomes \texttt{ite},
+$+$ becomes integer addition).
+
+\begin{theorem}[\cite{qed} \S4.4]
+On $\mathcal F_T$, with a complete oracle for $T$,
+$\den{Q_1}=\den{Q_2}\Rightarrow \textsf{unify}(\textsf{lin}(\textsf{snf}(Q_1)),\textsf{lin}(\textsf{snf}(Q_2)))$.
+\end{theorem}
+\begin{proof}[Proof idea --- worth understanding, it is elegant]
+Contrapositive. Suppose some group of terms with relational scope $S^*$ fails its body
+check; choose such $S^*$ with the fewest variables. Build a database instance in which each
+table $R_i$ is supported on exactly the finitely many points that the failing assignment
+$\sigma$ touches, with multiplicity $n_i$ a free parameter. Because the term is in LNF, all
+variables attached to a table are distinct and ordered, so a group with scope
+$R_1^{k_1}\cdots R_m^{k_m}$ evaluates to the \emph{monomial}
+$B_S[\delta,\sigma]\times n_1^{k_1}\cdots n_m^{k_m}$. Terms with larger scopes vanish (some
+variable is forced outside the support). Both sides are thus polynomials in
+$n_1,\dots,n_m$, and two polynomials over $\mathbb{N}$ are equal iff all coefficients match
+--- but the $S^*$ coefficient differs by assumption. Hence some instantiation separates
+$Q_1$ and $Q_2$.
+\end{proof}
+
+\keybox{The idea to steal}{%
+LNF turns each term into a monomial whose exponents are the scope and whose coefficient is
+the body. Bag equivalence then becomes \emph{polynomial identity}. That is why the paper
+insists on a total order on summation variables: without it the exponents are not
+well-defined.}
+
+\subsection{Algorithm B: the general algorithm}
+\label{sec:qed-general}
+
+For everything outside $\mathcal F_T$ --- including our running example, which has
+\texttt{GroupBy} --- \QED{} uses a weaker but far more general pipeline:
+\textbf{normalise $\to$ stabilise $\to$ unify}. Here the oracle is allowed to answer
+``unknown''.
+
+\subsubsection{SPNF (\cite{qed} Alg.\ 4)}
+Terms take the shape $\usum{\vec s}\ind{L}\times V$. The conversion is structural, and the
+two interesting lines are
+\[
+\textsf{spnf}(\sq{V}) = \ind{\textsf{spnf}(V)\neq 0},
+\qquad
+\textsf{spnf}(\notu{V}) = \ind{\textsf{spnf}(V)=0},
+\]
+i.e.\ squash and negation are \emph{eliminated} in favour of predicates. Products merge
+scopes and conjoin the conditions; sums concatenate.
+
+\subsubsection{Stabilisation (\cite{qed} Alg.\ 5)}
+\label{sec:stabilise}
+This is \QED{}'s replacement for \udp{}'s Lemma~\ref{lem:15}, and the upgrade is that it is
+\emph{semantic}. For each term $\usum{\vec s}\ind{L}\times V$ and each variable $s_i$, ask
+whether $L$ implies $s_i = f(\text{other variables})$ for some expression $f$; if so,
+substitute and delete the summation.
+
+\begin{lstlisting}[style=pseudo]
+function stable(U):
+  U' <- 0
+  for each term (Sum over s) [L] x V of U:
+    s',L',V' <- s,L,V
+    for each variable s_i in s:
+      s'' <- s' minus s_i
+      if exists f with  Gamma|Delta,s' |Phi |-_O  L' -> f(s'') = s_i :
+         s' <- s'' ;  L' <- L'[f(s'')/s_i] ;  V' <- V'[f(s'')/s_i]
+    U' <- U' + (Sum over s') [L'] x V'
+  return U'
+\end{lstlisting}
+
+Two ways to find $f$ are given: synthesise it with SyGuS, or ask the SMT solver for the
+\emph{congruence classes} of the term's subexpressions and read off an equal expression.
+\QED{} implements the second for simplicity and reports the two are equally powerful in
+practice.
+
+\begin{example}[composing two projections]
+$\usum{y,z}\ind{x=f(y)\wedge y=g(z)}R(z) \stackrel{?}{=} \usum{z}\ind{x=f(g(z))}R(z)$.
+Congruence classes on the left over $\{x,y,z,f(y),g(z)\}$ are $\{x,f(y)\},\{y,g(z)\},\{z\}$,
+exposing $y=g(z)$, so $y$ is eliminated. On the right the classes are $\{x,f(g(z))\},\{z\}$
+and nothing is eliminated. The scopes now match.
+\end{example}
+
+\begin{remark}[a real, acknowledged gap]
+The congruence-class method finds only expressions \emph{already present} in the term.
+Given $\ind{x+3=10}$ it will not discover $x=7$, because $7$ never appears; SyGuS would.
+The paper reports this never mattered in the evaluation.
+\end{remark}
+
+\subsubsection{Unification (\cite{qed} Alg.\ 6)}
+\begin{lstlisting}[style=pseudo]
+function unify(U1, U2):
+  drop terms whose body is provably false (oracle: not (L and squash V))
+  if #terms(U1) != #terms(U2): return Unknown       # <-- ceiling of THIS algorithm
+  for each term T1 of U1:
+     find a term T2 of U2 with termEq(T1,T2); remove it; else return Unknown
+  return True
+
+function termEq( (Sum s1)[L1] x V1 , (Sum s2)[L2] x V2 ):
+  if len(s1) != len(s2): return False
+  for each bijection sigma from s2 to s1:            # capped at 24 in the implementation
+     L2,V2 <- L2[sigma], V2[sigma]
+     L1',V1',L2',V2' <- ... with every HOp/QOp replaced by a FRESH variable
+     C <- congruence facts obtained by recursively unifying those operators' arguments
+          under the extra assumption  Phi and (L1' or L2')
+     if  Phi and C  |-_O  [L1'] x V1' = [L2'] x V2' : return True
+  return False
+\end{lstlisting}
+
+Three mechanisms are packed in here; take them one at a time.
+
+\paragraph{(i) Scope permutation.} Summation is commutative, so before comparing bodies you
+must try bijections between the two scopes. The justification is
+$(\forall \vec s.\ f(\vec s)=g(\vec s)) \Rightarrow \usum{\vec s}f=\usum{\vec s}g$. Note
+this is \emph{pointwise} comparison: sound, but it can only ever prove sums equal by proving
+their summands equal. The implementation caps at 24 permutations; empirically only $\sim$2\%
+of cases need more than the identity permutation.
+
+\paragraph{(ii) Higher-order operators become fresh variables.}
+$\qop(o,\vec v,\lam{x}{W})$ becomes a fresh table symbol; $\hop(o,\vec v,Q)$ a fresh scalar.
+Congruence facts like $\forall x.R(x)=R'(x)$ are then \emph{recovered} by checking that the
+operators match and recursively comparing their arguments.
+
+\paragraph{(iii) The ambient assumption --- the genuinely new idea.}
+\label{sec:ambient}
+The recursive comparison of the operators' arguments is performed under the extra hypothesis
+$L'_1\vee L'_2$: the conditions of the two enclosing terms. Soundness in one sentence:
+
+\begin{lemma}[\cite{qed} Eq.\ 17]
+To verify $\ind{L'_1}\times V'_1=\ind{L'_2}\times V'_2$ it suffices to check
+$\Phi\wedge(L'_1\vee L'_2)\vdash C$ and $\Phi\wedge C\vdash \ind{L'_1}V'_1=\ind{L'_2}V'_2$.
+\end{lemma}
+\begin{proof}
+If $\neg L'_1\wedge\neg L'_2$ then $\ind{L'_1}=\ind{L'_2}=0$ and both sides are $0$
+regardless of $C$. So assuming $L'_1\vee L'_2$ while deriving $C$ loses nothing.
+\end{proof}
+
+\subsubsection{Encoding to first-order logic}
+$\Nbar$-valued expressions cannot be handed to an SMT solver directly, but \QED{} never
+needs their values --- only whether they are zero. So $U\neq0$ is pushed inward:
+\[
+U_1+U_2\neq0 \rightsquigarrow U_1\neq0\vee U_2\neq0,\qquad
+U_1\times U_2\neq0 \rightsquigarrow U_1\neq0\wedge U_2\neq0,
+\]
+\[
+\sq{U}\neq0\rightsquigarrow U\neq0,\qquad
+\ind{P}\neq0\rightsquigarrow P,\qquad
+\usum{s}U\neq0\rightsquigarrow \exists s.\,U\neq0.
+\]
+What survives is only fully-applied table symbols $R(a)\neq0$ and operator applications, all
+of which are uninterpreted predicates. \QED{} additionally assumes every table has
+\emph{finite} multiplicity at each row (type $S\to\mathbb{N}$, not $S\to\Nbar$) so that no
+$\infty$ arises during term comparison.
+
+\warnbox{This trick only works under a squash}{%
+Turning $\usum{}$ into $\exists$ requires that the enclosing context care about
+zero-vs-non-zero. When the top-level expression is \emph{not} squashed --- plain
+\lstinline|SELECT x FROM r|, an unsquashed join --- multiplicities matter and \QED{} must
+fall back on pointwise term matching, which is where its incompleteness bites
+(\S\ref{sec:compare}).}
+
+\begin{remark}[the two algorithms differ exactly here --- do not conflate them]
+Alg.~6 demands a \emph{bijection} between the two sides' terms. Alg.~3, the
+complete-fragment algorithm of \S\ref{sec:qed-complete}, does \textbf{not}: it groups terms
+by relational scope and compares $\ind{P_1}+\cdots+\ind{P_n}$ with
+$\ind{P'_1}+\cdots+\ind{P'_m}$ for $n\neq m$. So ``\QED{} cannot handle differing numbers of
+terms'' is a statement about Alg.~6 only. A \lstinline|UNION ALL| split stays provable while
+the query remains inside $\mathcal F_T$; adding a \texttt{GroupBy} or \texttt{Distinct}
+pushes it into Alg.~6 and the bijection requirement returns.
+\end{remark}
+
+\subsection{The running example, proved}
+\label{sec:qed-worked}
+
+Translate $Q_1,Q_2$ of \S\ref{sec:running}, with the primary key already applied:
+\begin{align*}
+Q_1(x,r) &= \Bigl\lVert\usum{y,a}\ind{x{=}a}R(x,y)\sq{S(a)}\Bigr\rVert
+ \times\Bigl[r=\Sumagg\bigl(\lam{y}{\usum{a}\ind{x{=}a}R(x,y)\sq{S(a)}}\bigr)\Bigr]\\
+Q_2(x,r) &= \usum{a}\ind{x{=}a}\ \Bigl\lVert\usum{y}R(x,y)\Bigr\rVert
+ \times\bigl[r=\Sumagg(\lam{y}{R(x,y)})\bigr]\times\sq{S(a)}
+\end{align*}
+
+\paragraph{Step 1 --- stabilise.} Both terms contain $\ind{x=a}$, which pins $a$ to $x$;
+congruence classes put $x$ and $a$ together, so $\usum{a}$ is deleted:
+\begin{align*}
+Q_1(x,r) &= \Bigl\lVert\usum{y}R(x,y)\sq{S(x)}\bigl[r=\Sumagg(\lam{y}{R(x,y)\sq{S(x)}})\bigr]\Bigr\rVert\\
+Q_2(x,r) &= \Bigl\lVert\usum{y}R(x,y)\sq{S(x)}\bigl[r=\Sumagg(\lam{y}{R(x,y)})\bigr]\Bigr\rVert
+\end{align*}
+One difference remains: the $\sq{S(x)}$ inside the aggregate.
+
+\begin{remark}[why $Q_2$ may be written with an outer squash]
+Every factor of $Q_2$ is already $0$-or-$1$: $\sq{\usum{y}R(x,y)}$, the bracket, and
+$\sq{S(a)}$. So wrapping in $\sq{\cdot}$ changes nothing. But $\sq{S(a)}$ is squashed
+\emph{only because of the primary key} --- drop the key and the factor is $S(a)$, which can
+be $2$, and $Q_2$ is no longer squashable. That is precisely the counterexample of
+\S\ref{sec:pkcounter}, where $Q_2$ returned $(1,30)$ \emph{twice}.
+\end{remark}
+
+\paragraph{Step 2 --- encode.} With $v_1,v_2$ fresh for the two aggregates:
+\[
+\phi_1(x,r)=\exists y.\,R(x,y)\neq0\wedge S(x)\neq0\wedge r=v_1,\qquad
+\phi_2(x,r)=\exists y.\,R(x,y)\neq0\wedge S(x)\neq0\wedge r=v_2
+\]
+Goal $\forall x,r.\ \phi_1\leftrightarrow\phi_2$; identical but for $v_1$ vs $v_2$.
+
+\paragraph{Step 3 --- recursive check with the ambient assumption.}
+$v_1=v_2$ needs $\lam{y}{R(x,y)\sq{S(x)}}\equiv\lam{y}{R(x,y)}$, which is \textbf{false}
+standalone ($x\notin S \Rightarrow$ left is empty). Under $\phi_1\vee\phi_2$, however, we
+have $S(x)\neq0$, hence $\sq{S(x)}=1$, hence
+\[
+(\phi_1\vee\phi_2)\rightarrow\forall y.\ R(x,y)\times\sq{S(x)}=R(x,y)
+\qquad\text{\emph{valid}.}
+\]
+So $v_1=v_2$, so $\phi_1\leftrightarrow\phi_2$, so $Q_1\equiv Q_2$. $\blacksquare$
+
+\medskip
+\noindent In English: \emph{the group-by only emits a row for an $x$ that survived the join,
+and any such $x$ is in $S$; so inside the aggregate $\sq{S(x)}$ is just $1$ and vanishes.}
+
+\subsection{Results and honest limits}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+suite & & \udp{} & EQUITAS & \spes{} & $\QED'$ & \QED{}\\
+\midrule
+Calcite (old, 232)   & proved & 34 & 67 & 95 & 49 & \textbf{147}\\
+Calcite (v1.32, 444) & proved & -- & -- & 121 & 98 & \textbf{299}\\
+CockroachDB (1287)   & proved & -- & -- & 325 & 656 & \textbf{979}\\
+\bottomrule
+\end{tabular}
+\caption{\cite{qed} Table 1. $\QED'$ is the complete-fragment algorithm alone; \QED{} is the
+full pipeline. Every case \spes{} proves, \QED{} also proves. Average runtime
+0.88\,s (Calcite v1.32), of which $\sim$0.83\,s is SMT time inside stabilisation.}
+\end{table}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+failure category & Calcite & CockroachDB\\
+\midrule
+aggregates        & \textbf{96} & 27\\
+custom operators  & 25 & \textbf{152}\\
+list semantics (\lstinline|ORDER BY|/\lstinline|LIMIT|) & 18 & 103\\
+typing (implicit casts) & 6 & 26\\
+\bottomrule
+\end{tabular}
+\caption{\cite{qed} Table 3. Aggregates dominate on Calcite --- the direct cost of leaving
+$\alpha$ uninterpreted. \sqlsolver{} attacks exactly this column.}
+\end{table}

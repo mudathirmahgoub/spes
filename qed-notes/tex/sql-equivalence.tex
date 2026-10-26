@@ -1,0 +1,86 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\input{preamble}
+\usepackage[colorlinks=true,linkcolor=cBlue,citecolor=cGreen,urlcolor=cBlue]{hyperref}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}[definition]{Example}
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+
+\title{\bfseries Proving SQL Queries Equivalent\\[4pt]
+\large U-expressions, Q-expressions, and \liastar{}\\[6pt]
+\normalsize A from-scratch guide for people who want to \emph{implement} these algorithms}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent
+Three systems dominate automated SQL equivalence checking under bag semantics:
+\udp{} (Chu et al., VLDB 2018), which introduced \emph{U-expressions} and the U-semiring;
+\QED{} (Wang, Pan and Cheung, VLDB 2024), which redesigned them into \emph{Q-expressions}; and
+\sqlsolver{} (Ding et al., SIGMOD 2024), which kept U-expressions and replaced the
+decision procedure with the theory \liastar{}.
+This document explains all three from first principles. We assume you know SQL and
+nothing else --- no semiring theory, no SMT, no proof assistants.
+Every symbol is introduced with a SQL query that exhibits it, every algorithm is given
+as pseudocode you could type in, and every claim about the three systems is traced to a
+specific definition, theorem or table in the source papers.
+Plans are shown as Apache Calcite \texttt{RelNode} trees (the representation all three
+systems actually consume) with PostgreSQL plans as a secondary, executable cross-check.
+\end{abstract}
+
+\vspace{4pt}
+\noindent\textbf{How to read this.}
+Section~\ref{sec:prelim} builds the counting-function view of SQL and fixes a running
+example. Section~\ref{sec:uexpr} is U-expressions end to end. Section~\ref{sec:qexpr} is
+Q-expressions end to end. Section~\ref{sec:lia} is \liastar{}. Section~\ref{sec:compare}
+compares the three on examples chosen to separate them. Section~\ref{sec:impl} is an
+implementer's checklist. Appendix~\ref{app:axioms} collects every axiom on one page.
+
+\tableofcontents
+\newpage
+
+\input{sec-intro}
+\input{sec-prelim}
+\input{sec-uexpr}
+\input{sec-qexpr}
+\input{sec-lia}
+\input{sec-compare}
+\input{sec-impl}
+\appendix
+\input{sec-appendix}
+
+\begin{thebibliography}{9}
+\bibitem{udp} Shumo Chu, Brendan Murphy, Jared Roesch, Alvin Cheung, Dan Suciu.
+  \emph{Axiomatic Foundations and Algorithms for Deciding Semantic Equivalences of SQL Queries.}
+  PVLDB 11(11), 2018. arXiv:1802.02229.
+\bibitem{qed} Shuxian Wang, Sicheng Pan, Alvin Cheung.
+  \emph{QED: A Powerful Query Equivalence Decider for SQL.} PVLDB 17(11):3602--3614, 2024.
+\bibitem{sqlsolver} Haoran Ding, Zhaoguo Wang, Yicun Yang, Dexin Zhang, Zhenglin Xu,
+  Haibo Chen, Ruzica Piskac, Jinyang Li.
+  \emph{Proving Query Equivalence Using Linear Integer Arithmetic.}
+  Proc.\ ACM Manag.\ Data 1(4), Article 227 (SIGMOD), 2023.
+\bibitem{spes} Qi Zhou, Joy Arulraj, Shamkant Navathe, William Harris, Jinpeng Wu.
+  \emph{SPES: A Symbolic Approach to Proving Query Equivalence Under Bag Semantics.} ICDE 2022.
+\bibitem{green} Todd J. Green, Grigoris Karvounarakis, Val Tannen.
+  \emph{Provenance Semirings.} PODS 2007.
+\bibitem{cohen} Sara Cohen. \emph{Equivalence of Queries Combining Set and Bag-Set Semantics.}
+  PODS 2006.
+\bibitem{piskac} Ruzica Piskac, Viktor Kuncak.
+  \emph{Decision Procedures for Multisets with Cardinality Constraints.} VMCAI 2008.
+\bibitem{levatich} Maxwell Levatich, Nikolaj Bj\o{}rner, Ruzica Piskac, Sharon Shoham.
+  \emph{Solving LIA$^*$ Using Approximations.} VMCAI 2020.
+\bibitem{wetune} Zhaoguo Wang et al. \emph{WeTune: Automatic Discovery and Verification of
+  Query Rewrite Rules.} SIGMOD 2022.
+\end{thebibliography}
+
+\end{document}

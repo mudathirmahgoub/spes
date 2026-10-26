@@ -1,0 +1,105 @@
+\contentsline {section}{\numberline {1}The problem, and why it is hard}{4}{section.1}%
+\contentsline {subsection}{\numberline {1.1}What we are trying to decide}{4}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Bag semantics, and why it changes everything}{4}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}The common architecture}{4}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}A warning about the published numbers}{5}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Preliminaries: a table is a counting function}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}The one idea everything rests on}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Query operators as arithmetic}{5}{subsection.2.2}%
+\contentsline {paragraph}{Why projection is a sum.}{6}{section*.4}%
+\contentsline {paragraph}{Why the sum is ``unbounded''.}{6}{section*.5}%
+\contentsline {subsection}{\numberline {2.3}$\Sigma $ versus $\ensuremath {\mathrm {Sum}}$: two things called ``sum''}{6}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}The running example: aggregate pushdown through a join}{6}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Calcite plans (primary)}{7}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Calcite applies the rule itself --- and reveals the key fact}{7}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.3}PostgreSQL plans (secondary cross-check)}{7}{subsubsection.2.4.3}%
+\contentsline {subsubsection}{\numberline {2.4.4}Why the primary key is load-bearing}{7}{subsubsection.2.4.4}%
+\contentsline {section}{\numberline {3}U-expressions: the U-semiring and \textsc {UDP}{}}{9}{section.3}%
+\contentsline {subsection}{\numberline {3.1}The design goal, and the two constraints that shaped it}{9}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}The U-semiring}{9}{subsection.3.2}%
+\contentsline {paragraph}{Squash $\ensuremath {\left \lVert \cdot \right \rVert }$ (models \lstinline |DISTINCT|).}{9}{section*.9}%
+\contentsline {paragraph}{Negation $\ensuremath {\mathrm {not}(\cdot )}$ (models \lstinline |NOT EXISTS|).}{9}{section*.10}%
+\contentsline {paragraph}{Unbounded summation $\ensuremath {\DOTSB \sum@ \slimits@ _{t}}$ (models projection).}{10}{section*.11}%
+\contentsline {paragraph}{Predicates and equality.}{10}{section*.12}%
+\contentsline {subsection}{\numberline {3.3}Which structures actually \emph {are} U-semirings?}{10}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Translating SQL into U-expressions}{10}{subsection.3.4}%
+\contentsline {paragraph}{Aggregates.}{11}{section*.13}%
+\contentsline {subsection}{\numberline {3.5}Sum-Product Normal Form (SPNF)}{11}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Integrity constraints as identities}{12}{subsection.3.6}%
+\contentsline {paragraph}{Views and indexes.}{12}{section*.14}%
+\contentsline {subsection}{\numberline {3.7}A complete worked proof: the index rewrite}{12}{subsection.3.7}%
+\contentsline {subsection}{\numberline {3.8}The decision procedure}{13}{subsection.3.8}%
+\contentsline {paragraph}{Step 0: canonize (\cite {udp} Alg.\ 1).}{13}{section*.15}%
+\contentsline {paragraph}{Step 2: \textsc {TDP} (\cite {udp} Alg.\ 3).}{14}{section*.17}%
+\contentsline {paragraph}{Step 3: \textsc {SDP} (\cite {udp} Alg.\ 4).}{14}{section*.18}%
+\contentsline {subsection}{\numberline {3.9}Guarantees}{15}{subsection.3.9}%
+\contentsline {subsection}{\numberline {3.10}\textsc {UDP}{} on the running example --- and why it fails}{15}{subsection.3.10}%
+\contentsline {paragraph}{(a) The aggregate is a black box compared out of context.}{15}{section*.19}%
+\contentsline {paragraph}{(b) Predicate matching is syntactic.}{15}{section*.20}%
+\contentsline {paragraph}{What \textsc {UDP}{} \emph {can} do here.}{15}{section*.21}%
+\contentsline {subsection}{\numberline {3.11}Scorecard for U-expressions as of 2018}{15}{subsection.3.11}%
+\contentsline {section}{\numberline {4}Q-expressions and \textsc {Qed}{}}{16}{section.4}%
+\contentsline {subsection}{\numberline {4.1}The one-line summary}{16}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}The concrete domain}{16}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Query syntax}{17}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Semantics}{17}{subsection.4.4}%
+\contentsline {paragraph}{Read the \texttt {GroupBy} rule slowly --- it is the crux of the paper.}{17}{section*.24}%
+\contentsline {subsection}{\numberline {4.5}Integrity constraints: rewrite the table, not the query}{18}{subsection.4.5}%
+\contentsline {paragraph}{Primary key (\cite {qed} Eqs.\ 6--8).}{18}{section*.25}%
+\contentsline {paragraph}{Foreign key (\cite {qed} Eq.\ 9).}{18}{section*.26}%
+\contentsline {paragraph}{Check constraint.}{18}{section*.27}%
+\contentsline {subsection}{\numberline {4.6}NULL semantics}{18}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Algorithm A: the complete fragment}{19}{subsection.4.7}%
+\contentsline {subsubsection}{\numberline {4.7.1}Scoped normal form (SNF)}{19}{subsubsection.4.7.1}%
+\contentsline {subsubsection}{\numberline {4.7.2}Linearisation (LNF)}{19}{subsubsection.4.7.2}%
+\contentsline {subsubsection}{\numberline {4.7.3}Unification and completeness}{20}{subsubsection.4.7.3}%
+\contentsline {subsection}{\numberline {4.8}Algorithm B: the general algorithm}{20}{subsection.4.8}%
+\contentsline {subsubsection}{\numberline {4.8.1}SPNF (\cite {qed} Alg.\ 4)}{20}{subsubsection.4.8.1}%
+\contentsline {subsubsection}{\numberline {4.8.2}Stabilisation (\cite {qed} Alg.\ 5)}{21}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{\numberline {4.8.3}Unification (\cite {qed} Alg.\ 6)}{21}{subsubsection.4.8.3}%
+\contentsline {paragraph}{(i) Scope permutation.}{21}{section*.28}%
+\contentsline {paragraph}{(ii) Higher-order operators become fresh variables.}{22}{section*.29}%
+\contentsline {paragraph}{(iii) The ambient assumption --- the genuinely new idea.}{22}{section*.30}%
+\contentsline {subsubsection}{\numberline {4.8.4}Encoding to first-order logic}{22}{subsubsection.4.8.4}%
+\contentsline {subsection}{\numberline {4.9}The running example, proved}{22}{subsection.4.9}%
+\contentsline {paragraph}{Step 1 --- stabilise.}{23}{section*.31}%
+\contentsline {paragraph}{Step 2 --- encode.}{23}{section*.32}%
+\contentsline {paragraph}{Step 3 --- recursive check with the ambient assumption.}{23}{section*.33}%
+\contentsline {subsection}{\numberline {4.10}Results and honest limits}{23}{subsection.4.10}%
+\contentsline {section}{\numberline {5}U-expressions $+$ \textsf {LIA}\ensuremath {^*}{}: \textsc {SQLSolver}{}}{24}{section.5}%
+\contentsline {subsection}{\numberline {5.1}The diagnosis}{24}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}\textsf {LIA}{} and \textsf {LIA}\ensuremath {^*}{}}{24}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}The algorithm, on Example~\ref {ex:splitunion}}{25}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Three complications the textbook theory does not cover}{26}{subsection.5.4}%
+\contentsline {paragraph}{(1) Nested summations.}{26}{section*.36}%
+\contentsline {paragraph}{(2) Parameterised summations.}{26}{section*.37}%
+\contentsline {paragraph}{(3) Non-linear summations.}{26}{section*.38}%
+\contentsline {subsection}{\numberline {5.5}Extended U-expressions: modelling more SQL}{26}{subsection.5.5}%
+\contentsline {paragraph}{Concrete aggregates --- the big one.}{27}{section*.40}%
+\contentsline {subsection}{\numberline {5.6}Ordered bag semantics (\lstinline |ORDER BY|)}{27}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}Guarantees}{28}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Results}{28}{subsection.5.8}%
+\contentsline {subsection}{\numberline {5.9}\textsc {SQLSolver}{} on the running example}{28}{subsection.5.9}%
+\contentsline {subsection}{\numberline {5.10}Scorecard}{29}{subsection.5.10}%
+\contentsline {section}{\numberline {6}The three approaches compared}{29}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Where the effort went}{29}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Capability matrix}{29}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}A gallery of separating examples}{29}{subsection.6.3}%
+\contentsline {paragraph}{(1) Syntactically different but equal predicates.}{30}{section*.44}%
+\contentsline {paragraph}{(2) Aggregate pushdown through a key join}{30}{section*.45}%
+\contentsline {paragraph}{(3) Differing numbers of summations}{30}{section*.46}%
+\contentsline {paragraph}{(5) Redundant self-join on a unique key}{30}{section*.48}%
+\contentsline {paragraph}{(6) Predicate pushdown through a left join}{30}{section*.49}%
+\contentsline {paragraph}{(7) \lstinline |ORDER BY| anything.}{30}{section*.50}%
+\contentsline {subsection}{\numberline {6.4}The deep structural difference: squashed versus not}{31}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}On the published numbers}{31}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}What the combination would look like}{32}{subsection.6.6}%
+\contentsline {section}{\numberline {7}An implementer's guide}{32}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Build order}{32}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Data structures}{32}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Ten traps, each of which will cost you a day}{33}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Testing: use a real database}{33}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Getting plans out of Calcite}{34}{subsection.7.5}%
+\contentsline {section}{\numberline {A}All axioms and definitions on one page}{34}{appendix.A}%
+\contentsline {section}{\numberline {B}Symbol glossary}{35}{appendix.B}%
+\contentsline {section}{\numberline {C}Reproducing the measurements}{35}{appendix.C}%

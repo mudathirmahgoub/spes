@@ -102,6 +102,12 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getFoldKind()
+  {
+    return Kind.BAG_FOLD;
+  }
+
+  @Override
   protected Kind getAggregateKind()
   {
     return Kind.TABLE_AGGREGATE;

@@ -99,6 +99,12 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getFoldKind()
+  {
+    return Kind.SET_FOLD;
+  }
+
+  @Override
   protected Kind getAggregateKind()
   {
     return Kind.RELATION_AGGREGATE;

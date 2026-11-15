@@ -408,6 +408,18 @@ public class Cvc5TranslatorTest
   }
 
   @Test
+  public void globalAggregateOfAnEmptyTable() throws Exception
+  {
+    // no GROUP BY: one row even over no rows; GROUP BY: no group, so no row
+    String none = "(SELECT * FROM (VALUES (1),(2)) AS w WHERE w.EXPR$0 > 5) AS v";
+    assertEquivalent("COUNT(*) with no GROUP BY is 0 over an empty table",
+        "SELECT COUNT(*) FROM " + none, values("(0)"));
+    assertEquivalent("GROUP BY over an empty table has no rows",
+        "SELECT v.EXPR$0, COUNT(*) FROM " + none + " GROUP BY v.EXPR$0",
+        "SELECT * FROM (VALUES (1, 2)) AS u WHERE u.EXPR$0 > 5");
+  }
+
+  @Test
   public void globalSumWithoutGroupBy() throws Exception
   {
     assertEquivalent("SUM with no GROUP BY folds the whole table",

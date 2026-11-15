@@ -72,10 +72,10 @@ import org.apache.calcite.sql.type.SqlTypeName;
  *       {@code y__0} for a fold), so the lambdas the two queries share are one term. Lambdas are
  *       not simplified here: cvc5 rewrites them after its bags-facts pass has read the keys and
  *       {@code NOT NULL} columns off the constraints.
- *   <li><b>GROUP BY</b> counts each group's rows in a hidden column and drops the row of initial
- *       values {@code table.aggr} gives an empty input; {@code DISTINCT} aggregates fold over
- *       their own deduplicated input, joined on the keys; {@code AVG} is an uninterpreted {@code
- *       avg(sum, count)}.
+ *   <li><b>GROUP BY</b> is {@code table.aggr}, which gives an empty input no group, and
+ *       aggregates without {@code GROUP BY} are one row holding a {@code bag.fold}; {@code
+ *       DISTINCT} aggregates fold over their own deduplicated input, joined on the keys; {@code
+ *       AVG} is an uninterpreted {@code avg(sum, count)}.
  *   <li><b>Subqueries</b> ({@code EXISTS}, {@code IN} with its three-valued reading, scalar ones,
  *       correlated or not) are encoded where they stand, so the plans are taken from Calcite
  *       without expanding them into joins.
@@ -647,8 +647,11 @@ public abstract class Cvc5AbstractTranslator
   /** Cartesian product: table.product or relation.product. */
   protected abstract Kind getProductKind();
 
-  /** The fold operator: table.aggr or relation.aggr. */
+  /** {@code GROUP BY}: table.aggr or relation.aggr. */
   protected abstract Kind getAggregateKind();
+
+  /** Aggregates without {@code GROUP BY}: bag.fold or set.fold. */
+  protected abstract Kind getFoldKind();
 
   /** {@code WHERE}: bag.filter or set.filter. */
   protected abstract Kind getFilterKind();
@@ -1802,12 +1805,12 @@ public abstract class Cvc5AbstractTranslator
    * {@code GROUP BY} over {@code child} by the columns {@code indices}, the calls folding over
    * every row, each reading column {@code args[j]} (-1 for {@code COUNT(*)}), and {@code extra[j]}
    * the further columns of a {@code COUNT} of several. For {@code SELECT k, COUNT(*) FROM t GROUP
-   * BY k}, k column 0, {@code ((_ table.project 0 1) (bag.filter (lambda ((r U)) (>= ((_
-   * tuple.select 2) r) 1)) ((_ table.aggr 0) (lambda ((x T) (y U)) (tuple ((_ tuple.select 0) x)
-   * (nullable.some (+ (nullable.val ((_ tuple.select 1) y)) 1)) (+ ((_ tuple.select 2) y) 1)))
-   * (tuple (as nullable.null (Nullable Int)) (nullable.some 0) 0) t)))}: the last column counts
-   * the rows of the group, and the filter drops the row of initial values {@code table.aggr}
-   * gives an empty {@code t}.
+   * BY k}, k column 0, {@code ((_ table.aggr 0) (lambda ((x T) (y U)) (tuple ((_ tuple.select 0)
+   * x) (nullable.some (+ (nullable.val ((_ tuple.select 1) y)) 1)))) (tuple (as nullable.null
+   * (Nullable Int)) (nullable.some 0)) t)}, with no group, so no row, for an empty {@code t}.
+   * For {@code SELECT COUNT(*) FROM t}, one row even for an empty {@code t}: {@code (bag
+   * (bag.fold (lambda ((x T) (y U)) (tuple (nullable.some (+ (nullable.val ((_ tuple.select 0)
+   * y)) 1)))) (tuple (nullable.some 0)) t) 1)}.
    */
   private Term aggregateOver(Term child, int[] indices, List<Agg> calls, int[] args, int[][] extra)
       throws CVC5ApiException
@@ -1834,14 +1837,6 @@ public abstract class Cvc5AbstractTranslator
       Sort[] s = call.op.equals("AVG") ? new Sort[] {out, integer} : new Sort[] {out};
       slotSorts.addAll(Arrays.asList(s));
       slots.add(s);
-    }
-    // GROUP BY over an empty table has no groups, so SQL answers with no rows, while table.aggr
-    // gives the empty table one empty part folded to a row of initial values. A hidden counter
-    // tells that row apart: it is the one with count 0, filtered out below and projected away.
-    boolean counted = indices.length > 0;
-    if (counted)
-    {
-      slotSorts.add(tm.getIntegerSort());
     }
     Sort ySort = tm.mkTupleSort(slotSorts.toArray(new Sort[0]));
     Term x = var(xSort, "x");
@@ -1893,23 +1888,14 @@ public abstract class Cvc5AbstractTranslator
       aggregateStep(call, arg, accs, s, elements, initial);
       at += s.length;
     }
-    int last = slotSorts.size() - 1;
-    if (counted)
-    {
-      elements.add(tm.mkTerm(Kind.ADD, select(y, last), tm.mkInteger(1)));
-      initial.add(tm.mkInteger(0));
-    }
     Term f = lambda(new Term[] {x, y}, tm.mkTuple(elements.toArray(new Term[0])));
     Term init = tm.mkTuple(initial.toArray(new Term[0]));
-    Term aggregated = tm.mkTerm(tm.mkOp(getAggregateKind(), indices), f, init, child);
-    if (counted)
-    {
-      // keep the groups a row reached, then drop the counter
-      Term r = var(ySort, "r");
-      Term reached = tm.mkTerm(Kind.GEQ, select(r, last), tm.mkInteger(1));
-      aggregated = tm.mkTerm(getFilterKind(), lambda(new Term[] {r}, reached), aggregated);
-      aggregated = project(range(last), aggregated);
-    }
+    // GROUP BY has a row per group, so none over an empty table, as table.aggr. Without GROUP
+    // BY, SQL asks for exactly one row even over no rows -- SELECT COUNT(*) FROM empty is 0 --
+    // which is the fold of the whole table.
+    Term aggregated = indices.length > 0
+        ? tm.mkTerm(tm.mkOp(getAggregateKind(), indices), f, init, child)
+        : mkSingleton(tm.mkTerm(getFoldKind(), f, init, child));
     boolean finish = false;
     for (int j = 0; j < calls.size(); j++)
     {
@@ -1919,8 +1905,6 @@ public abstract class Cvc5AbstractTranslator
     {
       aggregated = finishAggregates(aggregated, indices.length, calls, slots, intSums);
     }
-    // No GROUP BY: SQL asks for exactly one row even over no rows -- SELECT COUNT(*) FROM empty
-    // is 0 -- which is what the fold of a single empty group gives.
     return aggregated;
   }
 

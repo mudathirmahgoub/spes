@@ -4,9 +4,6 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.logical.LogicalMinus;
-import org.apache.calcite.rel.logical.LogicalUnion;
 
 /**
  * Encodes SQL under bag (multiset) semantics, where a table is a cvc5 {@code Bag} of tuples and
@@ -87,6 +84,24 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getMemberKind()
+  {
+    return Kind.BAG_MEMBER;
+  }
+
+  @Override
+  protected Kind getCardKind()
+  {
+    return Kind.BAG_CARD;
+  }
+
+  @Override
+  protected Kind getChooseKind()
+  {
+    return Kind.BAG_CHOOSE;
+  }
+
+  @Override
   protected Kind getAggregateKind()
   {
     return Kind.TABLE_AGGREGATE;
@@ -113,7 +128,7 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
   @Override
   protected Term mkSingleton(Term smtTuple)
   {
-    return tm.mkTerm(Kind.BAG_MAKE, smtTuple, one);
+    return tm.mkTerm(Kind.BAG_MAKE, smtTuple, tm.mkInteger(1));
   }
 
   /** {@code bag.setof}: caps every multiplicity at one. */
@@ -123,32 +138,7 @@ public class Cvc5BagsTranslator extends Cvc5AbstractTranslator
     return tm.mkTerm(Kind.BAG_SETOF, table);
   }
 
-  @Override
-  protected Term translate(LogicalMinus minus) throws CVC5ApiException
-  {
-    List<RelNode> inputs = minus.getInputs();
-    Kind k = minus.all ? Kind.BAG_DIFFERENCE_SUBTRACT : Kind.BAG_DIFFERENCE_REMOVE;
-    Term result = translate(inputs.get(0));
-    for (int i = 1; i < inputs.size(); i++)
-    {
-      result = tm.mkTerm(k, result, translate(inputs.get(i)));
-    }
-    // EXCEPT (without ALL) returns distinct rows
-    return minus.all ? result : mkDistinct(result);
-  }
 
-  @Override
-  protected Term translate(LogicalUnion n) throws CVC5ApiException
-  {
-    List<RelNode> inputs = n.getInputs();
-    Term result = translate(inputs.get(0));
-    for (int i = 1; i < inputs.size(); i++)
-    {
-      result = tm.mkTerm(Kind.BAG_UNION_DISJOINT, result, translate(inputs.get(i)));
-    }
-    // UNION (without ALL) returns distinct rows
-    return n.all ? result : mkDistinct(result);
-  }
 
   /**
    * Expands a bag value from a cvc5 model into the rows of a counterexample table.

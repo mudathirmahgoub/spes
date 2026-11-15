@@ -113,11 +113,25 @@ public class Cvc5Analysis
       String name = testCase.get("name").getAsString();
       try
       {
+        int replayed = Cvc5AbstractTranslator.replayedCounterexamples;
+        int confirmed = Cvc5AbstractTranslator.confirmedCounterexamples;
         Result result = verify(query1, query2, name, writer, isSetSemantics, schema);
         String verdict = result == null ? "filtered"
             : result.isUnsat() ? "equivalent"
             : result.isSat() ? "inequivalent" : "unknown";
+        if (result != null && result.isSat())
+        {
+          // whether a real engine reproduced the model's difference
+          verdict += Cvc5AbstractTranslator.replayedCounterexamples == replayed ? " not-replayed"
+              : Cvc5AbstractTranslator.confirmedCounterexamples > confirmed ? " confirmed" : " unconfirmed";
+        }
         System.out.println("; RESULT " + name + " " + verdict);
+      }
+      catch (Cvc5AbstractTranslator.Incomparable e)
+      {
+        // the two queries return rows of different sorts: no equality to ask cvc5 about
+        report(writer, "; incomparable " + name + ": " + e.getMessage());
+        System.out.println("; RESULT " + name + " incomparable");
       }
       catch (UnsupportedOperationException e)
       {

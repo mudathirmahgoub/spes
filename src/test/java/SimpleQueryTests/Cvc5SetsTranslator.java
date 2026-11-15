@@ -3,17 +3,15 @@ import io.github.cvc5.*;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.logical.LogicalMinus;
-import org.apache.calcite.rel.logical.LogicalUnion;
 
 /**
  * Encodes SQL under set semantics, where a table is a cvc5 {@code Set} of tuples and a row is
  * either present or absent.
  *
- * <p>This is deliberately an approximation of SQL: {@code UNION ALL}, {@code EXCEPT ALL} and
- * {@code INTERSECT ALL} collapse onto the plain set operators, so multiplicities are lost and
- * two queries differing only in duplicates are reported equivalent. In exchange the encoding
+ * <p>This is deliberately an approximation of SQL: {@code UNION ALL} collapses onto the plain
+ * set union, so multiplicities are lost and two queries differing only in duplicates are reported
+ * equivalent; {@code EXCEPT ALL} and {@code INTERSECT ALL}, which are about multiplicities, are
+ * refused. In exchange the encoding
  * is much easier for the solver, which in practice proves considerably more benchmarks than
  * the bag encoding does. Use it when duplicates are known not to matter.
  *
@@ -83,6 +81,24 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
   }
 
   @Override
+  protected Kind getMemberKind()
+  {
+    return Kind.SET_MEMBER;
+  }
+
+  @Override
+  protected Kind getCardKind()
+  {
+    return Kind.SET_CARD;
+  }
+
+  @Override
+  protected Kind getChooseKind()
+  {
+    return Kind.SET_CHOOSE;
+  }
+
+  @Override
   protected Kind getAggregateKind()
   {
     return Kind.RELATION_AGGREGATE;
@@ -119,28 +135,7 @@ public class Cvc5SetsTranslator extends Cvc5AbstractTranslator
     return table;
   }
 
-  @Override
-  protected Term translate(LogicalMinus minus) throws CVC5ApiException
-  {
-    Term a = translate(minus.getInput(0));
-    Term b = translate(minus.getInput(1));
-    Term difference = tm.mkTerm(Kind.SET_MINUS, a, b);
-    return difference;
-  }
 
-  @Override
-  protected Term translate(LogicalUnion n) throws CVC5ApiException
-  {
-    List<RelNode> inputs = n.getInputs();
-    Kind k = Kind.SET_UNION;
-    Term result = translate(inputs.get(0));
-    result = tm.mkTerm(k, result, translate(inputs.get(1)));
-    for (int i = 2; i < inputs.size(); i++)
-    {
-      result = tm.mkTerm(k, result, translate(inputs.get(i)));
-    }
-    return result;
-  }
 
   @Override
   protected List<List<Object>> getTableRows(Term tableValue) throws CVC5ApiException

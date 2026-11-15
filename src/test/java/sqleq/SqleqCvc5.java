@@ -30,6 +30,7 @@ import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.sql.type.SqlTypeTransforms;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
+import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.Planner;
@@ -66,6 +67,9 @@ public final class SqleqCvc5 implements Batch.Checker {
   static final String USAGE = "usage: sqleq.SqleqCvc5 [--semantics=bags|sets] [--timeout=SECONDS] [--out=FILE.csv] [--smt=DIR] [--log=DIR] [--no-fork] PATH...\n"
       + "  PATH: sqleq pair files (.sql) or directories of them; --smt: write each pair's SMT-LIB problem under DIR";
 
+  private static final java.util.regex.Pattern COLLATE =
+      java.util.regex.Pattern.compile("\\bCOLLATE\\b", java.util.regex.Pattern.CASE_INSENSITIVE);
+
   private final boolean sets;
   private final String smtDir;
 
@@ -87,6 +91,22 @@ public final class SqleqCvc5 implements Batch.Checker {
     if (p.catalog.tables().isEmpty()) {
       throw new Unsupported("no declared tables: the translator needs a schema");
     }
+    for (String statement : p.file.ddl) {
+      if (statement.trim().toUpperCase(Locale.ROOT).replaceAll("\\s+", " ").startsWith("CREATE COLLATION")) {
+        throw new Unsupported("a collation the DDL creates, which may compare different strings as equal");
+      }
+    }
+    // The catalog reads `real` as a `double precision`, which it is not: 16777217 is a double and
+    // not a real. Not read as either.
+    for (sqleq.input.Catalog.Table t : p.catalog.tables()) {
+      for (sqleq.input.Catalog.Column c : t.columns) {
+        String raw = c.rawType.trim().toLowerCase(Locale.ROOT);
+        if (raw.equals("real") || raw.equals("float4") || raw.matches("float\\s*\\(\\s*([1-9]|1[0-9]|2[0-4])\\s*\\)")) {
+          throw new Unsupported("a column of type real (float4), " + c.name + ", which the catalog reads as a double precision");
+        }
+      }
+    }
+    boolean collated = p.catalog.hasCollations() || COLLATE.matcher(p.q0).find() || COLLATE.matcher(p.q1).find();
     DatabaseSchema schema = DatabaseSchema.parse(DdlOut.postgres(p.catalog), Dialect.POSTGRESQL);
     List<SqlOperator> udfs = new ArrayList<SqlOperator>();
     for (Declares.Decl d : p.declares) {
@@ -97,7 +117,7 @@ public final class SqleqCvc5 implements Batch.Checker {
     if (!p.params.isEmpty()) {
       Map<Integer, List<SqlTypeName>> seen = new HashMap<Integer, List<SqlTypeName>>();
       for (String q : new String[] {q0, q1}) {
-        RelNode rel = plan(schema, udfs, ParamTypes.withQuestionMarks(q), "parameter typing");
+        RelNode rel = plan(schema, udfs, ParamTypes.withQuestionMarks(q), "parameter typing", true);
         ParamTypes.collect(rel, ParamTypes.occurrences(q), seen);
       }
       Map<Integer, SqlTypeName> types = ParamTypes.unify(p.params, seen);
@@ -108,8 +128,10 @@ public final class SqleqCvc5 implements Batch.Checker {
       q1 = ParamTypes.withCalls(q1, "qp_");
       row.note = "params " + types;
     }
-    RelNode r0 = plan(schema, udfs, q0, "Calcite");
-    RelNode r1 = plan(schema, udfs, q1, "Calcite");
+    // Subqueries stay subqueries, as in sqleq's IR: the translator encodes EXISTS, IN and scalar
+    // subqueries where they stand, as sqleq-cvc5 does.
+    RelNode r0 = plan(schema, udfs, q0, "Calcite", false);
+    RelNode r1 = plan(schema, udfs, q1, "Calcite", false);
     if (RelOptUtil.toString(r0).equals(RelOptUtil.toString(r1))) {
       row.verdict = "identical plans";
       row.bucket = "proved-literal";
@@ -133,15 +155,26 @@ public final class SqleqCvc5 implements Batch.Checker {
     long t0 = System.currentTimeMillis();
     try {
       Cvc5AbstractTranslator translator = sets ? new Cvc5SetsTranslator(true, w) : new Cvc5BagsTranslator(true, w);
+      translator.setCollated(collated);
       Result result = translator.translate(p.file.name, r0, q0, r1, q1);
       row.verdict = result.toString();
       if (result.isUnsat()) {
         row.bucket = "proved";
       } else if (result.isSat()) {
-        row.bucket = "model";
+        // under an uninterpreted symbol a model also fixes its values, which the real function
+        // may not take: a candidate, as sqleq-cvc5 reports it
+        row.bucket = translator.isExact() ? "model" : "no-proof";
+        if (!translator.isExact()) {
+          row.note = "candidate model, under uninterpreted symbols";
+        }
       } else {
         row.bucket = System.currentTimeMillis() - t0 >= timeoutMs * 0.8 ? "timeout" : "unknown";
       }
+    } catch (Cvc5AbstractTranslator.Incomparable e) {
+      // no equality to check: the rows differ in shape, which sqleq's cvc5 axis reports as no-proof
+      row.verdict = "incomparable";
+      row.bucket = "no-proof";
+      row.note = e.getMessage();
     } catch (UnsupportedOperationException e) {
       throw new Unsupported(firstLine(e));
     } finally {
@@ -151,10 +184,13 @@ public final class SqleqCvc5 implements Batch.Checker {
     }
   }
 
-  static RelNode plan(DatabaseSchema schema, List<SqlOperator> udfs, String sql, String stage) throws Unsupported {
+  /** @param expand whether Calcite rewrites subqueries into joins and aggregates */
+  static RelNode plan(DatabaseSchema schema, List<SqlOperator> udfs, String sql, String stage, boolean expand)
+      throws Unsupported {
     FrameworkConfig config = Frameworks.newConfigBuilder()
         .defaultSchema(schema.rootSchema())
         .parserConfig(schema.parserConfig())
+        .sqlToRelConverterConfig(SqlToRelConverter.configBuilder().withExpand(expand).build())
         .operatorTable(new ChainedSqlOperatorTable(Arrays.<SqlOperatorTable>asList(
             SqlStdOperatorTable.instance(), new UdfTable(udfs))))
         .build();
